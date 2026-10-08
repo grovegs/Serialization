@@ -1,0 +1,25 @@
+{
+    "name": "GroveGames.Serialization.Unity.DependencyInjection",
+    "rootNamespace": "GroveGames.Serialization.Unity",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GroveGames.Serialization.dll",
+        "GroveGames.DependencyInjection.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "GROVEGAMES_DEPENDENCYINJECTION"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.grovegames.dependencyinjection",
+            "expression": "0.6.8",
+            "define": "GROVEGAMES_DEPENDENCYINJECTION"
+        }
+    ],
+    "noEngineReferences": false
+}

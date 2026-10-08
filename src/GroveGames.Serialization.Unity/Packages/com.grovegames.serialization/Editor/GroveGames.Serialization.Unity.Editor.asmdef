@@ -1,0 +1,20 @@
+{
+    "name": "GroveGames.Serialization.Unity.Editor",
+    "rootNamespace": "GroveGames.Serialization.Unity.Editor",
+    "references": [
+        "GroveGames.Serialization.Unity"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GroveGames.Serialization.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

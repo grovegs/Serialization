@@ -1,0 +1,26 @@
+{
+    "name": "GroveGames.Serialization.Unity.Mathematics",
+    "rootNamespace": "GroveGames.Serialization.Unity",
+    "references": [
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GroveGames.Serialization.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "GROVEGAMES_SERIALIZATION_MATHEMATICS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.mathematics",
+            "expression": "1.0.0",
+            "define": "GROVEGAMES_SERIALIZATION_MATHEMATICS"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src\GroveGames.Serialization\GroveGames.Serialization.csproj" />
+  <Project Path="tests\GroveGames.Serialization.Tests\GroveGames.Serialization.Tests.csproj" />
+</Solution>

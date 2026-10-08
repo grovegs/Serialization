@@ -1,0 +1,42 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591;1573</NoWarn>
+
+    <RootNamespace>GroveGames.Serialization</RootNamespace>
+    <Company>Grove Games</Company>
+    <Authors>Grove Games</Authors>
+    <Copyright>© $([System.DateTime]::Now.ToString("yyyy")) Grove Games</Copyright>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>0.0.0</Version>
+    <PackageId>$(AssemblyName)</PackageId>
+    <PackageProjectUrl>https://github.com/grovegs/Serialization</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/grovegs/Serialization</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>High-performance JSON, MessagePack and CSV serialization with format conversion and versioned migrations</Description>
+    <PackageTags>serialization;json;messagepack;csv;migration;unity;godot</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)Icon.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.401" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

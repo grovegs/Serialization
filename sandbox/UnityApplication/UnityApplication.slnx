@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="GroveGames.Serialization.Unity.csproj" />
+  <Project Path="GroveGames.Serialization.Unity.Mathematics.csproj" />
+  <Project Path="GroveGames.Serialization.Unity.Editor.csproj" />
+  <Project Path="GroveGames.Serialization.Unity.Editor.Tests.csproj" />
+  <Project Path="PluginBuilder.Editor.csproj" />
+</Solution>

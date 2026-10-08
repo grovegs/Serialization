@@ -1,0 +1,21 @@
+{
+  "name": "com.grovegames.serialization",
+  "version": "0.0.0",
+  "displayName": "GroveGames.Serialization",
+  "description": "High-performance JSON, MessagePack and CSV serialization with format conversion and versioned migrations",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/grovegs/Serialization",
+  "changelogUrl": "https://github.com/grovegs/Serialization/releases",
+  "licensesUrl": "https://github.com/grovegs/Serialization/blob/main/LICENSE",
+  "keywords": [
+    "serialization",
+    "json",
+    "messagepack",
+    "csv",
+    "migration"
+  ],
+  "author": {
+    "name": "Grove Games",
+    "url": "https://github.com/grovegs"
+  }
+}
