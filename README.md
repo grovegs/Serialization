@@ -220,7 +220,7 @@ Download the Godot addon from the [latest release](https://github.com/grovegs/Se
 dotnet test
 ```
 
-This runs the core tests and the source generator tests.
+This runs the core tests and the source generator tests, which CI runs as two jobs.
 
 The Unity package tests run from `sandbox/UnityApplication` with the Unity Test Runner. Before opening the sandbox the first time, build the core library and the generator into it, because the package cannot compile until they exist:
 
