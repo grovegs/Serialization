@@ -2,7 +2,7 @@
 
 public sealed class DataValueFormatter : IFormatter<DataValue>
 {
-    public void Write<TWriter>(ref TWriter writer, DataValue value, FormatterRegistry registry)
+    public void Write<TWriter>(ref TWriter writer, DataValue value)
         where TWriter : struct, IFormatWriter
     {
         switch (value.Kind)
@@ -26,7 +26,7 @@ public sealed class DataValueFormatter : IFormatter<DataValue>
 
                 for (var i = 0; i < array.Count; i++)
                 {
-                    Write(ref writer, array[i], registry);
+                    Write(ref writer, array[i]);
                 }
 
                 writer.EndArray();
@@ -39,7 +39,7 @@ public sealed class DataValueFormatter : IFormatter<DataValue>
                 {
                     var field = obj[i];
                     writer.WriteField(System.Text.Encoding.UTF8.GetBytes(field.Name));
-                    Write(ref writer, field.Value, registry);
+                    Write(ref writer, field.Value);
                 }
 
                 writer.EndObject();
@@ -50,16 +50,16 @@ public sealed class DataValueFormatter : IFormatter<DataValue>
         }
     }
 
-    public DataValue Read<TReader>(ref TReader reader, FormatterRegistry registry)
+    public DataValue Read<TReader>(ref TReader reader)
         where TReader : struct, IFormatReader
     {
         return DataValue.Read(ref reader);
     }
 
-    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
+    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
         where TReader : struct, IFormatReader
         where TWriter : struct, IFormatWriter
     {
-        Write(ref writer, DataValue.Read(ref reader), registry);
+        Write(ref writer, DataValue.Read(ref reader));
     }
 }

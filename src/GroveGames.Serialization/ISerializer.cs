@@ -4,7 +4,6 @@ namespace GroveGames.Serialization;
 
 public interface ISerializer
 {
-    public FormatterRegistry Registry { get; }
     public void Serialize<T>(T? value, IBufferWriter<byte> output);
     public T? Deserialize<T>(ReadOnlyMemory<byte> data);
 }

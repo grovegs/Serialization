@@ -4,10 +4,20 @@ namespace GroveGames.Serialization.Tests;
 
 public sealed class CsvSerializerTests
 {
+    static CsvSerializerTests()
+    {
+        Formatters.Register(registrar => registrar
+            .AddFormatter(new TestItemFormatter<TestItem>())
+            .AddFormatter(new ListFormatter<TestItem>())
+            .AddFormatter(new TestItemFormatter<TestItemV2>())
+            .AddFormatter(new ListFormatter<TestItemV2>(), version: 2)
+            .AddMigration(new TestRowsNoChange()));
+    }
+
     [Fact]
     public void Serialize_Rows_WritesHeaderAndRows()
     {
-        var serializer = CreateSerializer(version: 1);
+        var serializer = CreateSerializer();
         var rows = new List<TestItem> { new() { Id = "a,b", Count = 1, Weight = 0.5, Score = 2 }, new() { Id = "say \"hi\"", Count = 2 } };
 
         var csv = Encoding.UTF8.GetString(serializer.Serialize(rows));
@@ -18,7 +28,7 @@ public sealed class CsvSerializerTests
     [Fact]
     public void Deserialize_SerializedRows_RoundTrips()
     {
-        var serializer = CreateSerializer(version: 1);
+        var serializer = CreateSerializer();
         var rows = new List<TestItem> { new() { Id = "line\nbreak", Count = -3, Weight = 1e-7, Score = 4.5f }, new() { Id = "", Count = 0 } };
 
         var result = serializer.Deserialize<List<TestItem>>(serializer.Serialize(rows));
@@ -34,15 +44,10 @@ public sealed class CsvSerializerTests
     [Fact]
     public void Deserialize_OlderVersionWithNumberLikeText_KeepsText()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new TestItemFormatter())
-            .AddFormatter(new ListFormatter<TestItem>(), version: 2)
-            .AddMigration(new TestRowsNoChange())
-            .Build();
-        var serializer = new CsvSerializer(registry);
+        var serializer = new CsvSerializer();
         var csv = "id,count,weight,score\n007,1,2.5,0.5\n";
 
-        var result = serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv));
+        var result = serializer.Deserialize<List<TestItemV2>>(Encoding.UTF8.GetBytes(csv));
 
         Assert.Equal("007", result![0].Id);
         Assert.Equal(1, result[0].Count);
@@ -56,7 +61,7 @@ public sealed class CsvSerializerTests
     [InlineData("id,count\n\"open,1\n")]
     public void Deserialize_MalformedCsv_ThrowsFormatException(string csv)
     {
-        var serializer = CreateSerializer(version: 1);
+        var serializer = CreateSerializer();
 
         Assert.Throws<FormatException>(() => serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv)));
     }
@@ -64,9 +69,9 @@ public sealed class CsvSerializerTests
     [Fact]
     public void Serialize_VersionedRows_WritesVersionLine()
     {
-        var serializer = CreateSerializer(version: 2);
+        var serializer = new CsvSerializer();
 
-        var csv = Encoding.UTF8.GetString(serializer.Serialize(new List<TestItem> { new() { Id = "a", Count = 1 } }));
+        var csv = Encoding.UTF8.GetString(serializer.Serialize(new List<TestItemV2> { new() { Id = "a", Count = 1 } }));
 
         Assert.StartsWith("#v=2\nid,count,weight,score\n", csv);
     }
@@ -74,21 +79,17 @@ public sealed class CsvSerializerTests
     [Fact]
     public void Serialize_SingleObject_ThrowsNotSupportedException()
     {
-        var serializer = CreateSerializer(version: 1);
+        var serializer = CreateSerializer();
 
         Assert.Throws<NotSupportedException>(() => serializer.Serialize(new TestItem()));
     }
 
-    private static CsvSerializer CreateSerializer(int version)
+    private static CsvSerializer CreateSerializer()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new TestItemFormatter())
-            .AddFormatter(new ListFormatter<TestItem>(), version)
-            .Build();
-        return new CsvSerializer(registry);
+        return new CsvSerializer();
     }
 
-    private sealed class TestRowsNoChange : IMigration<List<TestItem>>
+    private sealed class TestRowsNoChange : IMigration<List<TestItemV2>>
     {
         public int FromVersion => 1;
 
@@ -97,7 +98,7 @@ public sealed class CsvSerializerTests
         }
     }
 
-    private sealed class TestItem
+    private class TestItem
     {
         public string? Id;
         public int Count;
@@ -105,11 +106,12 @@ public sealed class CsvSerializerTests
         public float Score;
     }
 
-    private sealed class TestItemFormatter : IFormatter<TestItem>
+    private sealed class TestItemFormatter<T> : IFormatter<T>
+        where T : TestItem, new()
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -129,7 +131,7 @@ public sealed class CsvSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
+        public T? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -137,7 +139,7 @@ public sealed class CsvSerializerTests
                 return null;
             }
 
-            var value = new TestItem();
+            var value = new T();
             reader.ReadObjectStart();
 
             while (reader.TryReadField(s_fields, out var index))
@@ -165,11 +167,15 @@ public sealed class CsvSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
-            Write(ref writer, Read(ref reader, registry), registry);
+            Write(ref writer, Read(ref reader));
         }
+    }
+
+    private sealed class TestItemV2 : TestItem
+    {
     }
 }

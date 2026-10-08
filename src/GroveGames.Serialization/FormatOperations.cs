@@ -4,19 +4,19 @@ namespace GroveGames.Serialization;
 
 internal static class FormatOperations
 {
-    public static void Serialize<T>(IFormat format, T? value, IBufferWriter<byte> output, FormatterRegistry registry)
+    public static void Serialize<T>(IFormat format, T? value, IBufferWriter<byte> output)
     {
         ArgumentNullException.ThrowIfNull(output);
         var buffer = output as ByteBuffer ?? ScratchBuffers.Output();
-        format.Serialize(value, buffer, registry);
+        format.Serialize(value, buffer);
         Flush(output, buffer);
     }
 
-    public static void Convert<T>(IFormat from, IFormat to, ReadOnlyMemory<byte> data, IBufferWriter<byte> output, FormatterRegistry registry)
+    public static void Convert<T>(IFormat from, IFormat to, ReadOnlyMemory<byte> data, IBufferWriter<byte> output)
     {
         ArgumentNullException.ThrowIfNull(output);
         var buffer = output as ByteBuffer ?? ScratchBuffers.Output();
-        from.Convert<T>(data, to, buffer, registry);
+        from.Convert<T>(data, to, buffer);
         Flush(output, buffer);
     }
 

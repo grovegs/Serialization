@@ -12,3 +12,4 @@ GGS004 | GroveGames.Serialization | Info | SchemaDiagnostics
 GGS005 | GroveGames.Serialization | Error | SchemaDiagnostics
 GGS006 | GroveGames.Serialization | Error | SchemaDiagnostics
 GGS007 | GroveGames.Serialization | Error | SchemaDiagnostics
+GGS008 | GroveGames.Serialization | Error | SchemaDiagnostics

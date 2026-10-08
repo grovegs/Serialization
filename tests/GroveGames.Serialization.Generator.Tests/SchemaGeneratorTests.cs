@@ -43,7 +43,59 @@ public sealed class SchemaGeneratorTests
         Assert.Empty(result.GeneratorDiagnostics);
         Assert.Empty(result.CompilationErrors);
         Assert.Contains(result.GeneratedSources, source => source.Contains("internal sealed class SaveFormatter"));
-        Assert.Contains(result.GeneratedSources, source => source.Contains("AddTestsFormatters") && source.Contains("new global::Game.SaveMigration()"));
+        Assert.Contains(result.GeneratedSources, source => source.Contains("[assembly: global::GroveGames.Serialization.FormatterModule(typeof(global::GroveGames.Serialization.TestsFormatterModule))]") && source.Contains("new global::Game.SaveMigration()"));
+    }
+
+    [Fact]
+    public void Generate_MarkedFormatter_IsRegisteredWithVersionListAndMigrations()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            public struct Point
+            {
+                public int X;
+            }
+
+            [Formatter(version: 2)]
+            internal sealed class PointFormatter : IFormatter<Point>
+            {
+                public void Write<TWriter>(ref TWriter writer, Point value) where TWriter : struct, IFormatWriter
+                {
+                    writer.WriteInt32(value.X);
+                }
+
+                public Point Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
+                {
+                    return new Point { X = reader.ReadInt32() };
+                }
+
+                public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
+                    where TReader : struct, IFormatReader
+                    where TWriter : struct, IFormatWriter
+                {
+                    writer.WriteInt32(reader.ReadInt32());
+                }
+            }
+
+            public sealed class PointMigration : IMigration<Point>
+            {
+                public int FromVersion => 1;
+
+                public void Apply(DataValue root)
+                {
+                }
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("registrar.AddFormatter(new global::Game.PointFormatter(), 2);")
+            && source.Contains("new global::GroveGames.Serialization.ListFormatter<global::Game.Point>()")
+            && source.Contains("new global::Game.PointMigration()"));
     }
 
     [Theory]
@@ -58,6 +110,8 @@ public sealed class SchemaGeneratorTests
     [InlineData("[Schema] public sealed class Target { } public sealed class Bad : IMigration<Target> { public Bad(int value) { } public int FromVersion => 1; public void Apply(DataValue root) { } }", "GGS005")]
     [InlineData("[Schema] public sealed class NoDefault { public NoDefault(int value) { } }", "GGS006")]
     [InlineData("[Schema(version: 0)] public sealed class Zero { }", "GGS007")]
+    [InlineData("[Formatter] public sealed class NotAFormatter { }", "GGS008")]
+    [InlineData("public sealed class Outer { [Formatter] private sealed class Hidden : IFormatter<int> { public void Write<TWriter>(ref TWriter writer, int value) where TWriter : struct, IFormatWriter { } public int Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => 0; public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { } } }", "GGS008")]
     public void Generate_InvalidSchema_ReportsDiagnostic(string declarations, string id)
     {
         var result = Run("using GroveGames.Serialization;\nnamespace Game;\n" + declarations);

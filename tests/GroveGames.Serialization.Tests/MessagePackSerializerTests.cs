@@ -2,6 +2,15 @@
 
 public sealed class MessagePackSerializerTests
 {
+    static MessagePackSerializerTests()
+    {
+        Formatters.Register(registrar => registrar
+            .AddFormatter(new TestItemFormatter<TestItem>())
+            .AddFormatter(new ListFormatter<TestItem>())
+            .AddFormatter(new TestItemFormatter<TestItemV2>(), version: 2)
+            .AddFormatter(new TestItemFormatter<TestItemV300>(), version: 300));
+    }
+
     [Fact]
     public void Deserialize_SerializedItem_RoundTrips()
     {
@@ -74,11 +83,7 @@ public sealed class MessagePackSerializerTests
     [Fact]
     public void Deserialize_ListRoot_RoundTrips()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new TestItemFormatter())
-            .AddFormatter(new ListFormatter<TestItem>())
-            .Build();
-        var serializer = new MessagePackSerializer(registry);
+        var serializer = CreateSerializer();
         var items = Enumerable.Range(0, 20).Select(i => new TestItem { Id = "item" + i, Count = i }).ToList();
 
         var result = serializer.Deserialize<List<TestItem>>(serializer.Serialize(items));
@@ -86,31 +91,28 @@ public sealed class MessagePackSerializerTests
         Assert.Equal(items.Select(i => i.Id), result!.Select(i => i.Id));
     }
 
-    [Theory]
-    [InlineData(2, new byte[] { 0xd4, 0x56, 0x02 })]
-    [InlineData(300, new byte[] { 0xd6, 0x56, 0x00, 0x00, 0x01, 0x2c })]
-    public void Serialize_VersionedType_WritesVersionExtensionPrefix(int version, byte[] prefix)
+    [Fact]
+    public void Serialize_VersionTwo_WritesFixExt1Prefix()
     {
-        var registry = new FormatterRegistryBuilder().AddFormatter(new TestItemFormatter(), version).Build();
-        var serializer = new MessagePackSerializer(registry);
+        AssertVersionPrefix<TestItemV2>([0xd4, 0x56, 0x02]);
+    }
 
-        var bytes = serializer.Serialize(new TestItem { Id = "a" });
-
-        Assert.Equal(prefix, bytes.AsSpan(0, prefix.Length).ToArray());
-        Assert.Equal("a", serializer.Deserialize<TestItem>(bytes)!.Id);
+    [Fact]
+    public void Serialize_VersionAboveByte_WritesFixExt4Prefix()
+    {
+        AssertVersionPrefix<TestItemV300>([0xd6, 0x56, 0x00, 0x00, 0x01, 0x2c]);
     }
 
     [Fact]
     public void Deserialize_VersionedEveryTruncation_ThrowsFormatException()
     {
-        var registry = new FormatterRegistryBuilder().AddFormatter(new TestItemFormatter(), version: 2).Build();
-        var serializer = new MessagePackSerializer(registry);
-        var bytes = serializer.Serialize(new TestItem { Id = "potion", Count = 70_000 });
+        var serializer = CreateSerializer();
+        var bytes = serializer.Serialize(new TestItemV2 { Id = "potion", Count = 70_000 });
 
         for (var length = 0; length < bytes.Length; length++)
         {
             var truncated = bytes.AsMemory(0, length);
-            Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(truncated));
+            Assert.Throws<FormatException>(() => serializer.Deserialize<TestItemV2>(truncated));
         }
     }
 
@@ -125,13 +127,21 @@ public sealed class MessagePackSerializerTests
 
     private static MessagePackSerializer CreateSerializer()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new TestItemFormatter())
-            .Build();
-        return new MessagePackSerializer(registry);
+        return new MessagePackSerializer();
     }
 
-    private sealed class TestItem
+    private static void AssertVersionPrefix<T>(byte[] prefix)
+        where T : TestItem, new()
+    {
+        var serializer = CreateSerializer();
+
+        var bytes = serializer.Serialize(new T { Id = "a" });
+
+        Assert.Equal(prefix, bytes.AsSpan(0, prefix.Length).ToArray());
+        Assert.Equal("a", serializer.Deserialize<T>(bytes)!.Id);
+    }
+
+    private class TestItem
     {
         public string? Id;
         public int Count;
@@ -139,11 +149,12 @@ public sealed class MessagePackSerializerTests
         public float Score;
     }
 
-    private sealed class TestItemFormatter : IFormatter<TestItem>
+    private sealed class TestItemFormatter<T> : IFormatter<T>
+        where T : TestItem, new()
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -163,7 +174,7 @@ public sealed class MessagePackSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
+        public T? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -171,7 +182,7 @@ public sealed class MessagePackSerializerTests
                 return null;
             }
 
-            var value = new TestItem();
+            var value = new T();
             reader.ReadObjectStart();
 
             while (reader.TryReadField(s_fields, out var index))
@@ -199,11 +210,19 @@ public sealed class MessagePackSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
-            Write(ref writer, Read(ref reader, registry), registry);
+            Write(ref writer, Read(ref reader));
         }
+    }
+
+    private sealed class TestItemV2 : TestItem
+    {
+    }
+
+    private sealed class TestItemV300 : TestItem
+    {
     }
 }

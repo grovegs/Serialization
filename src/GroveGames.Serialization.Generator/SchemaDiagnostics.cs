@@ -16,7 +16,7 @@ internal static class SchemaDiagnostics
         "GGS003", "Unsupported member", "'{0}' cannot be serialized: {1}", Category, DiagnosticSeverity.Error, true);
 
     public static readonly DiagnosticDescriptor RegisteredMember = new(
-        "GGS004", "Member uses a registered formatter", "'{0}' has type '{1}', which has no [Schema], so its formatter must be registered", Category, DiagnosticSeverity.Info, true);
+        "GGS004", "Member uses a registered formatter", "'{0}' has type '{1}', which has no [Schema], so it needs a formatter marked with [Formatter]", Category, DiagnosticSeverity.Info, true);
 
     public static readonly DiagnosticDescriptor InvalidMigration = new(
         "GGS005", "Invalid migration", "Migration '{0}' must be a non-abstract, non-generic class with a parameterless constructor", Category, DiagnosticSeverity.Error, true);
@@ -26,6 +26,9 @@ internal static class SchemaDiagnostics
 
     public static readonly DiagnosticDescriptor InvalidVersion = new(
         "GGS007", "Invalid schema version", "'{0}' has version {1}, but versions start at 1", Category, DiagnosticSeverity.Error, true);
+
+    public static readonly DiagnosticDescriptor InvalidFormatter = new(
+        "GGS008", "Invalid formatter", "Formatter '{0}' must be a public or internal, non-abstract, non-generic class or struct that implements IFormatter<T> once and has a parameterless constructor", Category, DiagnosticSeverity.Error, true);
 
     public static DiagnosticDescriptor Find(string id)
     {
@@ -37,7 +40,8 @@ internal static class SchemaDiagnostics
             "GGS004" => RegisteredMember,
             "GGS005" => InvalidMigration,
             "GGS006" => MissingConstructor,
-            _ => InvalidVersion
+            "GGS007" => InvalidVersion,
+            _ => InvalidFormatter
         };
     }
 }

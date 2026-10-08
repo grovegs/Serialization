@@ -5,7 +5,7 @@ namespace GroveGames.Serialization.Generator;
 
 internal static class RegistrationEmitter
 {
-    public static string MethodName(string assemblyName)
+    public static string ModuleName(string assemblyName)
     {
         var builder = new StringBuilder();
         var upper = true;
@@ -27,30 +27,40 @@ internal static class RegistrationEmitter
             builder.Insert(0, "Assembly");
         }
 
-        return builder.ToString();
+        return builder.Append("FormatterModule").ToString();
     }
 
-    public static string Emit(string assemblyName, IReadOnlyList<SchemaTypeModel> schemas, IReadOnlyList<MigrationModel> migrations)
+    public static string Emit(string assemblyName, IReadOnlyList<SchemaTypeModel> schemas, IReadOnlyList<FormatterModel> formatters, IReadOnlyList<MigrationModel> migrations)
     {
-        var name = MethodName(assemblyName);
+        var name = ModuleName(assemblyName);
         var code = new CodeBuilder();
         code.Line("#nullable disable");
+        code.Line($"[assembly: global::GroveGames.Serialization.FormatterModule(typeof(global::GroveGames.Serialization.{name}))]");
         code.Open("namespace GroveGames.Serialization");
-        code.Open($"public static class {name}FormatterRegistryBuilderExtensions");
-        code.Open($"public static global::GroveGames.Serialization.FormatterRegistryBuilder Add{name}Formatters(this global::GroveGames.Serialization.FormatterRegistryBuilder builder)");
+        code.Line("[global::GroveGames.Serialization.Preserve]");
+        code.Open($"internal sealed class {name} : global::GroveGames.Serialization.IFormatterModule");
+        code.Line("[global::GroveGames.Serialization.Preserve]");
+        code.Open($"public {name}()");
+        code.Close();
+        code.Open("public void Register(global::GroveGames.Serialization.FormatterRegistrar registrar)");
 
         foreach (var schema in schemas)
         {
-            code.Line($"builder.AddFormatter({schema.FormatterFullName}.Instance, {schema.Version});");
-            code.Line($"builder.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{schema.FullName}>());");
+            code.Line($"registrar.AddFormatter({schema.FormatterFullName}.Instance, {schema.Version});");
+            code.Line($"registrar.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{schema.FullName}>());");
+        }
+
+        foreach (var formatter in formatters)
+        {
+            code.Line($"registrar.AddFormatter(new {formatter.FullName}(), {formatter.Version});");
+            code.Line($"registrar.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{formatter.TargetFullName}>());");
         }
 
         foreach (var migration in migrations)
         {
-            code.Line($"builder.AddMigration(new {migration.FullName}());");
+            code.Line($"registrar.AddMigration(new {migration.FullName}());");
         }
 
-        code.Line("return builder;");
         code.Close();
         code.Close();
         code.Close();

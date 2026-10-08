@@ -4,12 +4,20 @@ namespace GroveGames.Serialization.Tests;
 
 public sealed class ConverterTests
 {
+    static ConverterTests()
+    {
+        Formatters.Register(registrar => registrar
+            .AddFormatter(new TestItemFormatter<TestItem>())
+            .AddFormatter(new ListFormatter<TestItem>())
+            .AddFormatter(new TestItemFormatter<TestItemV2>(), version: 2)
+            .AddMigration(new TestItemRenameAmount()));
+    }
+
     [Fact]
     public void Convert_JsonToMessagePackAndBack_PreservesData()
     {
-        var registry = CreateRegistry();
-        var json = new JsonSerializer(registry);
-        var messagePack = new MessagePackSerializer(registry);
+        var json = new JsonSerializer();
+        var messagePack = new MessagePackSerializer();
         var original = json.Serialize(new TestItem { Id = "e\"scaped", Count = 5, Weight = 0.1, Score = 2 });
 
         var packed = new Converter(json, messagePack).Convert<TestItem>(original);
@@ -21,9 +29,8 @@ public sealed class ConverterTests
     [Fact]
     public void Convert_CsvRowsToJson_PreservesData()
     {
-        var registry = CreateRegistry();
-        var csv = new CsvSerializer(registry);
-        var json = new JsonSerializer(registry);
+        var csv = new CsvSerializer();
+        var json = new JsonSerializer();
         var rows = new List<TestItem> { new() { Id = "a", Count = 1, Weight = 1.5, Score = 0.5f } };
 
         var converted = new Converter(csv, json).Convert<List<TestItem>>(csv.Serialize(rows));
@@ -36,30 +43,17 @@ public sealed class ConverterTests
     [Fact]
     public void Convert_DataWithoutVersion_MigratesWhileConverting()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new TestItemFormatter(), version: 2)
-            .AddMigration(new TestItemRenameAmount())
-            .Build();
-        var json = new JsonSerializer(registry);
-        var messagePack = new MessagePackSerializer(registry);
+        var json = new JsonSerializer();
+        var messagePack = new MessagePackSerializer();
         var output = new ByteBuffer();
 
-        new Converter(json, messagePack).Convert<TestItem>(Encoding.UTF8.GetBytes("{\"id\":\"a\",\"amount\":4}"), output);
-        var result = messagePack.Deserialize<TestItem>(output.WrittenMemory);
+        new Converter(json, messagePack).Convert<TestItemV2>(Encoding.UTF8.GetBytes("{\"id\":\"a\",\"amount\":4}"), output);
+        var result = messagePack.Deserialize<TestItemV2>(output.WrittenMemory);
 
         Assert.Equal(4, result!.Count);
     }
 
-    [Fact]
-    public void Constructor_DifferentRegistries_ThrowsArgumentException()
-    {
-        var json = new JsonSerializer(CreateRegistry());
-        var messagePack = new MessagePackSerializer(CreateRegistry());
-
-        Assert.Throws<ArgumentException>(() => new Converter(json, messagePack));
-    }
-
-    private sealed class TestItemRenameAmount : IMigration<TestItem>
+    private sealed class TestItemRenameAmount : IMigration<TestItemV2>
     {
         public int FromVersion => 1;
 
@@ -69,15 +63,7 @@ public sealed class ConverterTests
         }
     }
 
-    private static FormatterRegistry CreateRegistry()
-    {
-        return new FormatterRegistryBuilder()
-            .AddFormatter(new TestItemFormatter())
-            .AddFormatter(new ListFormatter<TestItem>())
-            .Build();
-    }
-
-    private sealed class TestItem
+    private class TestItem
     {
         public string? Id;
         public int Count;
@@ -85,11 +71,12 @@ public sealed class ConverterTests
         public float Score;
     }
 
-    private sealed class TestItemFormatter : IFormatter<TestItem>
+    private sealed class TestItemFormatter<T> : IFormatter<T>
+        where T : TestItem, new()
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -109,7 +96,7 @@ public sealed class ConverterTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
+        public T? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -117,7 +104,7 @@ public sealed class ConverterTests
                 return null;
             }
 
-            var value = new TestItem();
+            var value = new T();
             reader.ReadObjectStart();
 
             while (reader.TryReadField(s_fields, out var index))
@@ -145,11 +132,15 @@ public sealed class ConverterTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
-            Write(ref writer, Read(ref reader, registry), registry);
+            Write(ref writer, Read(ref reader));
         }
+    }
+
+    private sealed class TestItemV2 : TestItem
+    {
     }
 }

@@ -4,9 +4,8 @@ namespace GroveGames.Serialization.Unity
 {
     public static class SerializationContainerBuilderExtensions
     {
-        public static IContainerBuilder AddSerialization(this IContainerBuilder builder, FormatterRegistry registry)
+        public static IContainerBuilder AddSerialization(this IContainerBuilder builder)
         {
-            builder.AddSingleton(registry);
             builder.AddSingleton<JsonSerializer>();
             builder.AddSingleton<MessagePackSerializer>();
             return builder.AddSingleton<CsvSerializer>();
