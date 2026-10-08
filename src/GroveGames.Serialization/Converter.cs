@@ -6,7 +6,7 @@ public sealed class Converter : IConverter
 {
     private readonly IFormat _from;
     private readonly IFormat _to;
-    private readonly SerializerRegistry _registry;
+    private readonly FormatterRegistry _registry;
 
     public Converter(ISerializer from, ISerializer to)
     {

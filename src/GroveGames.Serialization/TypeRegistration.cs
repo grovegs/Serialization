@@ -15,7 +15,7 @@ internal sealed class TypeRegistration<T>
 
     public int Version { get; }
 
-    public void Migrate(DataNode root, int fromVersion)
+    public void Migrate(DataValue root, int fromVersion)
     {
         for (var version = fromVersion; version < Version; version++)
         {

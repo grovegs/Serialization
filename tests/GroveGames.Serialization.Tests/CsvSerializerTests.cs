@@ -34,7 +34,7 @@ public sealed class CsvSerializerTests
     [Fact]
     public void Deserialize_OlderVersionWithNumberLikeText_KeepsText()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .AddFormatter(new ListFormatter<TestItem>(), version: 2)
             .AddMigration(new TestRowsNoChange())
@@ -81,7 +81,7 @@ public sealed class CsvSerializerTests
 
     private static CsvSerializer CreateSerializer(int version)
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .AddFormatter(new ListFormatter<TestItem>(), version)
             .Build();
@@ -92,7 +92,7 @@ public sealed class CsvSerializerTests
     {
         public int FromVersion => 1;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
         }
     }
@@ -109,7 +109,7 @@ public sealed class CsvSerializerTests
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -129,7 +129,7 @@ public sealed class CsvSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -165,7 +165,7 @@ public sealed class CsvSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {

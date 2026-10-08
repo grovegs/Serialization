@@ -2,11 +2,11 @@
 
 namespace GroveGames.Serialization;
 
-public sealed class SerializerRegistry
+public sealed class FormatterRegistry
 {
     private readonly Dictionary<Type, object> _registrations;
 
-    internal SerializerRegistry(Dictionary<Type, object> registrations)
+    internal FormatterRegistry(Dictionary<Type, object> registrations)
     {
         _registrations = registrations;
     }

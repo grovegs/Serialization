@@ -8,7 +8,7 @@ public static class Program
 {
     public static void Main()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new ItemFormatter())
             .AddFormatter(new ListFormatter<Item>())
             .AddFormatter(new PlayerSaveFormatter(), version: 3)

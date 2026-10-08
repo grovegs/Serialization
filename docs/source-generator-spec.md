@@ -47,16 +47,16 @@ A member type with no known formatter at compile time falls back to `registry.Ge
 
 ## Output per type
 
-1. `sealed class {Type}Formatter : IFormatter<{Type}>` with a static `FieldTable` in declaration order and `Write`, `Read` and `Transcode`, all taking the `SerializerRegistry`. `switch` on the field index, with `default: reader.Skip()`.
+1. `sealed class {Type}Formatter : IFormatter<{Type}>` with a static `FieldTable` in declaration order and `Write`, `Read` and `Transcode`, all taking the `FormatterRegistry`. `switch` on the field index, with `default: reader.Skip()`.
 2. Nested `[Schema]` formatters are private readonly fields created in the constructor, not static instances.
 3. Classes handle `null` at the top of each method. Structs do not.
 4. One extension per assembly, so registration stays explicit and DI friendly:
 
-   ```csharp
-   public static SerializerRegistryBuilder Add{AssemblyName}Formatters(this SerializerRegistryBuilder builder)
-   ```
+    ```csharp
+    public static FormatterRegistryBuilder Add{AssemblyName}Formatters(this FormatterRegistryBuilder builder)
+    ```
 
-   It registers every generated formatter with its `[Schema]` version, a `ListFormatter<T>` for each schema type, and every `IMigration<T>` class in the assembly (each needs a parameterless constructor). There is no module initializer and no static registry.
+    It registers every generated formatter with its `[Schema]` version, a `ListFormatter<T>` for each schema type, and every `IMigration<T>` class in the assembly (each needs a parameterless constructor). There is no module initializer and no static registry.
 
 ## Diagnostics (GGS0xx, errors unless noted)
 
@@ -68,7 +68,7 @@ A member type with no known formatter at compile time falls back to `registry.Ge
 - GGS006: an `IMigration<T>` for a type that has no `[Schema]`.
 - GGS007: gap in the migration chain (warning), for example version 3 with no migration from 1 or 2.
 
-`FromVersion` is a runtime value, so range and duplicate checks stay in `SerializerRegistryBuilder.Build()`.
+`FromVersion` is a runtime value, so range and duplicate checks stay in `FormatterRegistryBuilder.Build()`.
 
 ## Done when
 

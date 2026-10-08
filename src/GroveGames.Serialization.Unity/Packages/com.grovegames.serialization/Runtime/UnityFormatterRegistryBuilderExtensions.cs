@@ -1,8 +1,8 @@
 namespace GroveGames.Serialization.Unity
 {
-    public static class UnitySerializerRegistryBuilderExtensions
+    public static class UnityFormatterRegistryBuilderExtensions
     {
-        public static SerializerRegistryBuilder AddUnityFormatters(this SerializerRegistryBuilder builder)
+        public static FormatterRegistryBuilder AddUnityFormatters(this FormatterRegistryBuilder builder)
         {
             return builder
                 .AddFormatter(new Vector2Formatter())

@@ -2,7 +2,7 @@
 
 internal static class Pipeline
 {
-    public static void Write<T, TWriter>(ref TWriter writer, T? value, SerializerRegistry registry)
+    public static void Write<T, TWriter>(ref TWriter writer, T? value, FormatterRegistry registry)
         where TWriter : struct, IDocumentWriter
     {
         var registration = registry.GetRegistration<T>();
@@ -21,7 +21,7 @@ internal static class Pipeline
         }
     }
 
-    public static T? Read<T, TReader>(ref TReader reader, SerializerRegistry registry)
+    public static T? Read<T, TReader>(ref TReader reader, FormatterRegistry registry)
         where TReader : struct, IDocumentReader
     {
         var registration = registry.GetRegistration<T>();
@@ -34,9 +34,9 @@ internal static class Pipeline
         }
         else if (stored < registration.Version)
         {
-            var node = DataNode.Read(ref reader);
+            var node = DataValue.Read(ref reader);
             registration.Migrate(node, stored);
-            var nodeReader = new DataNodeReader(node);
+            var nodeReader = new DataValueReader(node);
             result = registration.Formatter.Read(ref nodeReader, registry);
         }
         else
@@ -53,7 +53,7 @@ internal static class Pipeline
         return result;
     }
 
-    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
         where TReader : struct, IDocumentReader
         where TWriter : struct, IDocumentWriter
     {
@@ -77,9 +77,9 @@ internal static class Pipeline
         }
         else
         {
-            var node = DataNode.Read(ref reader);
+            var node = DataValue.Read(ref reader);
             registration.Migrate(node, stored);
-            var nodeReader = new DataNodeReader(node);
+            var nodeReader = new DataValueReader(node);
             registration.Formatter.Transcode(ref nodeReader, ref writer, registry);
         }
 

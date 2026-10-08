@@ -1,8 +1,8 @@
 namespace GroveGames.Serialization.Unity
 {
-    public static class MathematicsSerializerRegistryBuilderExtensions
+    public static class MathematicsFormatterRegistryBuilderExtensions
     {
-        public static SerializerRegistryBuilder AddMathematicsFormatters(this SerializerRegistryBuilder builder)
+        public static FormatterRegistryBuilder AddMathematicsFormatters(this FormatterRegistryBuilder builder)
         {
             return builder
                 .AddFormatter(new Float2Formatter())

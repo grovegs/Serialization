@@ -206,22 +206,22 @@ public sealed class JsonSerializerTests
     [Fact]
     public void Serialize_UnregisteredType_ThrowsInvalidOperationException()
     {
-        var serializer = new JsonSerializer(new SerializerRegistryBuilder().Build());
+        var serializer = new JsonSerializer(new FormatterRegistryBuilder().Build());
 
         Assert.Throws<InvalidOperationException>(() => serializer.Serialize(new TestItem()));
     }
 
     private static JsonSerializer CreateSerializer()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .Build();
         return new JsonSerializer(registry);
     }
 
-    private static SerializerRegistry CreateSaveRegistry()
+    private static FormatterRegistry CreateSaveRegistry()
     {
-        return new SerializerRegistryBuilder()
+        return new FormatterRegistryBuilder()
             .AddFormatter(new TestSaveFormatter(), version: 3)
             .AddMigration(new TestSaveRenameCoins())
             .AddMigration(new TestSaveXpToLevel())
@@ -240,7 +240,7 @@ public sealed class JsonSerializerTests
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -260,7 +260,7 @@ public sealed class JsonSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -296,7 +296,7 @@ public sealed class JsonSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
@@ -314,7 +314,7 @@ public sealed class JsonSerializerTests
     {
         private static readonly FieldTable s_fields = new("name", "level", "gold");
 
-        public void Write<TWriter>(ref TWriter writer, TestSave? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestSave? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -332,7 +332,7 @@ public sealed class JsonSerializerTests
             writer.EndObject();
         }
 
-        public TestSave? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestSave? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -365,7 +365,7 @@ public sealed class JsonSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
@@ -377,9 +377,9 @@ public sealed class JsonSerializerTests
     {
         public int FromVersion => 1;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
-            root.Rename("coins", "gold");
+            root.AsObject.Rename("coins", "gold");
         }
     }
 
@@ -387,11 +387,12 @@ public sealed class JsonSerializerTests
     {
         public int FromVersion => 2;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
-            var xp = root.Has("xp") ? root["xp"]!.AsInt64 : 0;
-            root["level"] = DataNode.FromInt((xp / 1000) + 1);
-            root.Remove("xp");
+            var save = root.AsObject;
+            var xp = save.TryGetValue("xp", out var value) ? value.AsInt64 : 0;
+            save["level"] = (xp / 1000) + 1;
+            save.Remove("xp");
         }
     }
 }

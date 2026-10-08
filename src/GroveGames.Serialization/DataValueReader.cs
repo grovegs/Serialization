@@ -2,46 +2,46 @@
 
 namespace GroveGames.Serialization;
 
-internal struct DataNodeReader : IFormatReader
+internal struct DataValueReader : IFormatReader
 {
     private const int MaxDepth = 64;
 
-    private readonly DataNode[] _containers;
+    private readonly DataValue[] _containers;
     private readonly int[] _indices;
     private int _depth;
-    private DataNode _current;
+    private DataValue _current;
 
-    public DataNodeReader(DataNode root)
+    public DataValueReader(DataValue root)
     {
-        _containers = new DataNode[MaxDepth];
+        _containers = new DataValue[MaxDepth];
         _indices = new int[MaxDepth];
         _depth = 0;
         _current = root;
     }
 
-    public TokenType Peek()
+    public readonly TokenType Peek()
     {
         return _current.Kind switch
         {
-            NodeKind.Object => TokenType.BeginObject,
-            NodeKind.Array => TokenType.BeginArray,
-            NodeKind.Int => TokenType.Integer,
-            NodeKind.Float => TokenType.Float,
-            NodeKind.String => TokenType.String,
-            NodeKind.Text => TokenType.Text,
-            NodeKind.Bool => TokenType.Bool,
+            DataKind.Object => TokenType.BeginObject,
+            DataKind.Array => TokenType.BeginArray,
+            DataKind.Integer => TokenType.Integer,
+            DataKind.Float => TokenType.Float,
+            DataKind.String => TokenType.String,
+            DataKind.Text => TokenType.Text,
+            DataKind.Bool => TokenType.Bool,
             _ => TokenType.Null
         };
     }
 
     public void ReadObjectStart()
     {
-        Push(NodeKind.Object);
+        Push(DataKind.Object);
     }
 
     public void ReadArrayStart()
     {
-        Push(NodeKind.Array);
+        Push(DataKind.Array);
     }
 
     public bool TryReadField(FieldTable fields, out int index)
@@ -58,16 +58,16 @@ internal struct DataNodeReader : IFormatReader
 
     public bool TryReadFieldName(out string name)
     {
-        var container = _containers[_depth];
+        var container = _containers[_depth].AsObject;
 
-        if (++_indices[_depth] >= container.Fields.Count)
+        if (++_indices[_depth] >= container.Count)
         {
             _depth--;
             name = string.Empty;
             return false;
         }
 
-        var field = container.Fields[_indices[_depth]];
+        var field = container[_indices[_depth]];
         _current = field.Value;
         name = field.Name;
         return true;
@@ -75,19 +75,19 @@ internal struct DataNodeReader : IFormatReader
 
     public bool TryReadNextElement()
     {
-        var container = _containers[_depth];
+        var container = _containers[_depth].AsArray;
 
-        if (++_indices[_depth] >= container.Items.Count)
+        if (++_indices[_depth] >= container.Count)
         {
             _depth--;
             return false;
         }
 
-        _current = container.Items[_indices[_depth]];
+        _current = container[_indices[_depth]];
         return true;
     }
 
-    public int ReadInt32()
+    public readonly int ReadInt32()
     {
         var value = _current.AsInt64;
 
@@ -99,32 +99,32 @@ internal struct DataNodeReader : IFormatReader
         return (int)value;
     }
 
-    public long ReadInt64()
+    public readonly long ReadInt64()
     {
         return _current.AsInt64;
     }
 
-    public float ReadSingle()
+    public readonly float ReadSingle()
     {
         return (float)_current.AsDouble;
     }
 
-    public double ReadDouble()
+    public readonly double ReadDouble()
     {
         return _current.AsDouble;
     }
 
-    public bool ReadBool()
+    public readonly bool ReadBool()
     {
         return _current.AsBool;
     }
 
-    public string? ReadString()
+    public readonly string? ReadString()
     {
         return _current.AsString;
     }
 
-    public bool ReadStringUtf8(out ReadOnlySpan<byte> utf8)
+    public readonly bool ReadStringUtf8(out ReadOnlySpan<byte> utf8)
     {
         var text = _current.AsString;
 
@@ -141,15 +141,15 @@ internal struct DataNodeReader : IFormatReader
         return true;
     }
 
-    public void Skip()
+    public readonly void Skip()
     {
     }
 
-    private void Push(NodeKind kind)
+    private void Push(DataKind kind)
     {
         if (_current.Kind != kind)
         {
-            throw new FormatException($"Node is {_current.Kind}, not {kind}.");
+            throw new FormatException($"Value is {_current.Kind}, not {kind}.");
         }
 
         if (++_depth >= MaxDepth)

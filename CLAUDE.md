@@ -106,14 +106,14 @@ dotnet pack -c Release
 Settled decisions. Ask before changing any of them.
 
 - **Names, not keys.** Every public field and property is serialized under its camelCase name in every format. There is no key attribute; `[Ignore]` excludes a member.
-- **No global state.** Formatters, versions and migrations live in an immutable `SerializerRegistry` built by `SerializerRegistryBuilder`. Serializers receive it in their constructor, and formatters receive it as a parameter for nested lookups.
+- **No global state.** Formatters, versions and migrations live in an immutable `FormatterRegistry` built by `FormatterRegistryBuilder`. Serializers receive it in their constructor, and formatters receive it as a parameter for nested lookups.
 - **One serializer per format.** `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer` implement `ISerializer`. Readers, writers, the envelope methods (`IDocumentWriter`, `IDocumentReader`) and the `IFormat` conversion contract are internal.
 - **Output is `IBufferWriter<byte>`.** A `ByteBuffer` is written directly; any other buffer writer receives the bytes from a thread-static scratch `ByteBuffer` in one copy, so the MessagePack writer can still back-patch headers.
-- **Versioning is `IMigration<T>` only, and data without a version is v1.** The version is written only when the root type is above v1: `{"$v":N,"data":...}` in JSON (`$v` first), a 3-byte extension prefix (type `0x56`, `fixext1` or `fixext4` for versions above 255) in MessagePack, and a `#v=N` first line in CSV. The same version reads straight into the object; an older version builds a `DataNode` tree, runs each migration from its `FromVersion`, then reads normally; a newer version throws `NotSupportedException`.
+- **Versioning is `IMigration<T>` only, and data without a version is v1.** The version is written only when the root type is above v1: `{"$v":N,"data":...}` in JSON (`$v` first), a 3-byte extension prefix (type `0x56`, `fixext1` or `fixext4` for versions above 255) in MessagePack, and a `#v=N` first line in CSV. The same version reads straight into the object; an older version builds a `DataValue` tree, runs each migration from its `FromVersion`, then reads normally; a newer version throws `NotSupportedException`.
 - **Struct readers and writers.** Formatter methods are generic over `TWriter : struct, IFormatWriter` and `TReader : struct, IFormatReader` so calls are direct under IL2CPP. Pass them by `ref`; never copy them.
 - **Zero allocation on serialize and convert.** Deserialize allocates only the resulting objects. Strings in conversion go through `ReadStringUtf8` and `WriteStringUtf8`. CSV allocates per call and is excluded from this rule.
 - **Malformed input throws `FormatException`.** Readers never read out of range, never overflow the stack (nesting stops at 63 levels) and reject trailing data. Tests truncate payloads at every byte.
-- **CSV is tabular only.** The root is a list of flat rows; nested objects throw `NotSupportedException`. Cells are untyped text, so the migration tree keeps them as `NodeKind.Text` and parses them on demand.
+- **CSV is tabular only.** The root is a list of flat rows; nested objects throw `NotSupportedException`. Cells are untyped text, so the migration tree keeps them as `DataKind.Text` and parses them on demand.
 - **Non-finite numbers in JSON** are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`, so the output stays valid JSON.
 
 ## Unity Package

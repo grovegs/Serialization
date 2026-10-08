@@ -74,7 +74,7 @@ public sealed class MessagePackSerializerTests
     [Fact]
     public void Deserialize_ListRoot_RoundTrips()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .AddFormatter(new ListFormatter<TestItem>())
             .Build();
@@ -91,7 +91,7 @@ public sealed class MessagePackSerializerTests
     [InlineData(300, new byte[] { 0xd6, 0x56, 0x00, 0x00, 0x01, 0x2c })]
     public void Serialize_VersionedType_WritesVersionExtensionPrefix(int version, byte[] prefix)
     {
-        var registry = new SerializerRegistryBuilder().AddFormatter(new TestItemFormatter(), version).Build();
+        var registry = new FormatterRegistryBuilder().AddFormatter(new TestItemFormatter(), version).Build();
         var serializer = new MessagePackSerializer(registry);
 
         var bytes = serializer.Serialize(new TestItem { Id = "a" });
@@ -103,7 +103,7 @@ public sealed class MessagePackSerializerTests
     [Fact]
     public void Deserialize_VersionedEveryTruncation_ThrowsFormatException()
     {
-        var registry = new SerializerRegistryBuilder().AddFormatter(new TestItemFormatter(), version: 2).Build();
+        var registry = new FormatterRegistryBuilder().AddFormatter(new TestItemFormatter(), version: 2).Build();
         var serializer = new MessagePackSerializer(registry);
         var bytes = serializer.Serialize(new TestItem { Id = "potion", Count = 70_000 });
 
@@ -125,7 +125,7 @@ public sealed class MessagePackSerializerTests
 
     private static MessagePackSerializer CreateSerializer()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .Build();
         return new MessagePackSerializer(registry);
@@ -143,7 +143,7 @@ public sealed class MessagePackSerializerTests
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -163,7 +163,7 @@ public sealed class MessagePackSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -199,7 +199,7 @@ public sealed class MessagePackSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
