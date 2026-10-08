@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GroveGames.Serialization\GroveGames.Serialization.csproj" />
+    <ProjectReference Include="..\..\src\GroveGames.Serialization.Generator\GroveGames.Serialization.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

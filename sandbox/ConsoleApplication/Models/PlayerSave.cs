@@ -1,5 +1,8 @@
+﻿using GroveGames.Serialization;
+
 namespace ConsoleApplication.Models;
 
+[Schema(version: 3)]
 public sealed class PlayerSave
 {
     public string? Name;

@@ -27,79 +27,69 @@ Install via NuGet:
 dotnet add package GroveGames.Serialization
 ```
 
-### Formatters
+### Schema Types
 
-Each type has an `IFormatter<T>` that writes its fields by name. Every public member is written under its camelCase name in every format. Until the source generator is available, formatters are written by hand; see `sandbox/ConsoleApplication/Models` for complete examples.
+Mark a type with `[Schema]` and the bundled source generator writes its formatter at compile time, with no reflection at runtime:
 
 ```csharp
-public sealed class ItemFormatter : IFormatter<Item>
+[Schema(version: 3)]
+public sealed class PlayerSave
 {
-    private static readonly FieldTable s_fields = new("id", "count");
+    public string? Name;
+    public int Level;
+    public long Gold;
+    public List<Item>? Items;
 
-    public void Write<TWriter>(ref TWriter writer, Item? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-
-        writer.BeginObject(2);
-        writer.WriteField(s_fields[0]);
-        writer.WriteString(value.Id);
-        writer.WriteField(s_fields[1]);
-        writer.WriteInt32(value.Count);
-        writer.EndObject();
-    }
-
-    public Item? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
-    {
-        if (reader.Peek() == TokenType.Null)
-        {
-            reader.Skip();
-            return null;
-        }
-
-        var value = new Item();
-        reader.ReadObjectStart();
-
-        while (reader.TryReadField(s_fields, out var index))
-        {
-            switch (index)
-            {
-                case 0:
-                    value.Id = reader.ReadString();
-                    break;
-                case 1:
-                    value.Count = reader.ReadInt32();
-                    break;
-                default:
-                    reader.Skip();
-                    break;
-            }
-        }
-
-        return value;
-    }
-
-    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
-        where TReader : struct, IFormatReader
-        where TWriter : struct, IFormatWriter
-    {
-        Write(ref writer, Read(ref reader, registry), registry);
-    }
+    [Ignore]
+    public int Cached;
 }
 ```
 
-Unknown fields are skipped and missing fields keep their defaults, so adding or removing a field needs no migration.
+Every public field and every public property with a public getter and setter is serialized under its camelCase name (`Gold` → `gold`, `URLPath` → `urlPath`), in declaration order. `[Ignore]` excludes a member.
+
+Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>` and `DataValue`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
+
+The generator also adds one registration method per assembly, which registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types:
+
+```csharp
+var registry = new FormatterRegistryBuilder()
+    .AddGameFormatters()
+    .Build();
+```
+
+The method is named after the assembly, so an assembly called `Game` gets `AddGameFormatters` and `Game.Data` gets `AddGameDataFormatters`.
+
+| Diagnostic | Severity | Meaning                                                                 |
+| ---------- | -------- | ----------------------------------------------------------------------- |
+| GGS001     | Error    | Nested and generic types cannot be schema types                         |
+| GGS002     | Error    | Two members map to the same field name                                  |
+| GGS003     | Error    | A member type is not supported, including `ulong` and init-only setters |
+| GGS004     | Info     | A member uses a registered formatter because its type has no `[Schema]` |
+| GGS005     | Error    | A migration for a schema type has no parameterless constructor          |
+| GGS006     | Error    | A schema class has no parameterless constructor                         |
+| GGS007     | Error    | A schema version is below 1                                             |
+
+### Type Schemas
+
+Generated formatters describe their type at runtime:
+
+```csharp
+TypeSchema schema = registry.GetSchema<PlayerSave>();
+FieldType level = schema.Fields[schema.IndexOf("level")].Type;
+ulong fingerprint = schema.Fingerprint;
+```
+
+`FieldType` gives the declared kind (`Bool`, `Int32`, `Int64`, `Single`, `Double`, `String`, `Array`, `Map`, `Object` or `Any`), whether it is nullable, the element type of arrays and maps, and the CLR type of objects. The fingerprint changes whenever a field name or type changes, so storage can detect a schema change that was not given a new version.
+
+### Custom Formatters
+
+A type can also have a hand-written `IFormatter<T>`, registered with `AddFormatter`. See the tests for complete examples.
 
 ### Serializing
 
 ```csharp
 var registry = new FormatterRegistryBuilder()
-    .AddFormatter(new ItemFormatter())
-    .AddFormatter(new ListFormatter<Item>())
-    .AddFormatter(new PlayerSaveFormatter(), version: 3)
+    .AddGameFormatters()
     .Build();
 
 var json = new JsonSerializer(registry);
@@ -150,12 +140,9 @@ public sealed class PlayerSaveXpToLevel : IMigration<PlayerSave>
     }
 }
 
-var registry = new FormatterRegistryBuilder()
-    .AddFormatter(new PlayerSaveFormatter(), version: 3)
-    .AddMigration(new PlayerSaveRenameCoins())
-    .AddMigration(new PlayerSaveXpToLevel())
-    .Build();
 ```
+
+Migrations for `[Schema]` types are registered by the generated method. Each needs a parameterless constructor.
 
 Versions belong to the root type. A change inside a nested type is migrated by the root type that contains it.
 
@@ -174,7 +161,9 @@ Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, list
 - **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `FormatterRegistry`
 - **`IConverter`** / **`Converter`**: Converts data between two serializers without creating objects
 - **`FormatterRegistryBuilder`** / **`FormatterRegistry`**: Registers formatters, versions and migrations, then freezes them
-- **`IFormatter<T>`**: Writes, reads and transcodes one type over any format
+- **`[Schema]`**: Generates a formatter, a `TypeSchema` and a registration method at compile time
+- **`IFormatter<T>`** / **`ISchemaFormatter<T>`**: Writes, reads and transcodes one type over any format; schema formatters also describe the type
+- **`TypeSchema`** / **`SchemaField`** / **`FieldType`**: Runtime description of a type's fields
 - **`IMigration<T>`**: Upgrades older data by field name
 - **`DataValue`** / **`DataObject`** / **`DataArray`**: A tagged value type and its containers, used by migrations and for schema-less data
 - **`ListFormatter<T>`**: Formatter for a `List<T>` root
@@ -198,7 +187,7 @@ Install the core through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForU
 var registry = new FormatterRegistryBuilder()
     .AddUnityFormatters()
     .AddMathematicsFormatters()
-    .AddFormatter(new PlayerSaveFormatter(), version: 3)
+    .AddGameFormatters()
     .Build();
 ```
 
@@ -231,7 +220,17 @@ Download the Godot addon from the [latest release](https://github.com/grovegs/Se
 dotnet test
 ```
 
-The Unity package tests run from `sandbox/UnityApplication` with the Unity Test Runner.
+This runs the core tests and the source generator tests.
+
+The Unity package tests run from `sandbox/UnityApplication` with the Unity Test Runner. Before opening the sandbox the first time, build the core library and the generator into it, because the package cannot compile until they exist:
+
+```bash
+cd sandbox/UnityApplication
+dotnet build ../../src/GroveGames.Serialization -c Release -f netstandard2.1 -o Assets/Plugins
+dotnet build ../../src/GroveGames.Serialization.Generator -c Release -o Assets/Plugins/Analyzers
+```
+
+After that, `Grove Games > Plugin Builder > Build` rebuilds both and labels the generator as a Roslyn analyzer.
 
 ---
 

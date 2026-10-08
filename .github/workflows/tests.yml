@@ -17,5 +17,5 @@ jobs:
   release:
     uses: grovegs/workflows/.github/workflows/package-tests.yml@v1.3.0
     with:
-      dotnet-project: tests/GroveGames.Serialization.Tests
+      dotnet-project: .
       global-json-file: global.json

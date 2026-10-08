@@ -116,6 +116,15 @@ Settled decisions. Ask before changing any of them.
 - **CSV is tabular only.** The root is a list of flat rows; nested objects throw `NotSupportedException`. Cells are untyped text, so the migration tree keeps them as `DataKind.Text` and parses them on demand.
 - **Non-finite numbers in JSON** are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`, so the output stays valid JSON.
 
+## Source Generator
+
+- `src/GroveGames.Serialization.Generator` is a `netstandard2.0` incremental generator on Microsoft.CodeAnalysis 4.3.1, the newest version Unity's compiler accepts. It is packed into the core NuGet package under `analyzers/dotnet/cs`.
+- For each `[Schema]` type it emits an internal `{Type}Formatter : ISchemaFormatter<T>` with a static `Instance`, so recursive types work. Nested schema types are called directly; other types go through `registry.GetFormatter<T>()`.
+- It emits one `Add{AssemblyName}Formatters()` extension per assembly that registers every schema type, a `ListFormatter<T>` for each, and every `IMigration<T>` targeting them. There is no static registration.
+- Migrations whose target has no `[Schema]` in the same assembly are ignored, so hand-written formatters can keep hand-registered migrations.
+- Generated code uses `#nullable disable`, block namespaces and `global::` names, and has no comments, so it compiles under Unity's C# version.
+- Models in the generator are equatable records over `EquatableArray<T>`, never Roslyn symbols, to keep the pipeline cacheable.
+
 ## Unity Package
 
 - Formatters for Unity types are in `Runtime/` and registered with `AddUnityFormatters()`.
