@@ -5,7 +5,7 @@ namespace GroveGames.Serialization.Generator;
 
 internal static class RegistrationEmitter
 {
-    public static string ModuleName(string assemblyName)
+    public static string ClassName(string assemblyName)
     {
         var builder = new StringBuilder();
         var upper = true;
@@ -27,22 +27,50 @@ internal static class RegistrationEmitter
             builder.Insert(0, "Assembly");
         }
 
-        return builder.Append("FormatterModule").ToString();
+        return builder.Append("FormatterRegistration").ToString();
     }
 
-    public static string Emit(string assemblyName, IReadOnlyList<SchemaTypeModel> schemas, IReadOnlyList<FormatterModel> formatters, IReadOnlyList<MigrationModel> migrations)
+    public static string Emit(TargetModel target, IReadOnlyList<SchemaTypeModel> schemas, IReadOnlyList<FormatterModel> formatters, IReadOnlyList<MigrationModel> migrations)
     {
-        var name = ModuleName(assemblyName);
+        var name = ClassName(target.AssemblyName);
         var code = new CodeBuilder();
         code.Line("#nullable disable");
-        code.Line($"[assembly: global::GroveGames.Serialization.FormatterModule(typeof(global::GroveGames.Serialization.{name}))]");
+
+        if (!target.HasUnityEngine && !target.HasModuleInitializer)
+        {
+            code.Open("namespace System.Runtime.CompilerServices");
+            code.Line("[global::System.AttributeUsage(global::System.AttributeTargets.Method, Inherited = false)]");
+            code.Open("internal sealed class ModuleInitializerAttribute : global::System.Attribute");
+            code.Close();
+            code.Close();
+        }
+
         code.Open("namespace GroveGames.Serialization");
-        code.Line("[global::GroveGames.Serialization.Preserve]");
-        code.Open($"internal sealed class {name} : global::GroveGames.Serialization.IFormatterModule");
-        code.Line("[global::GroveGames.Serialization.Preserve]");
-        code.Open($"public {name}()");
+        code.Open($"internal static class {name}");
+        code.Line("private static bool s_registered;");
+        code.Line();
+
+        if (target.HasUnityEngine)
+        {
+            code.Line("[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]");
+
+            if (target.HasUnityEditor)
+            {
+                code.Line("[global::UnityEditor.InitializeOnLoadMethod]");
+            }
+        }
+        else
+        {
+            code.Line("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        }
+
+        code.Open("internal static void Register()");
+        code.Open("if (s_registered)").Line("return;").Close().Line();
+        code.Line("s_registered = true;");
+        code.Line("global::GroveGames.Serialization.Formatters.Register(Configure);");
         code.Close();
-        code.Open("public void Register(global::GroveGames.Serialization.FormatterRegistrar registrar)");
+        code.Line();
+        code.Open("private static void Configure(global::GroveGames.Serialization.FormatterRegistrar registrar)");
 
         foreach (var schema in schemas)
         {

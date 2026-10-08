@@ -1,19 +1,27 @@
-using GroveGames.Serialization.Unity;
 using UnityEngine;
-
-[assembly: GroveGames.Serialization.FormatterModule(typeof(UnityFormatterModule))]
 
 namespace GroveGames.Serialization.Unity
 {
-    [GroveGames.Serialization.Preserve]
-    internal sealed class UnityFormatterModule : IFormatterModule
+    internal static class UnityFormatterRegistration
     {
-        [GroveGames.Serialization.Preserve]
-        public UnityFormatterModule()
+        private static bool s_registered;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#endif
+        internal static void Register()
         {
+            if (s_registered)
+            {
+                return;
+            }
+
+            s_registered = true;
+            Formatters.Register(Configure);
         }
 
-        public void Register(FormatterRegistrar registrar)
+        private static void Configure(FormatterRegistrar registrar)
         {
             registrar.AddFormatter(new Vector2Formatter());
             registrar.AddFormatter(new ListFormatter<Vector2>());
@@ -35,15 +43,6 @@ namespace GroveGames.Serialization.Unity
             registrar.AddFormatter(new ListFormatter<Rect>());
             registrar.AddFormatter(new BoundsFormatter());
             registrar.AddFormatter(new ListFormatter<Bounds>());
-        }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        private static void Load()
-        {
-            Formatters.Load(typeof(UnityFormatterModule).Assembly);
         }
     }
 }

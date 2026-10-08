@@ -43,7 +43,53 @@ public sealed class SchemaGeneratorTests
         Assert.Empty(result.GeneratorDiagnostics);
         Assert.Empty(result.CompilationErrors);
         Assert.Contains(result.GeneratedSources, source => source.Contains("internal sealed class SaveFormatter"));
-        Assert.Contains(result.GeneratedSources, source => source.Contains("[assembly: global::GroveGames.Serialization.FormatterModule(typeof(global::GroveGames.Serialization.TestsFormatterModule))]") && source.Contains("new global::Game.SaveMigration()"));
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("internal static class TestsFormatterRegistration")
+            && source.Contains("[global::System.Runtime.CompilerServices.ModuleInitializer]")
+            && source.Contains("new global::Game.SaveMigration()"));
+    }
+
+    [Fact]
+    public void Generate_UnityCompilation_RegistersAtUnityStartup()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace UnityEngine
+            {
+                public enum RuntimeInitializeLoadType { SubsystemRegistration }
+
+                public sealed class RuntimeInitializeOnLoadMethodAttribute : System.Attribute
+                {
+                    public RuntimeInitializeOnLoadMethodAttribute(RuntimeInitializeLoadType loadType)
+                    {
+                    }
+                }
+            }
+
+            namespace UnityEditor
+            {
+                public sealed class InitializeOnLoadMethodAttribute : System.Attribute
+                {
+                }
+            }
+
+            namespace Game
+            {
+                [Schema]
+                public sealed class Save
+                {
+                    public int Level;
+                }
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]")
+            && source.Contains("[global::UnityEditor.InitializeOnLoadMethod]")
+            && !source.Contains("ModuleInitializer"));
     }
 
     [Fact]

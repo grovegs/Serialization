@@ -74,7 +74,7 @@ public sealed class FormattersTests
     }
 
     [Fact]
-    public void Get_SchemaType_LoadsGeneratedModuleOfItsAssembly()
+    public void Get_SchemaType_IsRegisteredWhenAssemblyLoads()
     {
         Assert.True(Formatters.TryGet<GeneratedSample>(out _));
         Assert.True(Formatters.TryGet<List<GeneratedSample>>(out _));

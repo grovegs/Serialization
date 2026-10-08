@@ -50,12 +50,16 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         var registration = schemas.Collect()
             .Combine(formatters.Collect())
             .Combine(migrations.Collect())
-            .Combine(context.CompilationProvider.Select(static (compilation, _) => compilation.AssemblyName ?? "Assembly"));
+            .Combine(context.CompilationProvider.Select(static (compilation, _) => new TargetModel(
+                compilation.AssemblyName ?? "Assembly",
+                compilation.GetTypeByMetadataName("UnityEngine.RuntimeInitializeOnLoadMethodAttribute") != null,
+                compilation.GetTypeByMetadataName("UnityEditor.InitializeOnLoadMethodAttribute") != null,
+                compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.ModuleInitializerAttribute") != null)));
 
         context.RegisterSourceOutput(registration, static (context, data) => Register(context, data.Left.Left.Left, data.Left.Left.Right!, data.Left.Right!, data.Right));
     }
 
-    private static void Register(SourceProductionContext context, ImmutableArray<SchemaTypeModel> schemas, ImmutableArray<FormatterModel?> formatters, ImmutableArray<MigrationModel?> migrations, string assemblyName)
+    private static void Register(SourceProductionContext context, ImmutableArray<SchemaTypeModel> schemas, ImmutableArray<FormatterModel?> formatters, ImmutableArray<MigrationModel?> migrations, TargetModel target)
     {
         var validSchemas = new List<SchemaTypeModel>();
         var schemaNames = new HashSet<string>();
@@ -115,7 +119,7 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         validSchemas.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
         validFormatters.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
         validMigrations.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
-        context.AddSource("FormatterModule.g.cs", RegistrationEmitter.Emit(assemblyName, validSchemas, validFormatters, validMigrations));
+        context.AddSource("FormatterRegistration.g.cs", RegistrationEmitter.Emit(target, validSchemas, validFormatters, validMigrations));
     }
 
     private static string HintName(SchemaTypeModel model)

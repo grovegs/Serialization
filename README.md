@@ -49,7 +49,7 @@ Every public field and every public property with a public getter and setter is 
 
 Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>` and `DataValue`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
-The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Nothing needs to be called: the first time a type is serialized, the registrations of its assembly are loaded.
+The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Nothing needs to be called: the registration runs when the assembly starts.
 
 | Diagnostic | Severity | Meaning                                                                 |
 | ---------- | -------- | ----------------------------------------------------------------------- |
@@ -89,9 +89,11 @@ A formatter needs a parameterless constructor and must be public or internal. Se
 
 ### Registration
 
-`Formatters.Get<T>()`, `GetVersion<T>()` and `GetSchema<T>()` return what is registered for a type. Each type's registration is cached in a static field, so after the first use a lookup is a field read. The first lookup loads the registrations of the type's assembly, and of its generic arguments' assemblies; only a type that is still missing triggers a one-time scan of every loaded assembly. The Unity package registers its formatters at startup, so Unity types never need that scan.
+The generator writes the registration of each assembly's `[Schema]` types and `[Formatter]` classes at compile time, and runs it at startup: with `RuntimeInitializeOnLoadMethod` (and `InitializeOnLoadMethod` in the editor) when the assembly is compiled by Unity, and with a module initializer everywhere else. There is no reflection or assembly scanning. In Unity, a DLL that was compiled outside Unity is registered the first time one of its types is used, because Unity does not run module initializers on its own.
 
-Each type has exactly one formatter. Two assemblies that register the same type throw when the second one loads, naming that assembly.
+`Formatters.Get<T>()`, `GetVersion<T>()` and `GetSchema<T>()` return what is registered for a type. Each type's registration is cached in a static field, so a lookup is a field read.
+
+Each type has exactly one formatter. Registering a type twice throws, naming the type.
 
 ### Serializing
 
