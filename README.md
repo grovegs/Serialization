@@ -49,27 +49,15 @@ Every public field and every public property with a public getter and setter is 
 
 Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>` and `DataValue`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
-The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Serializers created without a registry find these registrations on their own:
+The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Serializers find these registrations on their own:
 
 ```csharp
 var json = new JsonSerializer();
 ```
 
-### Registries
+### Registry
 
-`FormatterRegistry.Default` is built once, on first use, from every loaded assembly that declares `[assembly: FormatterModule(...)]`. The generator declares one for each assembly with schema types, and the Unity package declares one for its formatters. Assemblies loaded after that first use are not included.
-
-To choose the formatters yourself, for example in tests, build a registry and pass it to the serializer:
-
-```csharp
-var registry = new FormatterRegistryBuilder()
-    .AddGameFormatters()
-    .Build();
-
-var json = new JsonSerializer(registry);
-```
-
-Each assembly's method is named after it, so an assembly called `Game` gets `AddGameFormatters` and `Game.Data` gets `AddGameDataFormatters`. `AddAllFormatters()` adds every module, like the default registry.
+`FormatterRegistry.Default` is built once, on first use, from every loaded assembly that declares `[assembly: FormatterModule(...)]`. The generator declares one for each assembly with schema types, and the Unity package declares one for its formatters. Assemblies loaded after that first use are not included, and two assemblies that register the same type throw on first use, naming the assembly.
 
 | Diagnostic | Severity | Meaning                                                                 |
 | ---------- | -------- | ----------------------------------------------------------------------- |
@@ -86,7 +74,7 @@ Each assembly's method is named after it, so an assembly called `Game` gets `Add
 Generated formatters describe their type at runtime:
 
 ```csharp
-TypeSchema schema = registry.GetSchema<PlayerSave>();
+TypeSchema schema = FormatterRegistry.Default.GetSchema<PlayerSave>();
 FieldType level = schema.Fields[schema.IndexOf("level")].Type;
 ulong fingerprint = schema.Fingerprint;
 ```
@@ -95,7 +83,7 @@ ulong fingerprint = schema.Fingerprint;
 
 ### Custom Formatters
 
-A type can also have a hand-written `IFormatter<T>`, registered with `AddFormatter`. To include it in the default registry, register it from an `IFormatterModule` declared with `[assembly: FormatterModule(typeof(GameFormatterModule))]`, and mark the module and its constructor `[Preserve]` so IL2CPP stripping keeps them. See the tests for complete examples.
+A type can also have a hand-written `IFormatter<T>`. Register it with `builder.AddFormatter(...)` from an `IFormatterModule` declared with `[assembly: FormatterModule(typeof(GameFormatterModule))]`, and mark the module and its constructor `[Preserve]` so IL2CPP stripping keeps them. See the Unity package's `UnityFormatterModule` for a complete example.
 
 ### Serializing
 
@@ -120,7 +108,7 @@ var toJson = new Converter(messagePack, json);
 byte[] jsonBytes = toJson.Convert<PlayerSave>(bytes);
 ```
 
-Both serializers must share the same registry. Older data is migrated while converting.
+Older data is migrated while converting.
 
 ### Versions and Migrations
 
@@ -168,8 +156,8 @@ Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, list
 
 - **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `FormatterRegistry`
 - **`IConverter`** / **`Converter`**: Converts data between two serializers without creating objects
-- **`FormatterRegistryBuilder`** / **`FormatterRegistry`**: Registers formatters, versions and migrations, then freezes them; `FormatterRegistry.Default` collects every module
-- **`IFormatterModule`** / **`[FormatterModule]`**: Registers an assembly's formatters in the default registry
+- **`FormatterRegistry`**: Formatters, versions and migrations of every type; `FormatterRegistry.Default` collects every module
+- **`IFormatterModule`** / **`[FormatterModule]`**: Registers an assembly's formatters with a `FormatterRegistryBuilder`
 - **`[Schema]`**: Generates a formatter, a `TypeSchema` and a registration method at compile time
 - **`IFormatter<T>`** / **`ISchemaFormatter<T>`**: Writes, reads and transcodes one type over any format; schema formatters also describe the type
 - **`TypeSchema`** / **`SchemaField`** / **`FieldType`**: Runtime description of a type's fields
@@ -192,27 +180,15 @@ Install the core through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForU
 
 ### Unity Formatters
 
-The default registry includes these formatters. To build a registry yourself, add them with:
-
-```csharp
-var registry = new FormatterRegistryBuilder()
-    .AddUnityFormatters()
-    .AddMathematicsFormatters()
-    .AddGameFormatters()
-    .Build();
-```
-
-`AddUnityFormatters` registers `Vector2`, `Vector3`, `Vector4`, `Vector2Int`, `Vector3Int`, `Quaternion`, `Color`, `Color32`, `Rect` and `Bounds`. `AddMathematicsFormatters` registers `float2`, `float3`, `float4`, `int2`, `int3` and `quaternion`, and compiles only when `com.unity.mathematics` is installed. Each value is an object of named components, such as `{"x":1,"y":2,"z":3}`, so it is not supported in CSV rows.
+The package registers formatters for `Vector2`, `Vector3`, `Vector4`, `Vector2Int`, `Vector3Int`, `Quaternion`, `Color`, `Color32`, `Rect` and `Bounds`, and, when `com.unity.mathematics` is installed, for `float2`, `float3`, `float4`, `int2`, `int3` and `quaternion`. Each value is an object of named components, such as `{"x":1,"y":2,"z":3}`, so it is not supported in CSV rows.
 
 ### Dependency Injection
 
-With [GroveGames.DependencyInjection](https://github.com/grovegs/DependencyInjection) installed, register the default registry and the three serializers in an installer:
+With [GroveGames.DependencyInjection](https://github.com/grovegs/DependencyInjection) installed, register the three serializers in an installer:
 
 ```csharp
 builder.AddSerialization();
 ```
-
-`AddSerialization(registry)` registers a registry you built instead.
 
 Inject `JsonSerializer`, `MessagePackSerializer` or `CsvSerializer` where you need them.
 

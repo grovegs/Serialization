@@ -120,14 +120,14 @@ Settled decisions. Ask before changing any of them.
 
 - `src/GroveGames.Serialization.Generator` is a `netstandard2.0` incremental generator on Microsoft.CodeAnalysis 4.3.1, the newest version Unity's compiler accepts. It is packed into the core NuGet package under `analyzers/dotnet/cs`.
 - For each `[Schema]` type it emits an internal `{Type}Formatter : ISchemaFormatter<T>` with a static `Instance`, so recursive types work. Nested schema types are called directly; other types go through `registry.GetFormatter<T>()`.
-- It emits one `Add{AssemblyName}Formatters()` extension per assembly that registers every schema type, a `ListFormatter<T>` for each, and every `IMigration<T>` targeting them. There is no static registration.
-- Migrations whose target has no `[Schema]` in the same assembly are ignored, so hand-written formatters can keep hand-registered migrations.
+- It emits one internal `{AssemblyName}FormatterModule : IFormatterModule` per assembly, declared with `[assembly: FormatterModule]` and marked `[Preserve]`, that registers every schema type, a `ListFormatter<T>` for each, and every `IMigration<T>` targeting them. `FormatterRegistry.Default` collects every module with the internal `FormatterRegistryBuilder.AddFormatters()`; there is no public way to register formatters other than a module.
+- Migrations whose target has no `[Schema]` in the same assembly are ignored, so hand-written formatters register their migrations in their own module.
 - Generated code uses `#nullable disable`, block namespaces and `global::` names, and has no comments, so it compiles under Unity's C# version.
 - Models in the generator are equatable records over `EquatableArray<T>`, never Roslyn symbols, to keep the pipeline cacheable.
 
 ## Unity Package
 
-- Formatters for Unity types are in `Runtime/` and registered with `AddUnityFormatters()`.
-- Unity.Mathematics formatters are in `Integrations/Unity.Mathematics/`, compiled only when `com.unity.mathematics` is installed, and registered with `AddMathematicsFormatters()`.
-- The GroveGames.DependencyInjection integration is in `Integrations/GroveGames.DependencyInjection/` and adds `AddSerialization(registry)`.
+- Formatters for Unity types are in `Runtime/` and registered by `UnityFormatterModule`.
+- Unity.Mathematics formatters are in `Integrations/Unity.Mathematics/`, compiled only when `com.unity.mathematics` is installed, and registered by `MathematicsFormatterModule`.
+- The GroveGames.DependencyInjection integration is in `Integrations/GroveGames.DependencyInjection/` and adds `AddSerialization()`.
 - Every file and folder in the package needs a `.meta` with a 32-character lowercase hex GUID.

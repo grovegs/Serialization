@@ -1,4 +1,4 @@
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using ConsoleApplication.Models;
 using GroveGames.Serialization;
 using SystemTextJson = System.Text.Json;
@@ -22,11 +22,8 @@ public class Benchmark
     [GlobalSetup]
     public void Setup()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddDotnetBenchmarkFormatters()
-            .Build();
-        _json = new JsonSerializer(registry);
-        _messagePack = new MessagePackSerializer(registry);
+        _json = new JsonSerializer();
+        _messagePack = new MessagePackSerializer();
         _output = new ByteBuffer(64 * 1024);
         _save = new PlayerSave { Name = "Hero", Level = 42, Gold = 1_000_000, PlayTime = 12_345.678, Items = [] };
 

@@ -41,7 +41,7 @@ public sealed class FormatterRegistryBuilder
         return this;
     }
 
-    public FormatterRegistryBuilder AddAllFormatters()
+    internal FormatterRegistryBuilder AddFormatters()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         Array.Sort(assemblies, static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));

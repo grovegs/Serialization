@@ -14,7 +14,12 @@ namespace GroveGames.Serialization.Unity
 
         public void Register(FormatterRegistryBuilder builder)
         {
-            builder.AddMathematicsFormatters();
+            builder.AddFormatter(new Float2Formatter());
+            builder.AddFormatter(new Float3Formatter());
+            builder.AddFormatter(new Float4Formatter());
+            builder.AddFormatter(new Int2Formatter());
+            builder.AddFormatter(new Int3Formatter());
+            builder.AddFormatter(new MathematicsQuaternionFormatter());
         }
     }
 }

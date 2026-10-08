@@ -8,13 +8,9 @@ public static class Program
 {
     public static void Main()
     {
-        var registry = new FormatterRegistryBuilder()
-            .AddConsoleApplicationFormatters()
-            .Build();
-
-        var json = new JsonSerializer(registry);
-        var messagePack = new MessagePackSerializer(registry);
-        var csv = new CsvSerializer(registry);
+        var json = new JsonSerializer();
+        var messagePack = new MessagePackSerializer();
+        var csv = new CsvSerializer();
 
         var save = new PlayerSave
         {

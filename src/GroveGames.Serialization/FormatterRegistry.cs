@@ -4,7 +4,7 @@ namespace GroveGames.Serialization;
 
 public sealed class FormatterRegistry
 {
-    private static readonly Lazy<FormatterRegistry> s_default = new(static () => new FormatterRegistryBuilder().AddAllFormatters().Build());
+    private static readonly Lazy<FormatterRegistry> s_default = new(static () => new FormatterRegistryBuilder().AddFormatters().Build());
 
     private readonly Dictionary<Type, object> _registrations;
 

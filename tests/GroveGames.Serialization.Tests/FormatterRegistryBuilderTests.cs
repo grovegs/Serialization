@@ -11,20 +11,14 @@ public sealed class FormatterRegistryBuilderTests
     }
 
     [Fact]
-    public void AddAllFormatters_RegistersGeneratedModules()
+    public void Default_RegistersGeneratedModulesOnce()
     {
-        var registry = new FormatterRegistryBuilder().AddAllFormatters().Build();
+        var registry = FormatterRegistry.Default;
 
+        Assert.Same(registry, FormatterRegistry.Default);
         Assert.True(registry.TryGetFormatter<GeneratedSample>(out _));
         Assert.True(registry.TryGetFormatter<List<GeneratedSample>>(out _));
         Assert.Equal(2, registry.GetVersion<GeneratedChild>());
-    }
-
-    [Fact]
-    public void Default_RegistersGeneratedModulesOnce()
-    {
-        Assert.Same(FormatterRegistry.Default, FormatterRegistry.Default);
-        Assert.True(FormatterRegistry.Default.TryGetFormatter<GeneratedSample>(out _));
     }
 
     [Fact]
@@ -38,11 +32,11 @@ public sealed class FormatterRegistryBuilderTests
     }
 
     [Fact]
-    public void AddAllFormatters_AfterSameRegistration_ThrowsWithAssemblyName()
+    public void AddFormatters_AfterSameRegistration_ThrowsWithAssemblyName()
     {
-        var builder = new FormatterRegistryBuilder().AddGroveGamesSerializationTestsFormatters();
+        var builder = new FormatterRegistryBuilder().AddFormatter(GeneratedSampleFormatter.Instance);
 
-        var exception = Assert.Throws<InvalidOperationException>(() => builder.AddAllFormatters());
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.AddFormatters());
 
         Assert.StartsWith("GroveGames.Serialization.Tests:", exception.Message);
     }

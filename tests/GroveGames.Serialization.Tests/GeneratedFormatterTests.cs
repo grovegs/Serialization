@@ -104,7 +104,7 @@ public sealed class GeneratedFormatterTests
 
     private static FormatterRegistry CreateRegistry()
     {
-        return new FormatterRegistryBuilder().AddGroveGamesSerializationTestsFormatters().Build();
+        return FormatterRegistry.Default;
     }
 
     private static GeneratedSample CreateSample()

@@ -88,7 +88,7 @@ public sealed class SchemaGenerator : IIncrementalGenerator
 
         validSchemas.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
         validMigrations.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
-        context.AddSource("FormatterRegistryBuilderExtensions.g.cs", RegistrationEmitter.Emit(assemblyName, validSchemas, validMigrations));
+        context.AddSource("FormatterModule.g.cs", RegistrationEmitter.Emit(assemblyName, validSchemas, validMigrations));
     }
 
     private static string HintName(SchemaTypeModel model)

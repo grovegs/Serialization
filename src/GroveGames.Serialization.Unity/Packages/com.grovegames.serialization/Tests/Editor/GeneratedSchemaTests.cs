@@ -8,11 +8,7 @@ namespace GroveGames.Serialization.Unity.Editor.Tests
         [Test]
         public void GeneratedFormatter_UnityMember_RoundTrips()
         {
-            var registry = new FormatterRegistryBuilder()
-                .AddUnityFormatters()
-                .AddGroveGamesSerializationUnityEditorTestsFormatters()
-                .Build();
-            var serializer = new MessagePackSerializer(registry);
+            var serializer = new MessagePackSerializer();
             var value = new GeneratedUnitySample { Name = "spawn", Position = new Vector3(1, 2, 3), Count = 4 };
 
             var result = serializer.Deserialize<GeneratedUnitySample>(serializer.Serialize(value));
@@ -20,7 +16,7 @@ namespace GroveGames.Serialization.Unity.Editor.Tests
             Assert.AreEqual("spawn", result.Name);
             Assert.AreEqual(new Vector3(1, 2, 3), result.Position);
             Assert.AreEqual(4, result.Count);
-            Assert.AreEqual(FieldTypeKind.Object, registry.GetSchema<GeneratedUnitySample>().Fields[1].Type.Kind);
+            Assert.AreEqual(FieldTypeKind.Object, serializer.Registry.GetSchema<GeneratedUnitySample>().Fields[1].Type.Kind);
         }
     }
 
