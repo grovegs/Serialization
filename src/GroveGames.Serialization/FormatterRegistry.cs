@@ -28,6 +28,23 @@ public sealed class FormatterRegistry
         return false;
     }
 
+    public TypeSchema GetSchema<T>()
+    {
+        return TryGetSchema<T>(out var schema) ? schema : throw new InvalidOperationException($"The formatter for {typeof(T)} has no schema.");
+    }
+
+    public bool TryGetSchema<T>([NotNullWhen(true)] out TypeSchema? schema)
+    {
+        if (_registrations.TryGetValue(typeof(T), out var registration) && ((TypeRegistration<T>)registration).Formatter is ISchemaFormatter<T> schemaFormatter)
+        {
+            schema = schemaFormatter.Schema;
+            return true;
+        }
+
+        schema = null;
+        return false;
+    }
+
     public int GetVersion<T>()
     {
         return GetRegistration<T>().Version;
