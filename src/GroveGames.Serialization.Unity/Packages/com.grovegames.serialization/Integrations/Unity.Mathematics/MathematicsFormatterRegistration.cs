@@ -1,19 +1,27 @@
-using GroveGames.Serialization.Unity;
 using UnityEngine;
-
-[assembly: GroveGames.Serialization.FormatterModule(typeof(MathematicsFormatterModule))]
 
 namespace GroveGames.Serialization.Unity
 {
-    [GroveGames.Serialization.Preserve]
-    internal sealed class MathematicsFormatterModule : IFormatterModule
+    internal static class MathematicsFormatterRegistration
     {
-        [GroveGames.Serialization.Preserve]
-        public MathematicsFormatterModule()
+        private static bool s_registered;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#endif
+        internal static void Register()
         {
+            if (s_registered)
+            {
+                return;
+            }
+
+            s_registered = true;
+            Formatters.Register(Configure);
         }
 
-        public void Register(FormatterRegistrar registrar)
+        private static void Configure(FormatterRegistrar registrar)
         {
             registrar.AddFormatter(new Float2Formatter());
             registrar.AddFormatter(new ListFormatter<global::Unity.Mathematics.float2>());
@@ -27,15 +35,6 @@ namespace GroveGames.Serialization.Unity
             registrar.AddFormatter(new ListFormatter<global::Unity.Mathematics.int3>());
             registrar.AddFormatter(new MathematicsQuaternionFormatter());
             registrar.AddFormatter(new ListFormatter<global::Unity.Mathematics.quaternion>());
-        }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        private static void Load()
-        {
-            Formatters.Load(typeof(MathematicsFormatterModule).Assembly);
         }
     }
 }

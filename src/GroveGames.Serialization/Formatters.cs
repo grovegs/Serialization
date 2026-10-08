@@ -1,13 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace GroveGames.Serialization;
 
 public static class Formatters
 {
     private static readonly object s_lock = new();
-    private static readonly HashSet<Assembly> s_loaded = [];
-    private static bool s_scanned;
+    private static bool s_coreRegistered;
 
     public static IFormatter<T> Get<T>()
     {
@@ -36,21 +36,11 @@ public static class Formatters
         return schema != null;
     }
 
-    internal static TypeRegistration<T> GetRegistration<T>()
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void Register(Action<FormatterRegistrar> configure)
     {
-        return Volatile.Read(ref FormatterCache<T>.Registration) ?? Load<T>() ?? throw new InvalidOperationException($"No formatter is registered for {typeof(T)}. Mark it with [Schema], or mark a formatter for it with [Formatter].");
-    }
+        ArgumentNullException.ThrowIfNull(configure);
 
-    internal static void Load(Assembly assembly)
-    {
-        lock (s_lock)
-        {
-            LoadAssembly(assembly);
-        }
-    }
-
-    internal static void Register(Action<FormatterRegistrar> configure)
-    {
         lock (s_lock)
         {
             var registrar = new FormatterRegistrar();
@@ -59,70 +49,56 @@ public static class Formatters
         }
     }
 
+    internal static TypeRegistration<T> GetRegistration<T>()
+    {
+        return Volatile.Read(ref FormatterCache<T>.Registration) ?? Load<T>() ?? throw Missing<T>();
+    }
+
     private static TypeRegistration<T>? Load<T>()
     {
         lock (s_lock)
         {
-            LoadAssemblies(typeof(T));
-
-            if (FormatterCache<T>.Registration == null && !s_scanned)
+            if (!s_coreRegistered)
             {
-                s_scanned = true;
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                Array.Sort(assemblies, static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
-
-                foreach (var assembly in assemblies)
-                {
-                    LoadAssembly(assembly);
-                }
+                s_coreRegistered = true;
+                var registrar = new FormatterRegistrar();
+                registrar.AddFormatter(new DataValueFormatter());
+                registrar.AddFormatter(new ListFormatter<DataValue>());
+                registrar.Commit();
             }
-
-            return FormatterCache<T>.Registration;
         }
+
+        if (Volatile.Read(ref FormatterCache<T>.Registration) == null)
+        {
+            InitializeAssemblies(typeof(T));
+        }
+
+        return Volatile.Read(ref FormatterCache<T>.Registration);
     }
 
-    private static void LoadAssemblies(Type type)
+    private static void InitializeAssemblies(Type type)
     {
-        LoadAssembly(type.Assembly);
+        RuntimeHelpers.RunModuleConstructor(type.Assembly.ManifestModule.ModuleHandle);
 
         if (type.IsArray)
         {
-            LoadAssemblies(type.GetElementType()!);
+            InitializeAssemblies(type.GetElementType()!);
         }
         else if (type.IsGenericType)
         {
             foreach (var argument in type.GetGenericArguments())
             {
-                LoadAssemblies(argument);
+                InitializeAssemblies(argument);
             }
         }
     }
 
-    private static void LoadAssembly(Assembly assembly)
+    private static InvalidOperationException Missing<T>()
     {
-        if (assembly.IsDynamic || !s_loaded.Add(assembly))
-        {
-            return;
-        }
-
-        foreach (var attribute in assembly.GetCustomAttributes<FormatterModuleAttribute>())
-        {
-            if (Activator.CreateInstance(attribute.Type) is not IFormatterModule module)
-            {
-                throw new InvalidOperationException($"{attribute.Type} in {assembly.GetName().Name} is not an {nameof(IFormatterModule)}.");
-            }
-
-            var registrar = new FormatterRegistrar();
-            module.Register(registrar);
-
-            try
-            {
-                registrar.Commit();
-            }
-            catch (InvalidOperationException exception)
-            {
-                throw new InvalidOperationException($"{assembly.GetName().Name}: {exception.Message}", exception);
-            }
-        }
+        var type = typeof(T);
+        var hint = type.Namespace != null && (type.Namespace.StartsWith("UnityEngine", StringComparison.Ordinal) || type.Namespace.StartsWith("Unity.Mathematics", StringComparison.Ordinal))
+            ? " Install com.grovegames.serialization for Unity type formatters."
+            : " Mark it with [Schema], or mark a formatter for it with [Formatter].";
+        return new InvalidOperationException($"No formatter is registered for {type}.{hint}");
     }
 }

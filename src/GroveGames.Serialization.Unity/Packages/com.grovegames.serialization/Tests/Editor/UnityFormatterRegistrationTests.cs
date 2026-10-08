@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GroveGames.Serialization.Unity.Editor.Tests
 {
-    public sealed class UnityFormatterModuleTests
+    public sealed class UnityFormatterRegistrationTests
     {
         [Test]
         public void Formatters_UnityTypes_AreRegistered()
