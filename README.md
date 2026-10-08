@@ -146,6 +146,21 @@ Migrations for `[Schema]` types are registered by the generated method. Each nee
 
 Versions belong to the root type. A change inside a nested type is migrated by the root type that contains it.
 
+### Rows
+
+`RowSerializer` writes a record as a MessagePack array of its field values, without field names, for storage that keeps the names once per file:
+
+```csharp
+var rows = new RowSerializer(registry);
+FieldTable layout = rows.GetLayout<Player>();
+rows.SerializeLayout(layout, header);
+rows.Serialize(player, output);
+
+Player? loaded = rows.Deserialize<Player>(row, storedLayout, storedVersion);
+```
+
+Values are matched to the current fields by name through the stored layout, so renamed, added and removed fields work as in the other formats, and data from an older version is migrated. Only the top-level record is positional; nested objects keep their field names.
+
 ### Formats
 
 | Format      | Shape                            | Notes                                                                                    |
@@ -166,6 +181,7 @@ Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, list
 - **`TypeSchema`** / **`SchemaField`** / **`FieldType`**: Runtime description of a type's fields
 - **`IMigration<T>`**: Upgrades older data by field name
 - **`DataValue`** / **`DataObject`** / **`DataArray`**: A tagged value type and its containers, used by migrations and for schema-less data
+- **`RowSerializer`**: Writes records as positional rows against a stored layout, for databases
 - **`ListFormatter<T>`**: Formatter for a `List<T>` root
 - **`ByteBuffer`**: Growable, reusable `IBufferWriter<byte>`
 

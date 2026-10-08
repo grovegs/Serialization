@@ -114,6 +114,7 @@ Settled decisions. Ask before changing any of them.
 - **Zero allocation on serialize and convert.** Deserialize allocates only the resulting objects. Strings in conversion go through `ReadStringUtf8` and `WriteStringUtf8`. CSV allocates per call and is excluded from this rule.
 - **Malformed input throws `FormatException`.** Readers never read out of range, never overflow the stack (nesting stops at 63 levels) and reject trailing data. Tests truncate payloads at every byte.
 - **CSV is tabular only.** The root is a list of flat rows; nested objects throw `NotSupportedException`. Cells are untyped text, so the migration tree keeps them as `DataKind.Text` and parses them on demand.
+- **Rows are positional only at the top level.** `RowSerializer` writes the root object as a MessagePack array in layout order and reads it back through the stored layout by name; nested objects stay MessagePack maps. Rows carry no version; callers pass the stored version.
 - **Non-finite numbers in JSON** are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`, so the output stays valid JSON.
 
 ## Source Generator

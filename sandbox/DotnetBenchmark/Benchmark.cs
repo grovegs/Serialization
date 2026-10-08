@@ -14,6 +14,9 @@ public class Benchmark
     private PlayerSave _save = null!;
     private JsonSerializer _json = null!;
     private MessagePackSerializer _messagePack = null!;
+    private RowSerializer _rows = null!;
+    private FieldTable _layout = null!;
+    private byte[] _rowBytes = null!;
     private ByteBuffer _output = null!;
     private byte[] _jsonBytes = null!;
     private byte[] _messagePackBytes = null!;
@@ -27,6 +30,8 @@ public class Benchmark
             .Build();
         _json = new JsonSerializer(registry);
         _messagePack = new MessagePackSerializer(registry);
+        _rows = new RowSerializer(registry);
+        _layout = _rows.GetLayout<PlayerSave>();
         _output = new ByteBuffer(64 * 1024);
         _save = new PlayerSave { Name = "Hero", Level = 42, Gold = 1_000_000, PlayTime = 12_345.678, Items = [] };
 
@@ -37,6 +42,10 @@ public class Benchmark
 
         _jsonBytes = _json.Serialize(_save);
         _messagePackBytes = _messagePack.Serialize(_save);
+        _output.Reset();
+        _rows.Serialize(_save, _output);
+        _rowBytes = _output.ToArray();
+        Console.WriteLine($"Sizes: JSON {_jsonBytes.Length}, MessagePack {_messagePackBytes.Length}, row {_rowBytes.Length}");
         _systemTextJsonBytes = SystemTextJson.JsonSerializer.SerializeToUtf8Bytes(_save, s_systemTextJsonOptions);
     }
 
@@ -56,6 +65,14 @@ public class Benchmark
         return _output.Length;
     }
 
+    [Benchmark]
+    public int RowSerialize()
+    {
+        _output.Reset();
+        _rows.Serialize(_save, _output);
+        return _output.Length;
+    }
+
     [Benchmark(Baseline = true)]
     public int SystemTextJsonSerialize()
     {
@@ -72,6 +89,12 @@ public class Benchmark
     public PlayerSave? MessagePackDeserialize()
     {
         return _messagePack.Deserialize<PlayerSave>(_messagePackBytes);
+    }
+
+    [Benchmark]
+    public PlayerSave? RowDeserialize()
+    {
+        return _rows.Deserialize<PlayerSave>(_rowBytes, _layout);
     }
 
     [Benchmark]
