@@ -9,11 +9,7 @@ public static class Program
     public static void Main()
     {
         var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new ItemFormatter())
-            .AddFormatter(new ListFormatter<Item>())
-            .AddFormatter(new PlayerSaveFormatter(), version: 3)
-            .AddMigration(new PlayerSaveRenameCoins())
-            .AddMigration(new PlayerSaveXpToLevel())
+            .AddConsoleApplicationFormatters()
             .Build();
 
         var json = new JsonSerializer(registry);

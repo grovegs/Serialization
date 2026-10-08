@@ -11,13 +11,16 @@ namespace UnityApplication.Editor
         private const string PluginFileName = "GroveGames.Serialization.dll";
         private const string PluginPath = "Assets/Plugins/" + PluginFileName;
         private const string ProjectPath = "../../src/GroveGames.Serialization/GroveGames.Serialization.csproj";
+        private const string GeneratorFileName = "GroveGames.Serialization.Generator.dll";
+        private const string GeneratorPath = "Assets/Plugins/Analyzers/" + GeneratorFileName;
+        private const string GeneratorProjectPath = "../../src/GroveGames.Serialization.Generator/GroveGames.Serialization.Generator.csproj";
+        private const string GeneratorMeta = "fileFormatVersion: 2\nguid: 6f1f5a3c9b2d4e8a8c7d1e2f3a4b5c6d\nlabels:\n- RoslynAnalyzer\nPluginImporter:\n  externalObjects: {}\n  serializedVersion: 2\n  iconMap: {}\n  executionOrder: {}\n  defineConstraints: []\n  isPreloaded: 0\n  isOverridable: 0\n  isExplicitlyReferenced: 0\n  validateReferences: 1\n  platformData:\n  - first:\n      Any: \n    second:\n      enabled: 0\n      settings: {}\n  - first:\n      Editor: Editor\n    second:\n      enabled: 0\n      settings:\n        DefaultValueInitialized: true\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n";
 
         static PluginBuilder()
         {
             string projectRoot = Path.Combine(Application.dataPath, "..");
-            string pluginFullPath = Path.Combine(projectRoot, PluginPath);
 
-            if (!File.Exists(pluginFullPath))
+            if (!File.Exists(Path.Combine(projectRoot, PluginPath)) || !File.Exists(Path.Combine(projectRoot, GeneratorPath)))
             {
                 BuildPlugin();
             }
@@ -42,9 +45,32 @@ namespace UnityApplication.Editor
                 Directory.CreateDirectory(pluginsDir);
             }
 
+            if (!RunDotNet(dotnetPath, $"build {ProjectPath} -c Release -f netstandard2.1 -o ./Assets/Plugins", projectRoot))
+            {
+                return;
+            }
+
+            if (!RunDotNet(dotnetPath, $"build {GeneratorProjectPath} -c Release -o ./Assets/Plugins/Analyzers", projectRoot))
+            {
+                return;
+            }
+
+            string generatorMetaPath = Path.Combine(projectRoot, GeneratorPath + ".meta");
+
+            if (!File.Exists(generatorMetaPath))
+            {
+                File.WriteAllText(generatorMetaPath, GeneratorMeta);
+            }
+
+            UnityEngine.Debug.Log("Plugin build completed successfully");
+            AssetDatabase.Refresh();
+        }
+
+        private static bool RunDotNet(string dotnetPath, string arguments, string projectRoot)
+        {
             var process = new Process();
             process.StartInfo.FileName = dotnetPath;
-            process.StartInfo.Arguments = $"build {ProjectPath} -c Release -f netstandard2.1 -o ./Assets/Plugins";
+            process.StartInfo.Arguments = arguments;
             process.StartInfo.WorkingDirectory = projectRoot;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
@@ -58,18 +84,17 @@ namespace UnityApplication.Editor
 
                 if (process.ExitCode == 0)
                 {
-                    UnityEngine.Debug.Log("Plugin build completed successfully");
-                    AssetDatabase.Refresh();
+                    return true;
                 }
-                else
-                {
-                    string error = process.StandardError.ReadToEnd();
-                    UnityEngine.Debug.LogError($"Plugin build failed: {error}");
-                }
+
+                string error = process.StandardError.ReadToEnd();
+                UnityEngine.Debug.LogError($"Plugin build failed: {error}");
+                return false;
             }
             catch (System.Exception ex)
             {
                 UnityEngine.Debug.LogError($"Failed to start build process: {ex.Message}");
+                return false;
             }
             finally
             {

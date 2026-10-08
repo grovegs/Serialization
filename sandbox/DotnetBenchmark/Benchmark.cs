@@ -23,8 +23,7 @@ public class Benchmark
     public void Setup()
     {
         var registry = new FormatterRegistryBuilder()
-            .AddFormatter(new ItemFormatter())
-            .AddFormatter(new PlayerSaveFormatter())
+            .AddDotnetBenchmarkFormatters()
             .Build();
         _json = new JsonSerializer(registry);
         _messagePack = new MessagePackSerializer(registry);

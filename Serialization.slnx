@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="src\GroveGames.Serialization\GroveGames.Serialization.csproj" />
+  <Project Path="src\GroveGames.Serialization.Generator\GroveGames.Serialization.Generator.csproj" />
   <Project Path="tests\GroveGames.Serialization.Tests\GroveGames.Serialization.Tests.csproj" />
+  <Project Path="tests\GroveGames.Serialization.Generator.Tests\GroveGames.Serialization.Generator.Tests.csproj" />
 </Solution>

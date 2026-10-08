@@ -14,8 +14,14 @@ permissions:
   contents: read
 
 jobs:
-  release:
+  tests:
     uses: grovegs/workflows/.github/workflows/package-tests.yml@v1.3.0
     with:
       dotnet-project: tests/GroveGames.Serialization.Tests
+      global-json-file: global.json
+
+  generator-tests:
+    uses: grovegs/workflows/.github/workflows/package-tests.yml@v1.3.0
+    with:
+      dotnet-project: tests/GroveGames.Serialization.Generator.Tests
       global-json-file: global.json

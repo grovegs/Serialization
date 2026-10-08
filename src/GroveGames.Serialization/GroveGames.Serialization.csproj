@@ -22,4 +22,8 @@
     <Deterministic>true</Deterministic>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GroveGames.Serialization.Generator\GroveGames.Serialization.Generator.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    <None Include="..\GroveGames.Serialization.Generator\bin\$(Configuration)\netstandard2.0\GroveGames.Serialization.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
 </Project>
