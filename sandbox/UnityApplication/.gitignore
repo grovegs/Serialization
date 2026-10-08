@@ -99,3 +99,7 @@ InitTestScene*.unity*
 /[Aa]ssets/[Pp]ackages.meta
 /[Aa]ssets/[Pp]lugins
 /[Aa]ssets/[Pp]lugins.meta
+/[Aa]ssets/MobileDependencyResolver/
+/[Aa]ssets/MobileDependencyResolver.meta
+/[Aa]ssets/Resources/BillingMode.json
+/[Aa]ssets/Resources/BillingMode.json.meta

@@ -20,7 +20,7 @@ public sealed class MessagePackSerializerTests
     public void Deserialize_DeeplyNestedUnknownField_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
-        var bytes = new List<byte> { 0x82, 0xa2, (byte)'$', (byte)'v', 0x01, 0xa4, (byte)'d', (byte)'a', (byte)'t', (byte)'a', 0x81, 0xa1, (byte)'z' };
+        var bytes = new List<byte> { 0x81, 0xa1, (byte)'z' };
         bytes.AddRange(Enumerable.Repeat((byte)0x91, 1_000_000));
         bytes.Add(0xc0);
 
@@ -44,13 +44,13 @@ public sealed class MessagePackSerializerTests
     public void Deserialize_UInt64AboveInt64_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
-        byte[] bytes = [0x82, 0xa2, (byte)'$', (byte)'v', 0x01, 0xa4, (byte)'d', (byte)'a', (byte)'t', (byte)'a', 0x81, 0xa5, (byte)'c', (byte)'o', (byte)'u', (byte)'n', (byte)'t', 0xcf, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+        byte[] bytes = [0x81, 0xa5, (byte)'c', (byte)'o', (byte)'u', (byte)'n', (byte)'t', 0xcf, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
 
         Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(bytes));
     }
 
     [Fact]
-    public void Deserialize_DataAfterEnvelope_ThrowsFormatException()
+    public void Deserialize_DataAfterValue_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
         byte[] bytes = [.. serializer.Serialize(new TestItem()), 0xc0];

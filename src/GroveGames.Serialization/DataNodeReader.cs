@@ -19,15 +19,6 @@ internal struct DataNodeReader : IFormatReader
         _current = root;
     }
 
-    public int ReadEnvelope()
-    {
-        return 0;
-    }
-
-    public void EndEnvelope()
-    {
-    }
-
     public TokenType Peek()
     {
         return _current.Kind switch

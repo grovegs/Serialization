@@ -29,7 +29,7 @@ namespace GroveGames.Serialization.Unity.Editor.Tests
 
             var text = Encoding.UTF8.GetString(json.Serialize(new Vector3(1, 2, 3)));
 
-            Assert.AreEqual("{\"$v\":1,\"data\":{\"x\":1,\"y\":2,\"z\":3}}", text);
+            Assert.AreEqual("{\"x\":1,\"y\":2,\"z\":3}", text);
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace GroveGames.Serialization.Unity.Editor.Tests
             var registry = new SerializerRegistryBuilder().AddUnityFormatters().Build();
             var json = new JsonSerializer(registry);
 
-            var value = json.Deserialize<Vector3>(Encoding.UTF8.GetBytes("{\"$v\":1,\"data\":{\"w\":9,\"y\":2}}"));
+            var value = json.Deserialize<Vector3>(Encoding.UTF8.GetBytes("{\"w\":9,\"y\":2}"));
 
             Assert.AreEqual(new Vector3(0, 2, 0), value);
         }

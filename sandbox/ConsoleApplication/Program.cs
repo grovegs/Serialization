@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using ConsoleApplication.Models;
 using GroveGames.Serialization;
 
@@ -40,8 +40,13 @@ public static class Program
 
         Console.WriteLine($"CSV rows:\n{Encoding.UTF8.GetString(csv.Serialize(save.Items))}");
 
-        var old = "{\"$v\":1,\"data\":{\"name\":\"Veteran\",\"xp\":7200,\"coins\":90}}";
-        var migrated = json.Deserialize<PlayerSave>(Encoding.UTF8.GetBytes(old))!;
-        Console.WriteLine($"Migrated v1 -> v3: {migrated.Name}, level {migrated.Level}, gold {migrated.Gold}");
+        var storedRecord = Encoding.UTF8.GetBytes("{\"name\":\"Veteran\",\"xp\":7200,\"coins\":90}");
+        var record = json.Deserialize<PlayerSave>(storedRecord, version: 1)!;
+        Console.WriteLine($"Record stored at v1, read at v3: {record.Name}, level {record.Level}, gold {record.Gold}");
+
+        var file = new VersionedSerializer(json);
+        var fileBytes = file.Serialize(save);
+        Console.WriteLine($"Versioned file: {Encoding.UTF8.GetString(fileBytes)[..40]}...");
+        Console.WriteLine($"Versioned file reads back: {file.Deserialize<PlayerSave>(fileBytes)!.Name}");
     }
 }

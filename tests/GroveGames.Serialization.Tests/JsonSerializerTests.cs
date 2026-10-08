@@ -1,17 +1,18 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 
 namespace GroveGames.Serialization.Tests;
 
 public sealed class JsonSerializerTests
 {
     [Fact]
-    public void Serialize_Item_WritesEnvelopeWithCamelCaseFields()
+    public void Serialize_Item_WritesBareObjectWithCamelCaseFields()
     {
         var serializer = CreateSerializer();
 
         var json = Encoding.UTF8.GetString(serializer.Serialize(new TestItem { Id = "sword", Count = 2, Weight = 1.5, Score = 0.25f }));
 
-        Assert.Equal("{\"$v\":1,\"data\":{\"id\":\"sword\",\"count\":2,\"weight\":1.5,\"score\":0.25}}", json);
+        Assert.Equal("{\"id\":\"sword\",\"count\":2,\"weight\":1.5,\"score\":0.25}", json);
     }
 
     [Fact]
@@ -27,6 +28,18 @@ public sealed class JsonSerializerTests
         Assert.Equal(item.Count, result.Count);
         Assert.Equal(item.Weight, result.Weight);
         Assert.Equal(item.Score, result.Score);
+    }
+
+    [Fact]
+    public void Serialize_ForeignBufferWriter_WritesSameBytes()
+    {
+        var serializer = CreateSerializer();
+        var item = new TestItem { Id = "pooled", Count = 3 };
+        var output = new ArrayBufferWriter<byte>();
+
+        serializer.Serialize(item, output);
+
+        Assert.Equal(serializer.Serialize(item), output.WrittenSpan.ToArray());
     }
 
     [Theory]
@@ -45,16 +58,7 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_DataBeforeVersion_ThrowsFormatException()
-    {
-        var serializer = CreateSerializer();
-        var json = "{\"data\":{\"id\":\"a\",\"count\":1,\"weight\":1,\"score\":1},\"$v\":1}";
-
-        Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json)));
-    }
-
-    [Fact]
-    public void Deserialize_DataAfterEnvelope_ThrowsFormatException()
+    public void Deserialize_DataAfterValue_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
         var json = Encoding.UTF8.GetString(serializer.Serialize(new TestItem { Id = "a" })) + "{}";
@@ -63,11 +67,10 @@ public sealed class JsonSerializerTests
     }
 
     [Theory]
-    [InlineData("{\"$v\":1,\"data\":nope}")]
-    [InlineData("{\"$v\":1,\"data\":{\"id\":nul}}")]
-    [InlineData("{\"$v\":1,\"data\":{\"id\":\"\\u12\"}}")]
-    [InlineData("{\"$v\":1,\"data\":{\"count\":4294967296}}")]
-    [InlineData("{\"$v\":0,\"data\":{}}")]
+    [InlineData("nope")]
+    [InlineData("{\"id\":nul}")]
+    [InlineData("{\"id\":\"\\u12\"}")]
+    [InlineData("{\"count\":4294967296}")]
     public void Deserialize_MalformedJson_ThrowsFormatException(string json)
     {
         var serializer = CreateSerializer();
@@ -92,7 +95,7 @@ public sealed class JsonSerializerTests
     public void Deserialize_DeeplyNestedUnknownField_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
-        var json = "{\"$v\":1,\"data\":{\"unknown\":" + new string('[', 100_000) + "}}";
+        var json = "{\"unknown\":" + new string('[', 100_000) + "}";
 
         Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json)));
     }
@@ -101,7 +104,7 @@ public sealed class JsonSerializerTests
     public void Deserialize_UnknownAndMissingFields_SkipsAndKeepsDefaults()
     {
         var serializer = CreateSerializer();
-        var json = "{\"$v\":1,\"data\":{\"extra\":{\"a\":[1,2,{\"b\":null}]},\"count\":4}}";
+        var json = "{\"extra\":{\"a\":[1,2,{\"b\":null}]},\"count\":4}";
 
         var result = serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json));
 
@@ -110,30 +113,24 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_NewerVersion_ThrowsNotSupportedException()
+    public void Deserialize_StoredOlderVersion_RunsMigrationsInOrder()
     {
-        var serializer = CreateSerializer();
-        var json = "{\"$v\":2,\"data\":{}}";
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+        var json = "{\"name\":\"hero\",\"xp\":4500,\"coins\":30}";
 
-        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json)));
-    }
-
-    [Fact]
-    public void Deserialize_OlderVersion_RunsMigrationsInOrder()
-    {
-        var registry = new SerializerRegistryBuilder()
-            .AddFormatter(new TestSaveFormatter(), version: 3)
-            .AddMigration(new TestSaveRenameCoins())
-            .AddMigration(new TestSaveXpToLevel())
-            .Build();
-        var serializer = new JsonSerializer(registry);
-        var json = "{\"$v\":1,\"data\":{\"name\":\"hero\",\"xp\":4500,\"coins\":30}}";
-
-        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json));
+        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json), version: 1);
 
         Assert.Equal("hero", result!.Name);
         Assert.Equal(5, result.Level);
         Assert.Equal(30, result.Gold);
+    }
+
+    [Fact]
+    public void Deserialize_StoredNewerVersion_ThrowsNotSupportedException()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes("{}"), version: 4));
     }
 
     [Fact]
@@ -174,6 +171,15 @@ public sealed class JsonSerializerTests
             .AddFormatter(new TestItemFormatter())
             .Build();
         return new JsonSerializer(registry);
+    }
+
+    private static SerializerRegistry CreateSaveRegistry()
+    {
+        return new SerializerRegistryBuilder()
+            .AddFormatter(new TestSaveFormatter(), version: 3)
+            .AddMigration(new TestSaveRenameCoins())
+            .AddMigration(new TestSaveXpToLevel())
+            .Build();
     }
 
     private sealed class TestItem
@@ -251,7 +257,6 @@ public sealed class JsonSerializerTests
             Write(ref writer, Read(ref reader, registry), registry);
         }
     }
-
     private sealed class TestSave
     {
         public string? Name;

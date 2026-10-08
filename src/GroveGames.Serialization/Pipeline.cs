@@ -2,20 +2,29 @@
 
 internal static class Pipeline
 {
-    public static void Write<T, TWriter>(ref TWriter writer, T? value, SerializerRegistry registry)
-        where TWriter : struct, IFormatWriter
+    public static void Write<T, TWriter>(ref TWriter writer, T? value, SerializerRegistry registry, bool versioned)
+        where TWriter : struct, IDocumentWriter
     {
         var registration = registry.GetRegistration<T>();
-        writer.BeginEnvelope(registration.Version);
+
+        if (versioned)
+        {
+            writer.BeginEnvelope(registration.Version);
+        }
+
         registration.Formatter.Write(ref writer, value, registry);
-        writer.EndEnvelope();
+
+        if (versioned)
+        {
+            writer.EndEnvelope();
+        }
     }
 
-    public static T? Read<T, TReader>(ref TReader reader, SerializerRegistry registry)
-        where TReader : struct, IFormatReader
+    public static T? Read<T, TReader>(ref TReader reader, SerializerRegistry registry, int? version)
+        where TReader : struct, IDocumentReader
     {
         var registration = registry.GetRegistration<T>();
-        var stored = reader.ReadEnvelope();
+        var stored = version ?? reader.ReadEnvelope();
         T? result;
 
         if (stored == registration.Version)
@@ -34,23 +43,31 @@ internal static class Pipeline
             throw Newer<T>(stored, registration.Version);
         }
 
-        reader.EndEnvelope();
+        if (version == null)
+        {
+            reader.EndEnvelope();
+        }
+
+        reader.EndDocument();
         return result;
     }
 
-    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
-        where TReader : struct, IFormatReader
-        where TWriter : struct, IFormatWriter
+    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry, int? version, bool versioned)
+        where TReader : struct, IDocumentReader
+        where TWriter : struct, IDocumentWriter
     {
         var registration = registry.GetRegistration<T>();
-        var stored = reader.ReadEnvelope();
+        var stored = version ?? reader.ReadEnvelope();
 
         if (stored > registration.Version)
         {
             throw Newer<T>(stored, registration.Version);
         }
 
-        writer.BeginEnvelope(registration.Version);
+        if (versioned)
+        {
+            writer.BeginEnvelope(registration.Version);
+        }
 
         if (stored == registration.Version)
         {
@@ -64,8 +81,17 @@ internal static class Pipeline
             registration.Formatter.Transcode(ref nodeReader, ref writer, registry);
         }
 
-        writer.EndEnvelope();
-        reader.EndEnvelope();
+        if (versioned)
+        {
+            writer.EndEnvelope();
+        }
+
+        if (version == null)
+        {
+            reader.EndEnvelope();
+        }
+
+        reader.EndDocument();
     }
 
     private static NotSupportedException Newer<T>(int stored, int current)

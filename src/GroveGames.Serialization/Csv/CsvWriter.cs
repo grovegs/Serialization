@@ -3,7 +3,7 @@ using System.Text;
 
 namespace GroveGames.Serialization.Csv;
 
-internal struct CsvWriter : IFormatWriter
+internal struct CsvWriter : IDocumentWriter
 {
     private static readonly byte[] s_versionPrefix = Encoding.ASCII.GetBytes("#v=");
     private static readonly byte[] s_true = Encoding.ASCII.GetBytes("true");

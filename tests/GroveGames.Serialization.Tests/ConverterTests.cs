@@ -34,12 +34,39 @@ public sealed class ConverterTests
     }
 
     [Fact]
+    public void Convert_StoredOlderVersion_MigratesWhileConverting()
+    {
+        var registry = new SerializerRegistryBuilder()
+            .AddFormatter(new TestItemFormatter(), version: 2)
+            .AddMigration(new TestItemRenameAmount())
+            .Build();
+        var json = new JsonSerializer(registry);
+        var messagePack = new MessagePackSerializer(registry);
+        var output = new ByteBuffer();
+
+        new Converter(json, messagePack).Convert<TestItem>(Encoding.UTF8.GetBytes("{\"id\":\"a\",\"amount\":4}"), version: 1, output);
+        var result = messagePack.Deserialize<TestItem>(output.WrittenMemory);
+
+        Assert.Equal(4, result!.Count);
+    }
+
+    [Fact]
     public void Constructor_DifferentRegistries_ThrowsArgumentException()
     {
         var json = new JsonSerializer(CreateRegistry());
         var messagePack = new MessagePackSerializer(CreateRegistry());
 
         Assert.Throws<ArgumentException>(() => new Converter(json, messagePack));
+    }
+
+    private sealed class TestItemRenameAmount : IMigration<TestItem>
+    {
+        public int FromVersion => 1;
+
+        public void Apply(DataNode root)
+        {
+            root.Rename("amount", "count");
+        }
     }
 
     private static SerializerRegistry CreateRegistry()

@@ -5,14 +5,14 @@ namespace GroveGames.Serialization.Tests;
 public sealed class CsvSerializerTests
 {
     [Fact]
-    public void Serialize_Rows_WritesVersionHeaderAndRows()
+    public void Serialize_Rows_WritesHeaderAndRows()
     {
         var serializer = CreateSerializer(version: 1);
         var rows = new List<TestItem> { new() { Id = "a,b", Count = 1, Weight = 0.5, Score = 2 }, new() { Id = "say \"hi\"", Count = 2 } };
 
         var csv = Encoding.UTF8.GetString(serializer.Serialize(rows));
 
-        Assert.Equal("#v=1\nid,count,weight,score\n\"a,b\",1,0.5,2\n\"say \"\"hi\"\"\",2,0,0\n", csv);
+        Assert.Equal("id,count,weight,score\n\"a,b\",1,0.5,2\n\"say \"\"hi\"\"\",2,0,0\n", csv);
     }
 
     [Fact]
@@ -40,9 +40,9 @@ public sealed class CsvSerializerTests
             .AddMigration(new TestRowsNoChange())
             .Build();
         var serializer = new CsvSerializer(registry);
-        var csv = "#v=1\nid,count,weight,score\n007,1,2.5,0.5\n";
+        var csv = "id,count,weight,score\n007,1,2.5,0.5\n";
 
-        var result = serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv));
+        var result = serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv), version: 1);
 
         Assert.Equal("007", result![0].Id);
         Assert.Equal(1, result[0].Count);
@@ -50,10 +50,11 @@ public sealed class CsvSerializerTests
     }
 
     [Theory]
-    [InlineData("#v=1\nid,count\na,notanumber\n")]
-    [InlineData("#v=1\nid,count\na,99999999999\n")]
+    [InlineData("id,count\na,notanumber\n")]
+    [InlineData("id,count\na,99999999999\n")]
+    [InlineData("#v=1\nid,count\na,1\n")]
     [InlineData("#v=x\nid,count\na,1\n")]
-    [InlineData("#v=1\nid,count\n\"open,1\n")]
+    [InlineData("id,count\n\"open,1\n")]
     public void Deserialize_MalformedCsv_ThrowsFormatException(string csv)
     {
         var serializer = CreateSerializer(version: 1);

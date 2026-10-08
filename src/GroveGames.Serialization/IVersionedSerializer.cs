@@ -2,10 +2,9 @@
 
 namespace GroveGames.Serialization;
 
-public interface ISerializer
+public interface IVersionedSerializer
 {
     public SerializerRegistry Registry { get; }
     public void Serialize<T>(T? value, IBufferWriter<byte> output);
     public T? Deserialize<T>(ReadOnlyMemory<byte> data);
-    public T? Deserialize<T>(ReadOnlyMemory<byte> data, int version);
 }

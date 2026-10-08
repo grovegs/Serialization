@@ -1,7 +1,8 @@
-﻿namespace GroveGames.Serialization;
+﻿using System.Buffers;
+
+namespace GroveGames.Serialization;
 
 public interface IConverter
 {
-    public byte[] Convert<T>(ReadOnlyMemory<byte> data);
-    public void Convert<T>(ReadOnlyMemory<byte> data, ByteBuffer output);
+    public void Convert<T>(ReadOnlyMemory<byte> data, IBufferWriter<byte> output);
 }

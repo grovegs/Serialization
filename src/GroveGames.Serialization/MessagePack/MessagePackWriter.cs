@@ -3,7 +3,7 @@ using System.Text;
 
 namespace GroveGames.Serialization.MessagePack;
 
-internal struct MessagePackWriter : IFormatWriter
+internal struct MessagePackWriter : IDocumentWriter
 {
     private readonly ByteBuffer _output;
     private readonly MessagePackStack _stack;

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace GroveGames.Serialization.MessagePack;
 
-internal struct MessagePackReader : IFormatReader
+internal struct MessagePackReader : IDocumentReader
 {
     private readonly byte[] _buffer;
     private readonly int _end;
@@ -51,10 +51,13 @@ internal struct MessagePackReader : IFormatReader
         {
             Skip();
         }
+    }
 
+    public void EndDocument()
+    {
         if (_position != _end)
         {
-            throw Error("unexpected data after the envelope");
+            throw Error("unexpected data after the value");
         }
     }
 

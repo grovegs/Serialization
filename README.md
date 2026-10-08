@@ -14,7 +14,7 @@ High-performance JSON, MessagePack and CSV serialization for .NET, Unity and God
 - **Three formats, one model**: JSON, MessagePack and CSV read and write the same types through the same formatter.
 - **Zero-allocation serialization**: Writers are structs over a reusable `ByteBuffer`. Deserializing allocates only the resulting objects.
 - **Format conversion**: Convert JSON, MessagePack and CSV into each other without creating the objects.
-- **Versioned migrations**: Older data is upgraded step by step on load and on conversion.
+- **Versioned migrations**: Older data is upgraded step by step on load and on conversion, from a version stored in the payload or anywhere else.
 - **Safe on corrupt data**: Malformed or truncated input throws `FormatException` and never reads out of range or overflows the stack.
 - **DI friendly**: No global state. Formatters and migrations live in an immutable `SerializerRegistry` that each serializer receives in its constructor.
 - **Unity integration**: Formatters for Unity and Unity.Mathematics types, plus a GroveGames.DependencyInjection integration.
@@ -113,7 +113,7 @@ var buffer = new ByteBuffer();
 json.Serialize(save, buffer);
 ```
 
-`Serialize(value, ByteBuffer)` writes into a buffer you own and reuse, with no allocation. `Serialize(value)` returns a new `byte[]`, and both have `Stream` overloads.
+Serializers write the bare value. `Serialize(value, IBufferWriter<byte>)` writes into any buffer writer; a `ByteBuffer` you own and reuse is written with no allocation, and any other buffer writer receives the bytes in one copy. `Serialize(value)` returns a new `byte[]`, and there are `Stream` overloads.
 
 ### Converting
 
@@ -122,11 +122,24 @@ var toJson = new Converter(messagePack, json);
 byte[] jsonBytes = toJson.Convert<PlayerSave>(bytes);
 ```
 
-Both serializers must share the same registry.
+Both serializers must share the same registry. `Convert<T>(data, version, output)` migrates data stored at an older version while converting.
 
-### Migrations
+### Versions and Migrations
 
-Every payload stores the version of its root type: `{"$v":3,"data":{...}}` in JSON and MessagePack, and a `#v=3` first line in CSV. Data from an older version is loaded into a `DataNode` tree, each migration from its version runs in order, and the result is read normally. Data from a newer version throws `NotSupportedException`.
+Each root type has a version in the registry. There are two ways to keep track of the version data was written with:
+
+- **Stored elsewhere**, such as in a database record or collection: pass it to `Deserialize<T>(data, version)`.
+- **Inside the payload**, for files and messages: wrap the serializer in a `VersionedSerializer`, which writes `{"$v":3,"data":{...}}` in JSON and MessagePack and a `#v=3` first line in CSV. Use `VersionedConverter` to convert these payloads.
+
+```csharp
+PlayerSave? record = json.Deserialize<PlayerSave>(storedBytes, version: 1);
+
+var file = new VersionedSerializer(json);
+byte[] fileBytes = file.Serialize(save);
+PlayerSave? loaded = file.Deserialize<PlayerSave>(fileBytes);
+```
+
+Data from an older version is loaded into a `DataNode` tree, each migration from its version runs in order, and the result is read normally. Data from a newer version throws `NotSupportedException`.
 
 ```csharp
 public sealed class PlayerSaveXpToLevel : IMigration<PlayerSave>
@@ -156,19 +169,20 @@ Versions belong to the root type. A change inside a nested type is migrated by t
 | ----------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | JSON        | Objects keyed by camelCase names | `NaN` and infinities are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`. |
 | MessagePack | Maps keyed by name strings       | Floats are 32-bit (`0xca`), doubles 64-bit (`0xcb`).                                     |
-| CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`. The `#v=` line is optional.      |
+| CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`.                                  |
 
 Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, lists and `null`.
 
 ### Core Components
 
 - **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `SerializerRegistry`
-- **`IConverter`** / **`Converter`**: Converts data between two serializers without creating objects
+- **`IVersionedSerializer`** / **`VersionedSerializer`**: Adds the version to the payload for files and messages
+- **`IConverter`**: `Converter` for bare data and `VersionedConverter` for versioned payloads, without creating objects
 - **`SerializerRegistryBuilder`** / **`SerializerRegistry`**: Registers formatters, versions and migrations, then freezes them
 - **`IFormatter<T>`**: Writes, reads and transcodes one type over any format
 - **`IMigration<T>`** / **`DataNode`**: Upgrades older data by field name
 - **`ListFormatter<T>`**: Formatter for a `List<T>` root
-- **`ByteBuffer`**: Growable, reusable output buffer
+- **`ByteBuffer`**: Growable, reusable `IBufferWriter<byte>`
 
 ## Unity
 
@@ -176,9 +190,9 @@ Install the core through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForU
 
 ```json
 {
-  "dependencies": {
-    "com.grovegames.serialization": "https://github.com/grovegs/Serialization.git?path=src/GroveGames.Serialization.Unity/Packages/com.grovegames.serialization"
-  }
+    "dependencies": {
+        "com.grovegames.serialization": "https://github.com/grovegs/Serialization.git?path=src/GroveGames.Serialization.Unity/Packages/com.grovegames.serialization"
+    }
 }
 ```
 

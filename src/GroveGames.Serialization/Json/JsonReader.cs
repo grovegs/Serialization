@@ -3,7 +3,7 @@ using System.Text;
 
 namespace GroveGames.Serialization.Json;
 
-internal struct JsonReader : IFormatReader
+internal struct JsonReader : IDocumentReader
 {
     private const int MaxDepth = 63;
 
@@ -57,12 +57,15 @@ internal struct JsonReader : IFormatReader
         {
             Skip();
         }
+    }
 
+    public void EndDocument()
+    {
         SkipWhitespace();
 
         if (_position != _end)
         {
-            throw Error("unexpected data after the envelope");
+            throw Error("unexpected data after the value");
         }
     }
 
