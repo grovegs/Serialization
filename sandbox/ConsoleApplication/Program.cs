@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using ConsoleApplication.Models;
 using GroveGames.Serialization;
 
@@ -8,7 +8,7 @@ public static class Program
 {
     public static void Main()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new ItemFormatter())
             .AddFormatter(new ListFormatter<Item>())
             .AddFormatter(new PlayerSaveFormatter(), version: 3)
@@ -40,8 +40,11 @@ public static class Program
 
         Console.WriteLine($"CSV rows:\n{Encoding.UTF8.GetString(csv.Serialize(save.Items))}");
 
-        var old = "{\"$v\":1,\"data\":{\"name\":\"Veteran\",\"xp\":7200,\"coins\":90}}";
-        var migrated = json.Deserialize<PlayerSave>(Encoding.UTF8.GetBytes(old))!;
-        Console.WriteLine($"Migrated v1 -> v3: {migrated.Name}, level {migrated.Level}, gold {migrated.Gold}");
+        var item = json.Serialize(new Item { Id = "shield", Count = 1 });
+        Console.WriteLine($"v1 item has no version: {Encoding.UTF8.GetString(item)}");
+
+        var oldSave = Encoding.UTF8.GetBytes("{\"name\":\"Veteran\",\"xp\":7200,\"coins\":90}");
+        var migrated = json.Deserialize<PlayerSave>(oldSave)!;
+        Console.WriteLine($"Save without a version is v1, migrated to v3: {migrated.Name}, level {migrated.Level}, gold {migrated.Gold}");
     }
 }

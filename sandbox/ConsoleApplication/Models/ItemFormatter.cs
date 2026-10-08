@@ -6,7 +6,7 @@ public sealed class ItemFormatter : IFormatter<Item>
 {
     private static readonly FieldTable s_fields = new("id", "count", "weight");
 
-    public void Write<TWriter>(ref TWriter writer, Item? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+    public void Write<TWriter>(ref TWriter writer, Item? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
     {
         if (value == null)
         {
@@ -24,7 +24,7 @@ public sealed class ItemFormatter : IFormatter<Item>
         writer.EndObject();
     }
 
-    public Item? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+    public Item? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
     {
         if (reader.Peek() == TokenType.Null)
         {
@@ -57,7 +57,7 @@ public sealed class ItemFormatter : IFormatter<Item>
         return value;
     }
 
-    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
         where TReader : struct, IFormatReader
         where TWriter : struct, IFormatWriter
     {

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace GroveGames.Serialization.Json;
 
-internal struct JsonWriter : IFormatWriter
+internal struct JsonWriter : IDocumentWriter
 {
     private const int MaxDepth = 63;
 

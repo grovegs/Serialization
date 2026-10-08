@@ -6,10 +6,11 @@ public sealed class PlayerSaveXpToLevel : IMigration<PlayerSave>
 {
     public int FromVersion => 2;
 
-    public void Apply(DataNode root)
+    public void Apply(DataValue root)
     {
-        var xp = root.Has("xp") ? root["xp"]!.AsInt64 : 0;
-        root["level"] = DataNode.FromInt((xp / 1000) + 1);
-        root.Remove("xp");
+        var save = root.AsObject;
+        var xp = save.TryGetValue("xp", out var value) ? value.AsInt64 : 0;
+        save["level"] = (xp / 1000) + 1;
+        save.Remove("xp");
     }
 }

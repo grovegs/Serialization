@@ -6,8 +6,8 @@ public sealed class PlayerSaveRenameCoins : IMigration<PlayerSave>
 {
     public int FromVersion => 1;
 
-    public void Apply(DataNode root)
+    public void Apply(DataValue root)
     {
-        root.Rename("coins", "gold");
+        root.AsObject.Rename("coins", "gold");
     }
 }

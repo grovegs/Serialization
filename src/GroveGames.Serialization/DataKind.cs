@@ -1,10 +1,10 @@
 ﻿namespace GroveGames.Serialization;
 
-public enum NodeKind
+public enum DataKind : byte
 {
     Null,
     Bool,
-    Int,
+    Integer,
     Float,
     String,
     Text,

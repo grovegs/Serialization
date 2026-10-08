@@ -22,7 +22,7 @@ public class Benchmark
     [GlobalSetup]
     public void Setup()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new ItemFormatter())
             .AddFormatter(new PlayerSaveFormatter())
             .Build();

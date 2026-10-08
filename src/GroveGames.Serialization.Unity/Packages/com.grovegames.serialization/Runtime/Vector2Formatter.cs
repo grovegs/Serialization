@@ -6,7 +6,7 @@ namespace GroveGames.Serialization.Unity
     {
         private static readonly FieldTable s_fields = new("x", "y");
 
-        public void Write<TWriter>(ref TWriter writer, Vector2 value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, Vector2 value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             writer.BeginObject(2);
             writer.WriteField(s_fields[0]);
@@ -16,7 +16,7 @@ namespace GroveGames.Serialization.Unity
             writer.EndObject();
         }
 
-        public Vector2 Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public Vector2 Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -47,7 +47,7 @@ namespace GroveGames.Serialization.Unity
             return new Vector2(x, y);
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {

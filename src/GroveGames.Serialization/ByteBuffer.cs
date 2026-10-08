@@ -1,6 +1,8 @@
-﻿namespace GroveGames.Serialization;
+﻿using System.Buffers;
 
-public sealed class ByteBuffer
+namespace GroveGames.Serialization;
+
+public sealed class ByteBuffer : IBufferWriter<byte>
 {
     private byte[] _buffer;
     private int _length;
@@ -41,11 +43,18 @@ public sealed class ByteBuffer
         return span;
     }
 
-    public Span<byte> GetSpan(int sizeHint)
+    public Span<byte> GetSpan(int sizeHint = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(sizeHint);
-        EnsureCapacity(sizeHint);
+        EnsureCapacity(Math.Max(sizeHint, 1));
         return new Span<byte>(_buffer, _length, _buffer.Length - _length);
+    }
+
+    public Memory<byte> GetMemory(int sizeHint = 0)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(sizeHint);
+        EnsureCapacity(Math.Max(sizeHint, 1));
+        return new Memory<byte>(_buffer, _length, _buffer.Length - _length);
     }
 
     public void Advance(int count)

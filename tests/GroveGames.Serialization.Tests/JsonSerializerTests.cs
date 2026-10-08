@@ -1,17 +1,18 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 
 namespace GroveGames.Serialization.Tests;
 
 public sealed class JsonSerializerTests
 {
     [Fact]
-    public void Serialize_Item_WritesEnvelopeWithCamelCaseFields()
+    public void Serialize_Item_WritesBareObjectWithCamelCaseFields()
     {
         var serializer = CreateSerializer();
 
         var json = Encoding.UTF8.GetString(serializer.Serialize(new TestItem { Id = "sword", Count = 2, Weight = 1.5, Score = 0.25f }));
 
-        Assert.Equal("{\"$v\":1,\"data\":{\"id\":\"sword\",\"count\":2,\"weight\":1.5,\"score\":0.25}}", json);
+        Assert.Equal("{\"id\":\"sword\",\"count\":2,\"weight\":1.5,\"score\":0.25}", json);
     }
 
     [Fact]
@@ -27,6 +28,18 @@ public sealed class JsonSerializerTests
         Assert.Equal(item.Count, result.Count);
         Assert.Equal(item.Weight, result.Weight);
         Assert.Equal(item.Score, result.Score);
+    }
+
+    [Fact]
+    public void Serialize_ForeignBufferWriter_WritesSameBytes()
+    {
+        var serializer = CreateSerializer();
+        var item = new TestItem { Id = "pooled", Count = 3 };
+        var output = new ArrayBufferWriter<byte>();
+
+        serializer.Serialize(item, output);
+
+        Assert.Equal(serializer.Serialize(item), output.WrittenSpan.ToArray());
     }
 
     [Theory]
@@ -45,16 +58,7 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_DataBeforeVersion_ThrowsFormatException()
-    {
-        var serializer = CreateSerializer();
-        var json = "{\"data\":{\"id\":\"a\",\"count\":1,\"weight\":1,\"score\":1},\"$v\":1}";
-
-        Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json)));
-    }
-
-    [Fact]
-    public void Deserialize_DataAfterEnvelope_ThrowsFormatException()
+    public void Deserialize_DataAfterValue_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
         var json = Encoding.UTF8.GetString(serializer.Serialize(new TestItem { Id = "a" })) + "{}";
@@ -63,11 +67,10 @@ public sealed class JsonSerializerTests
     }
 
     [Theory]
-    [InlineData("{\"$v\":1,\"data\":nope}")]
-    [InlineData("{\"$v\":1,\"data\":{\"id\":nul}}")]
-    [InlineData("{\"$v\":1,\"data\":{\"id\":\"\\u12\"}}")]
-    [InlineData("{\"$v\":1,\"data\":{\"count\":4294967296}}")]
-    [InlineData("{\"$v\":0,\"data\":{}}")]
+    [InlineData("nope")]
+    [InlineData("{\"id\":nul}")]
+    [InlineData("{\"id\":\"\\u12\"}")]
+    [InlineData("{\"count\":4294967296}")]
     public void Deserialize_MalformedJson_ThrowsFormatException(string json)
     {
         var serializer = CreateSerializer();
@@ -92,7 +95,7 @@ public sealed class JsonSerializerTests
     public void Deserialize_DeeplyNestedUnknownField_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
-        var json = "{\"$v\":1,\"data\":{\"unknown\":" + new string('[', 100_000) + "}}";
+        var json = "{\"unknown\":" + new string('[', 100_000) + "}";
 
         Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json)));
     }
@@ -101,7 +104,7 @@ public sealed class JsonSerializerTests
     public void Deserialize_UnknownAndMissingFields_SkipsAndKeepsDefaults()
     {
         var serializer = CreateSerializer();
-        var json = "{\"$v\":1,\"data\":{\"extra\":{\"a\":[1,2,{\"b\":null}]},\"count\":4}}";
+        var json = "{\"extra\":{\"a\":[1,2,{\"b\":null}]},\"count\":4}";
 
         var result = serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json));
 
@@ -110,30 +113,70 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_NewerVersion_ThrowsNotSupportedException()
+    public void Serialize_VersionedType_WritesEnvelope()
     {
-        var serializer = CreateSerializer();
-        var json = "{\"$v\":2,\"data\":{}}";
+        var serializer = new JsonSerializer(CreateSaveRegistry());
 
-        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestItem>(Encoding.UTF8.GetBytes(json)));
+        var json = Encoding.UTF8.GetString(serializer.Serialize(new TestSave { Name = "hero", Level = 2, Gold = 3 }));
+
+        Assert.Equal("{\"$v\":3,\"data\":{\"name\":\"hero\",\"level\":2,\"gold\":3}}", json);
     }
 
     [Fact]
-    public void Deserialize_OlderVersion_RunsMigrationsInOrder()
+    public void Deserialize_VersionedType_RoundTrips()
     {
-        var registry = new SerializerRegistryBuilder()
-            .AddFormatter(new TestSaveFormatter(), version: 3)
-            .AddMigration(new TestSaveRenameCoins())
-            .AddMigration(new TestSaveXpToLevel())
-            .Build();
-        var serializer = new JsonSerializer(registry);
-        var json = "{\"$v\":1,\"data\":{\"name\":\"hero\",\"xp\":4500,\"coins\":30}}";
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        var result = serializer.Deserialize<TestSave>(serializer.Serialize(new TestSave { Name = "hero", Level = 9, Gold = long.MaxValue }));
+
+        Assert.Equal("hero", result!.Name);
+        Assert.Equal(9, result.Level);
+        Assert.Equal(long.MaxValue, result.Gold);
+    }
+
+    [Fact]
+    public void Deserialize_DataWithoutVersion_MigratesFromVersionOne()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+        var json = "{\"name\":\"hero\",\"xp\":4500,\"coins\":30}";
 
         var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json));
 
         Assert.Equal("hero", result!.Name);
         Assert.Equal(5, result.Level);
         Assert.Equal(30, result.Gold);
+    }
+
+    [Fact]
+    public void Deserialize_OlderEnvelope_RunsRemainingMigrations()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+        var json = "{\"$v\":2,\"data\":{\"name\":\"hero\",\"xp\":4500,\"gold\":30}}";
+
+        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json));
+
+        Assert.Equal(5, result!.Level);
+        Assert.Equal(30, result.Gold);
+    }
+
+    [Fact]
+    public void Deserialize_NewerEnvelope_ThrowsNotSupportedException()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes("{\"$v\":4,\"data\":{}}")));
+    }
+
+    [Theory]
+    [InlineData("{\"$v\":0,\"data\":{}}")]
+    [InlineData("{\"$v\":3,\"data\":{}}{}")]
+    [InlineData("{\"$v\":3}")]
+    [InlineData("{\"$v\":\"3\",\"data\":{}}")]
+    public void Deserialize_MalformedEnvelope_ThrowsFormatException(string json)
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        Assert.Throws<FormatException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json)));
     }
 
     [Fact]
@@ -163,17 +206,26 @@ public sealed class JsonSerializerTests
     [Fact]
     public void Serialize_UnregisteredType_ThrowsInvalidOperationException()
     {
-        var serializer = new JsonSerializer(new SerializerRegistryBuilder().Build());
+        var serializer = new JsonSerializer(new FormatterRegistryBuilder().Build());
 
         Assert.Throws<InvalidOperationException>(() => serializer.Serialize(new TestItem()));
     }
 
     private static JsonSerializer CreateSerializer()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .Build();
         return new JsonSerializer(registry);
+    }
+
+    private static FormatterRegistry CreateSaveRegistry()
+    {
+        return new FormatterRegistryBuilder()
+            .AddFormatter(new TestSaveFormatter(), version: 3)
+            .AddMigration(new TestSaveRenameCoins())
+            .AddMigration(new TestSaveXpToLevel())
+            .Build();
     }
 
     private sealed class TestItem
@@ -188,7 +240,7 @@ public sealed class JsonSerializerTests
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -208,7 +260,7 @@ public sealed class JsonSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -244,14 +296,13 @@ public sealed class JsonSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
             Write(ref writer, Read(ref reader, registry), registry);
         }
     }
-
     private sealed class TestSave
     {
         public string? Name;
@@ -263,7 +314,7 @@ public sealed class JsonSerializerTests
     {
         private static readonly FieldTable s_fields = new("name", "level", "gold");
 
-        public void Write<TWriter>(ref TWriter writer, TestSave? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestSave? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -281,7 +332,7 @@ public sealed class JsonSerializerTests
             writer.EndObject();
         }
 
-        public TestSave? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestSave? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -314,7 +365,7 @@ public sealed class JsonSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
@@ -326,9 +377,9 @@ public sealed class JsonSerializerTests
     {
         public int FromVersion => 1;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
-            root.Rename("coins", "gold");
+            root.AsObject.Rename("coins", "gold");
         }
     }
 
@@ -336,11 +387,12 @@ public sealed class JsonSerializerTests
     {
         public int FromVersion => 2;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
-            var xp = root.Has("xp") ? root["xp"]!.AsInt64 : 0;
-            root["level"] = DataNode.FromInt((xp / 1000) + 1);
-            root.Remove("xp");
+            var save = root.AsObject;
+            var xp = save.TryGetValue("xp", out var value) ? value.AsInt64 : 0;
+            save["level"] = (xp / 1000) + 1;
+            save.Remove("xp");
         }
     }
 }

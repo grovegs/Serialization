@@ -14,9 +14,9 @@ High-performance JSON, MessagePack and CSV serialization for .NET, Unity and God
 - **Three formats, one model**: JSON, MessagePack and CSV read and write the same types through the same formatter.
 - **Zero-allocation serialization**: Writers are structs over a reusable `ByteBuffer`. Deserializing allocates only the resulting objects.
 - **Format conversion**: Convert JSON, MessagePack and CSV into each other without creating the objects.
-- **Versioned migrations**: Older data is upgraded step by step on load and on conversion.
+- **Versioned migrations**: Older data is upgraded step by step on load and on conversion. Data without a version counts as v1.
 - **Safe on corrupt data**: Malformed or truncated input throws `FormatException` and never reads out of range or overflows the stack.
-- **DI friendly**: No global state. Formatters and migrations live in an immutable `SerializerRegistry` that each serializer receives in its constructor.
+- **DI friendly**: No global state. Formatters and migrations live in an immutable `FormatterRegistry` that each serializer receives in its constructor.
 - **Unity integration**: Formatters for Unity and Unity.Mathematics types, plus a GroveGames.DependencyInjection integration.
 
 ## .NET
@@ -36,7 +36,7 @@ public sealed class ItemFormatter : IFormatter<Item>
 {
     private static readonly FieldTable s_fields = new("id", "count");
 
-    public void Write<TWriter>(ref TWriter writer, Item? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+    public void Write<TWriter>(ref TWriter writer, Item? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
     {
         if (value == null)
         {
@@ -52,7 +52,7 @@ public sealed class ItemFormatter : IFormatter<Item>
         writer.EndObject();
     }
 
-    public Item? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+    public Item? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
     {
         if (reader.Peek() == TokenType.Null)
         {
@@ -82,7 +82,7 @@ public sealed class ItemFormatter : IFormatter<Item>
         return value;
     }
 
-    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
         where TReader : struct, IFormatReader
         where TWriter : struct, IFormatWriter
     {
@@ -96,7 +96,7 @@ Unknown fields are skipped and missing fields keep their defaults, so adding or 
 ### Serializing
 
 ```csharp
-var registry = new SerializerRegistryBuilder()
+var registry = new FormatterRegistryBuilder()
     .AddFormatter(new ItemFormatter())
     .AddFormatter(new ListFormatter<Item>())
     .AddFormatter(new PlayerSaveFormatter(), version: 3)
@@ -113,7 +113,7 @@ var buffer = new ByteBuffer();
 json.Serialize(save, buffer);
 ```
 
-`Serialize(value, ByteBuffer)` writes into a buffer you own and reuse, with no allocation. `Serialize(value)` returns a new `byte[]`, and both have `Stream` overloads.
+`Serialize(value, IBufferWriter<byte>)` writes into any buffer writer; a `ByteBuffer` you own and reuse is written with no allocation, and any other buffer writer receives the bytes in one copy. `Serialize(value)` returns a new `byte[]`, and there are `Stream` overloads.
 
 ### Converting
 
@@ -122,26 +122,35 @@ var toJson = new Converter(messagePack, json);
 byte[] jsonBytes = toJson.Convert<PlayerSave>(bytes);
 ```
 
-Both serializers must share the same registry.
+Both serializers must share the same registry. Older data is migrated while converting.
 
-### Migrations
+### Versions and Migrations
 
-Every payload stores the version of its root type: `{"$v":3,"data":{...}}` in JSON and MessagePack, and a `#v=3` first line in CSV. Data from an older version is loaded into a `DataNode` tree, each migration from its version runs in order, and the result is read normally. Data from a newer version throws `NotSupportedException`.
+Each root type has a version in the registry, and the version is written with the value only when it is above 1:
+
+| Format      | Version 1 | Version 3                          |
+| ----------- | --------- | ---------------------------------- |
+| JSON        | the value | `{"$v":3,"data":{...}}`            |
+| MessagePack | the value | a 3-byte extension, then the value |
+| CSV         | the rows  | a `#v=3` first line, then the rows |
+
+Data without a version counts as v1, so data written before a type was versioned keeps loading. Older data is loaded into a `DataValue` tree, each migration from its version runs in order, and the result is read normally. Data from a newer version throws `NotSupportedException`.
 
 ```csharp
 public sealed class PlayerSaveXpToLevel : IMigration<PlayerSave>
 {
     public int FromVersion => 2;
 
-    public void Apply(DataNode root)
+    public void Apply(DataValue root)
     {
-        var xp = root.Has("xp") ? root["xp"]!.AsInt64 : 0;
-        root["level"] = DataNode.FromInt((xp / 1000) + 1);
-        root.Remove("xp");
+        var save = root.AsObject;
+        var xp = save.TryGetValue("xp", out var value) ? value.AsInt64 : 0;
+        save["level"] = (xp / 1000) + 1;
+        save.Remove("xp");
     }
 }
 
-var registry = new SerializerRegistryBuilder()
+var registry = new FormatterRegistryBuilder()
     .AddFormatter(new PlayerSaveFormatter(), version: 3)
     .AddMigration(new PlayerSaveRenameCoins())
     .AddMigration(new PlayerSaveXpToLevel())
@@ -156,19 +165,20 @@ Versions belong to the root type. A change inside a nested type is migrated by t
 | ----------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | JSON        | Objects keyed by camelCase names | `NaN` and infinities are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`. |
 | MessagePack | Maps keyed by name strings       | Floats are 32-bit (`0xca`), doubles 64-bit (`0xcb`).                                     |
-| CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`. The `#v=` line is optional.      |
+| CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`.                                  |
 
 Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, lists and `null`.
 
 ### Core Components
 
-- **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `SerializerRegistry`
+- **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `FormatterRegistry`
 - **`IConverter`** / **`Converter`**: Converts data between two serializers without creating objects
-- **`SerializerRegistryBuilder`** / **`SerializerRegistry`**: Registers formatters, versions and migrations, then freezes them
+- **`FormatterRegistryBuilder`** / **`FormatterRegistry`**: Registers formatters, versions and migrations, then freezes them
 - **`IFormatter<T>`**: Writes, reads and transcodes one type over any format
-- **`IMigration<T>`** / **`DataNode`**: Upgrades older data by field name
+- **`IMigration<T>`**: Upgrades older data by field name
+- **`DataValue`** / **`DataObject`** / **`DataArray`**: A tagged value type and its containers, used by migrations and for schema-less data
 - **`ListFormatter<T>`**: Formatter for a `List<T>` root
-- **`ByteBuffer`**: Growable, reusable output buffer
+- **`ByteBuffer`**: Growable, reusable `IBufferWriter<byte>`
 
 ## Unity
 
@@ -176,16 +186,16 @@ Install the core through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForU
 
 ```json
 {
-  "dependencies": {
-    "com.grovegames.serialization": "https://github.com/grovegs/Serialization.git?path=src/GroveGames.Serialization.Unity/Packages/com.grovegames.serialization"
-  }
+    "dependencies": {
+        "com.grovegames.serialization": "https://github.com/grovegs/Serialization.git?path=src/GroveGames.Serialization.Unity/Packages/com.grovegames.serialization"
+    }
 }
 ```
 
 ### Unity Formatters
 
 ```csharp
-var registry = new SerializerRegistryBuilder()
+var registry = new FormatterRegistryBuilder()
     .AddUnityFormatters()
     .AddMathematicsFormatters()
     .AddFormatter(new PlayerSaveFormatter(), version: 3)
@@ -212,7 +222,7 @@ Download the Godot addon from the [latest release](https://github.com/grovegs/Se
 
 - **Struct readers and writers**: Formatters are generic over `TWriter : struct, IFormatWriter` and `TReader : struct, IFormatReader`, so every per-value call is direct, including under IL2CPP.
 - **Pre-encoded names**: `FieldTable` stores field names as UTF-8, so writers never encode them and readers match them without allocating.
-- **Fast path**: Data at the current version is read straight into the object. Only older data builds a `DataNode` tree.
+- **Fast path**: Data at the current version is read straight into the object. Only older data builds a `DataValue` tree, whose scalars are stored inline without allocating.
 - **Bounded nesting**: Readers stop at 63 levels of nesting and throw `FormatException`.
 
 ## Testing

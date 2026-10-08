@@ -5,14 +5,14 @@ namespace GroveGames.Serialization.Tests;
 public sealed class CsvSerializerTests
 {
     [Fact]
-    public void Serialize_Rows_WritesVersionHeaderAndRows()
+    public void Serialize_Rows_WritesHeaderAndRows()
     {
         var serializer = CreateSerializer(version: 1);
         var rows = new List<TestItem> { new() { Id = "a,b", Count = 1, Weight = 0.5, Score = 2 }, new() { Id = "say \"hi\"", Count = 2 } };
 
         var csv = Encoding.UTF8.GetString(serializer.Serialize(rows));
 
-        Assert.Equal("#v=1\nid,count,weight,score\n\"a,b\",1,0.5,2\n\"say \"\"hi\"\"\",2,0,0\n", csv);
+        Assert.Equal("id,count,weight,score\n\"a,b\",1,0.5,2\n\"say \"\"hi\"\"\",2,0,0\n", csv);
     }
 
     [Fact]
@@ -34,13 +34,13 @@ public sealed class CsvSerializerTests
     [Fact]
     public void Deserialize_OlderVersionWithNumberLikeText_KeepsText()
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .AddFormatter(new ListFormatter<TestItem>(), version: 2)
             .AddMigration(new TestRowsNoChange())
             .Build();
         var serializer = new CsvSerializer(registry);
-        var csv = "#v=1\nid,count,weight,score\n007,1,2.5,0.5\n";
+        var csv = "id,count,weight,score\n007,1,2.5,0.5\n";
 
         var result = serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv));
 
@@ -50,15 +50,25 @@ public sealed class CsvSerializerTests
     }
 
     [Theory]
-    [InlineData("#v=1\nid,count\na,notanumber\n")]
-    [InlineData("#v=1\nid,count\na,99999999999\n")]
+    [InlineData("id,count\na,notanumber\n")]
+    [InlineData("id,count\na,99999999999\n")]
     [InlineData("#v=x\nid,count\na,1\n")]
-    [InlineData("#v=1\nid,count\n\"open,1\n")]
+    [InlineData("id,count\n\"open,1\n")]
     public void Deserialize_MalformedCsv_ThrowsFormatException(string csv)
     {
         var serializer = CreateSerializer(version: 1);
 
         Assert.Throws<FormatException>(() => serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv)));
+    }
+
+    [Fact]
+    public void Serialize_VersionedRows_WritesVersionLine()
+    {
+        var serializer = CreateSerializer(version: 2);
+
+        var csv = Encoding.UTF8.GetString(serializer.Serialize(new List<TestItem> { new() { Id = "a", Count = 1 } }));
+
+        Assert.StartsWith("#v=2\nid,count,weight,score\n", csv);
     }
 
     [Fact]
@@ -71,7 +81,7 @@ public sealed class CsvSerializerTests
 
     private static CsvSerializer CreateSerializer(int version)
     {
-        var registry = new SerializerRegistryBuilder()
+        var registry = new FormatterRegistryBuilder()
             .AddFormatter(new TestItemFormatter())
             .AddFormatter(new ListFormatter<TestItem>(), version)
             .Build();
@@ -82,7 +92,7 @@ public sealed class CsvSerializerTests
     {
         public int FromVersion => 1;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
         }
     }
@@ -99,7 +109,7 @@ public sealed class CsvSerializerTests
     {
         private static readonly FieldTable s_fields = new("id", "count", "weight", "score");
 
-        public void Write<TWriter>(ref TWriter writer, TestItem? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestItem? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -119,7 +129,7 @@ public sealed class CsvSerializerTests
             writer.EndObject();
         }
 
-        public TestItem? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestItem? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -155,7 +165,7 @@ public sealed class CsvSerializerTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {

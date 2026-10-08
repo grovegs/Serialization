@@ -22,8 +22,8 @@ dotnet pack -c Release
 - Interface-first design for public APIs
 - Use readonly for fields that don't change after construction
 - Use ArgumentNullException.ThrowIfNull(), ArgumentOutOfRangeException.ThrowIfGreaterThan(), and ObjectDisposedException.ThrowIf() for validation
-- For thread-safe classes: use volatile int _disposed with Interlocked for disposal
-- For single-threaded classes: use bool _disposed
+- For thread-safe classes: use volatile int \_disposed with Interlocked for disposal
+- For single-threaded classes: use bool \_disposed
 - Create separate concurrent implementations when thread safety is needed (e.g., ObjectPool vs ConcurrentObjectPool)
 - Only use volatile and Interlocked when concurrent access is required
 
@@ -61,8 +61,8 @@ dotnet pack -c Release
 
 - Never throw C# exceptions (ArgumentNullException, ArgumentException, etc.) in engine implementations
 - Use engine-specific error handling instead:
-  - Unity: `Debug.LogError()`, `Debug.LogWarning()`, `Debug.Assert()`
-  - Godot: `GD.PushError()`, `GD.PushWarning()`, `GD.Assert()`
+    - Unity: `Debug.LogError()`, `Debug.LogWarning()`, `Debug.Assert()`
+    - Godot: `GD.PushError()`, `GD.PushWarning()`, `GD.Assert()`
 - Check parameters for null and provide fallback values with engine logging
 - Example Unity: `if (settings == null) { Debug.LogError("Settings cannot be null"); settings = CreateInstance<Settings>(); }`
 - Example Godot: `if (settings == null) { GD.PushError("Settings cannot be null"); settings = new(); }`
@@ -82,10 +82,10 @@ dotnet pack -c Release
 
 - Unity projects must include `csc.rsp` file in `Assets/` directory to enable C# 10 features:
 
-  ```text
-  -langversion:10
-  -nullable:enable
-  ```
+    ```text
+    -langversion:10
+    -nullable:enable
+    ```
 
 - This enables nullable reference types and C# 10 language features (pattern matching, global usings, etc.)
 - Required for compatibility with the core library that uses modern C# features
@@ -106,13 +106,14 @@ dotnet pack -c Release
 Settled decisions. Ask before changing any of them.
 
 - **Names, not keys.** Every public field and property is serialized under its camelCase name in every format. There is no key attribute; `[Ignore]` excludes a member.
-- **No global state.** Formatters, versions and migrations live in an immutable `SerializerRegistry` built by `SerializerRegistryBuilder`. Serializers receive it in their constructor, and formatters receive it as a parameter for nested lookups.
-- **One serializer per format.** `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer` implement `ISerializer`. Readers, writers and the internal `IFormat` conversion contract are internal.
-- **Versioning is `IMigration<T>` only.** The root type's version is stored as the envelope `{"$v":N,"data":...}` in JSON and MessagePack, and as a `#v=N` first line in CSV. `$v` must come before `data`. The same version reads straight into the object; an older version builds a `DataNode` tree, runs each migration from its `FromVersion`, then reads normally; a newer version throws `NotSupportedException`.
+- **No global state.** Formatters, versions and migrations live in an immutable `FormatterRegistry` built by `FormatterRegistryBuilder`. Serializers receive it in their constructor, and formatters receive it as a parameter for nested lookups.
+- **One serializer per format.** `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer` implement `ISerializer`. Readers, writers, the envelope methods (`IDocumentWriter`, `IDocumentReader`) and the `IFormat` conversion contract are internal.
+- **Output is `IBufferWriter<byte>`.** A `ByteBuffer` is written directly; any other buffer writer receives the bytes from a thread-static scratch `ByteBuffer` in one copy, so the MessagePack writer can still back-patch headers.
+- **Versioning is `IMigration<T>` only, and data without a version is v1.** The version is written only when the root type is above v1: `{"$v":N,"data":...}` in JSON (`$v` first), a 3-byte extension prefix (type `0x56`, `fixext1` or `fixext4` for versions above 255) in MessagePack, and a `#v=N` first line in CSV. The same version reads straight into the object; an older version builds a `DataValue` tree, runs each migration from its `FromVersion`, then reads normally; a newer version throws `NotSupportedException`.
 - **Struct readers and writers.** Formatter methods are generic over `TWriter : struct, IFormatWriter` and `TReader : struct, IFormatReader` so calls are direct under IL2CPP. Pass them by `ref`; never copy them.
 - **Zero allocation on serialize and convert.** Deserialize allocates only the resulting objects. Strings in conversion go through `ReadStringUtf8` and `WriteStringUtf8`. CSV allocates per call and is excluded from this rule.
 - **Malformed input throws `FormatException`.** Readers never read out of range, never overflow the stack (nesting stops at 63 levels) and reject trailing data. Tests truncate payloads at every byte.
-- **CSV is tabular only.** The root is a list of flat rows; nested objects throw `NotSupportedException`. Cells are untyped text, so the migration tree keeps them as `NodeKind.Text` and parses them on demand.
+- **CSV is tabular only.** The root is a list of flat rows; nested objects throw `NotSupportedException`. Cells are untyped text, so the migration tree keeps them as `DataKind.Text` and parses them on demand.
 - **Non-finite numbers in JSON** are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`, so the output stays valid JSON.
 
 ## Unity Package

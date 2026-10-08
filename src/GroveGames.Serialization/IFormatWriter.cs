@@ -2,8 +2,6 @@
 
 public interface IFormatWriter
 {
-    public void BeginEnvelope(int version);
-    public void EndEnvelope();
     public void BeginObject(int fieldCount);
     public void WriteField(byte[] utf8Name);
     public void EndObject();

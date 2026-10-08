@@ -1,18 +1,17 @@
-﻿namespace GroveGames.Serialization;
+﻿using System.Buffers;
+
+namespace GroveGames.Serialization;
 
 public sealed class Converter : IConverter
 {
     private readonly IFormat _from;
     private readonly IFormat _to;
-    private readonly SerializerRegistry _registry;
+    private readonly FormatterRegistry _registry;
 
     public Converter(ISerializer from, ISerializer to)
     {
-        ArgumentNullException.ThrowIfNull(from);
-        ArgumentNullException.ThrowIfNull(to);
-
-        _from = from as IFormat ?? throw new ArgumentException($"{from.GetType()} cannot be converted from.", nameof(from));
-        _to = to as IFormat ?? throw new ArgumentException($"{to.GetType()} cannot be converted to.", nameof(to));
+        _from = FormatOperations.GetFormat(from, nameof(from));
+        _to = FormatOperations.GetFormat(to, nameof(to));
 
         if (!ReferenceEquals(from.Registry, to.Registry))
         {
@@ -22,16 +21,8 @@ public sealed class Converter : IConverter
         _registry = from.Registry;
     }
 
-    public byte[] Convert<T>(ReadOnlyMemory<byte> data)
+    public void Convert<T>(ReadOnlyMemory<byte> data, IBufferWriter<byte> output)
     {
-        var output = ScratchBuffers.Output();
-        _from.Convert<T>(data, _to, output, _registry);
-        return output.ToArray();
-    }
-
-    public void Convert<T>(ReadOnlyMemory<byte> data, ByteBuffer output)
-    {
-        ArgumentNullException.ThrowIfNull(output);
-        _from.Convert<T>(data, _to, output, _registry);
+        FormatOperations.Convert<T>(_from, _to, data, output, _registry);
     }
 }

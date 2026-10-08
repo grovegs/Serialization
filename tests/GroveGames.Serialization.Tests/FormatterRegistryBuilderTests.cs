@@ -1,11 +1,11 @@
 ﻿namespace GroveGames.Serialization.Tests;
 
-public sealed class SerializerRegistryBuilderTests
+public sealed class FormatterRegistryBuilderTests
 {
     [Fact]
     public void AddFormatter_SameTypeTwice_ThrowsInvalidOperationException()
     {
-        var builder = new SerializerRegistryBuilder().AddFormatter(new TestSaveFormatter());
+        var builder = new FormatterRegistryBuilder().AddFormatter(new TestSaveFormatter());
 
         Assert.Throws<InvalidOperationException>(() => builder.AddFormatter(new TestSaveFormatter()));
     }
@@ -13,7 +13,7 @@ public sealed class SerializerRegistryBuilderTests
     [Fact]
     public void AddFormatter_ZeroVersion_ThrowsArgumentOutOfRangeException()
     {
-        var builder = new SerializerRegistryBuilder();
+        var builder = new FormatterRegistryBuilder();
 
         Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddFormatter(new TestSaveFormatter(), version: 0));
     }
@@ -21,7 +21,7 @@ public sealed class SerializerRegistryBuilderTests
     [Fact]
     public void Build_MigrationWithoutFormatter_ThrowsInvalidOperationException()
     {
-        var builder = new SerializerRegistryBuilder().AddMigration(new TestSaveRenameCoins());
+        var builder = new FormatterRegistryBuilder().AddMigration(new TestSaveRenameCoins());
 
         Assert.Throws<InvalidOperationException>(() => builder.Build());
     }
@@ -29,7 +29,7 @@ public sealed class SerializerRegistryBuilderTests
     [Fact]
     public void Build_MigrationFromCurrentVersion_ThrowsInvalidOperationException()
     {
-        var builder = new SerializerRegistryBuilder()
+        var builder = new FormatterRegistryBuilder()
             .AddFormatter(new TestSaveFormatter(), version: 1)
             .AddMigration(new TestSaveRenameCoins());
 
@@ -39,7 +39,7 @@ public sealed class SerializerRegistryBuilderTests
     [Fact]
     public void Build_TwoMigrationsFromSameVersion_ThrowsInvalidOperationException()
     {
-        var builder = new SerializerRegistryBuilder()
+        var builder = new FormatterRegistryBuilder()
             .AddFormatter(new TestSaveFormatter(), version: 2)
             .AddMigration(new TestSaveRenameCoins())
             .AddMigration(new TestSaveRenameCoins());
@@ -52,7 +52,7 @@ public sealed class SerializerRegistryBuilderTests
     {
         var formatter = new TestSaveFormatter();
 
-        var registry = new SerializerRegistryBuilder().AddFormatter(formatter, version: 3).Build();
+        var registry = new FormatterRegistryBuilder().AddFormatter(formatter, version: 3).Build();
 
         Assert.Same(formatter, registry.GetFormatter<TestSave>());
         Assert.Equal(3, registry.GetVersion<TestSave>());
@@ -70,7 +70,7 @@ public sealed class SerializerRegistryBuilderTests
     {
         private static readonly FieldTable s_fields = new("name", "level", "gold");
 
-        public void Write<TWriter>(ref TWriter writer, TestSave? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, TestSave? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             if (value == null)
             {
@@ -88,7 +88,7 @@ public sealed class SerializerRegistryBuilderTests
             writer.EndObject();
         }
 
-        public TestSave? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public TestSave? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -121,7 +121,7 @@ public sealed class SerializerRegistryBuilderTests
             return value;
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
@@ -133,9 +133,9 @@ public sealed class SerializerRegistryBuilderTests
     {
         public int FromVersion => 1;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
-            root.Rename("coins", "gold");
+            root.AsObject.Rename("coins", "gold");
         }
     }
 
@@ -143,11 +143,12 @@ public sealed class SerializerRegistryBuilderTests
     {
         public int FromVersion => 2;
 
-        public void Apply(DataNode root)
+        public void Apply(DataValue root)
         {
-            var xp = root.Has("xp") ? root["xp"]!.AsInt64 : 0;
-            root["level"] = DataNode.FromInt((xp / 1000) + 1);
-            root.Remove("xp");
+            var save = root.AsObject;
+            var xp = save.TryGetValue("xp", out var value) ? value.AsInt64 : 0;
+            save["level"] = (xp / 1000) + 1;
+            save.Remove("xp");
         }
     }
 }

@@ -2,8 +2,6 @@
 
 public interface IFormatReader
 {
-    public int ReadEnvelope();
-    public void EndEnvelope();
     public TokenType Peek();
     public void ReadObjectStart();
     public bool TryReadField(FieldTable fields, out int index);

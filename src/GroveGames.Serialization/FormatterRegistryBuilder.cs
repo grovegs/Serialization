@@ -1,17 +1,17 @@
 ﻿namespace GroveGames.Serialization;
 
-public sealed class SerializerRegistryBuilder
+public sealed class FormatterRegistryBuilder
 {
     private readonly Dictionary<Type, Func<Dictionary<Type, List<object>>, object>> _registrations;
     private readonly Dictionary<Type, List<object>> _migrations;
 
-    public SerializerRegistryBuilder()
+    public FormatterRegistryBuilder()
     {
         _registrations = [];
         _migrations = [];
     }
 
-    public SerializerRegistryBuilder AddFormatter<T>(IFormatter<T> formatter, int version = 1)
+    public FormatterRegistryBuilder AddFormatter<T>(IFormatter<T> formatter, int version = 1)
     {
         ArgumentNullException.ThrowIfNull(formatter);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(version);
@@ -25,7 +25,7 @@ public sealed class SerializerRegistryBuilder
         return this;
     }
 
-    public SerializerRegistryBuilder AddMigration<T>(IMigration<T> migration)
+    public FormatterRegistryBuilder AddMigration<T>(IMigration<T> migration)
     {
         ArgumentNullException.ThrowIfNull(migration);
 
@@ -39,7 +39,7 @@ public sealed class SerializerRegistryBuilder
         return this;
     }
 
-    public SerializerRegistry Build()
+    public FormatterRegistry Build()
     {
         foreach (var type in _migrations.Keys)
         {
@@ -56,7 +56,7 @@ public sealed class SerializerRegistryBuilder
             registrations.Add(pair.Key, pair.Value(_migrations));
         }
 
-        return new SerializerRegistry(registrations);
+        return new FormatterRegistry(registrations);
     }
 
     private static TypeRegistration<T> CreateRegistration<T>(IFormatter<T> formatter, int version, Dictionary<Type, List<object>> allMigrations)

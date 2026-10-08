@@ -13,7 +13,7 @@ namespace GroveGames.Serialization.Unity
             _vector3Formatter = new Vector3Formatter();
         }
 
-        public void Write<TWriter>(ref TWriter writer, Bounds value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, Bounds value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
         {
             writer.BeginObject(2);
             writer.WriteField(s_fields[0]);
@@ -23,7 +23,7 @@ namespace GroveGames.Serialization.Unity
             writer.EndObject();
         }
 
-        public Bounds Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+        public Bounds Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -54,7 +54,7 @@ namespace GroveGames.Serialization.Unity
             return new Bounds(center, size);
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {

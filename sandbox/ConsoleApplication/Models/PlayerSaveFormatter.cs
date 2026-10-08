@@ -13,7 +13,7 @@ public sealed class PlayerSaveFormatter : IFormatter<PlayerSave>
         _itemFormatter = new ItemFormatter();
     }
 
-    public void Write<TWriter>(ref TWriter writer, PlayerSave? value, SerializerRegistry registry) where TWriter : struct, IFormatWriter
+    public void Write<TWriter>(ref TWriter writer, PlayerSave? value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
     {
         if (value == null)
         {
@@ -51,7 +51,7 @@ public sealed class PlayerSaveFormatter : IFormatter<PlayerSave>
         writer.EndObject();
     }
 
-    public PlayerSave? Read<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+    public PlayerSave? Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
     {
         if (reader.Peek() == TokenType.Null)
         {
@@ -90,7 +90,7 @@ public sealed class PlayerSaveFormatter : IFormatter<PlayerSave>
         return value;
     }
 
-    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
+    public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
         where TReader : struct, IFormatReader
         where TWriter : struct, IFormatWriter
     {
@@ -162,7 +162,7 @@ public sealed class PlayerSaveFormatter : IFormatter<PlayerSave>
         writer.EndObject();
     }
 
-    private List<Item>? ReadItems<TReader>(ref TReader reader, SerializerRegistry registry) where TReader : struct, IFormatReader
+    private List<Item>? ReadItems<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
     {
         if (reader.Peek() == TokenType.Null)
         {

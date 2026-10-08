@@ -3,11 +3,12 @@ using System.Text;
 
 namespace GroveGames.Serialization.Csv;
 
-internal struct CsvReader : IFormatReader
+internal struct CsvReader : IDocumentReader
 {
     private readonly string[] _headers;
     private readonly List<string[]> _rows;
     private readonly int _version;
+    private readonly bool _hasVersionLine;
     private int _row;
     private int _column;
     private int _depth;
@@ -16,6 +17,7 @@ internal struct CsvReader : IFormatReader
     {
         var records = Parse(Encoding.UTF8.GetString(data.Span));
         _version = 1;
+        _hasVersionLine = false;
 
         if (records.Count > 0 && records[0][0].StartsWith("#v=", StringComparison.Ordinal))
         {
@@ -25,6 +27,7 @@ internal struct CsvReader : IFormatReader
             }
 
             records.RemoveAt(0);
+            _hasVersionLine = true;
         }
 
         _headers = records.Count > 0 ? records[0] : [];
@@ -34,12 +37,17 @@ internal struct CsvReader : IFormatReader
         _depth = 0;
     }
 
-    public readonly int ReadEnvelope()
+    public readonly bool TryReadEnvelope(out int version)
     {
-        return _version;
+        version = _version;
+        return _hasVersionLine;
     }
 
     public readonly void EndEnvelope()
+    {
+    }
+
+    public readonly void EndDocument()
     {
     }
 
