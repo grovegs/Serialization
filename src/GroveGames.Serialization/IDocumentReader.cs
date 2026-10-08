@@ -2,7 +2,7 @@
 
 internal interface IDocumentReader : IFormatReader
 {
-    public int ReadEnvelope();
+    public bool TryReadEnvelope(out int version);
     public void EndEnvelope();
     public void EndDocument();
 }

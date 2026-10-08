@@ -34,7 +34,7 @@ public sealed class ConverterTests
     }
 
     [Fact]
-    public void Convert_StoredOlderVersion_MigratesWhileConverting()
+    public void Convert_DataWithoutVersion_MigratesWhileConverting()
     {
         var registry = new SerializerRegistryBuilder()
             .AddFormatter(new TestItemFormatter(), version: 2)
@@ -44,7 +44,7 @@ public sealed class ConverterTests
         var messagePack = new MessagePackSerializer(registry);
         var output = new ByteBuffer();
 
-        new Converter(json, messagePack).Convert<TestItem>(Encoding.UTF8.GetBytes("{\"id\":\"a\",\"amount\":4}"), version: 1, output);
+        new Converter(json, messagePack).Convert<TestItem>(Encoding.UTF8.GetBytes("{\"id\":\"a\",\"amount\":4}"), output);
         var result = messagePack.Deserialize<TestItem>(output.WrittenMemory);
 
         Assert.Equal(4, result!.Count);

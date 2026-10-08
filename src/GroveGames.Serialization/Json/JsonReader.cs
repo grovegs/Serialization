@@ -27,16 +27,30 @@ internal struct JsonReader : IDocumentReader
         _first = 0;
     }
 
-    public int ReadEnvelope()
+    public bool TryReadEnvelope(out int version)
     {
+        version = 1;
+        SkipWhitespace();
+
+        if (_position >= _end || _buffer[_position] != '{')
+        {
+            return false;
+        }
+
+        var position = _position;
+        var depth = _depth;
+        var first = _first;
         ReadObjectStart();
 
         if (!TryReadField(Envelope.Fields, out var field) || field != Envelope.VersionField)
         {
-            throw Error("the envelope must start with \"$v\"");
+            _position = position;
+            _depth = depth;
+            _first = first;
+            return false;
         }
 
-        var version = ReadInt32();
+        version = ReadInt32();
 
         if (version < 1)
         {
@@ -48,7 +62,7 @@ internal struct JsonReader : IDocumentReader
             throw Error("the envelope has no \"data\" after \"$v\"");
         }
 
-        return version;
+        return true;
     }
 
     public void EndEnvelope()

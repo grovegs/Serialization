@@ -5,6 +5,8 @@ namespace GroveGames.Serialization.MessagePack;
 
 internal struct MessagePackReader : IDocumentReader
 {
+    private const byte VersionExtension = 0x56;
+
     private readonly byte[] _buffer;
     private readonly int _end;
     private readonly MessagePackStack _stack;
@@ -21,36 +23,53 @@ internal struct MessagePackReader : IDocumentReader
         _depth = 0;
     }
 
-    public int ReadEnvelope()
+    public bool TryReadEnvelope(out int version)
     {
-        ReadObjectStart();
+        version = 1;
 
-        if (!TryReadField(Envelope.Fields, out var field) || field != Envelope.VersionField)
+        if (_position >= _end)
         {
-            throw Error("the envelope must start with \"$v\"");
+            return false;
         }
 
-        var version = ReadInt32();
+        var header = _buffer[_position];
+
+        if (header == 0xd4)
+        {
+            Need(3);
+            ExpectVersionExtension(_buffer[_position + 1]);
+            version = _buffer[_position + 2];
+            _position += 3;
+        }
+        else if (header == 0xd6)
+        {
+            Need(6);
+            ExpectVersionExtension(_buffer[_position + 1]);
+            var stored = BinaryPrimitives.ReadUInt32BigEndian(new ReadOnlySpan<byte>(_buffer, _position + 2, 4));
+
+            if (stored > int.MaxValue)
+            {
+                throw Error($"version {stored} is not valid");
+            }
+
+            version = (int)stored;
+            _position += 6;
+        }
+        else
+        {
+            return false;
+        }
 
         if (version < 1)
         {
             throw Error($"version {version} is not valid");
         }
 
-        if (!TryReadField(Envelope.Fields, out field) || field != Envelope.DataField)
-        {
-            throw Error("the envelope has no \"data\" after \"$v\"");
-        }
-
-        return version;
+        return true;
     }
 
-    public void EndEnvelope()
+    public readonly void EndEnvelope()
     {
-        while (TryReadField(Envelope.Fields, out _))
-        {
-            Skip();
-        }
     }
 
     public void EndDocument()
@@ -297,6 +316,14 @@ internal struct MessagePackReader : IDocumentReader
     public void Skip()
     {
         SkipValue(_depth);
+    }
+
+    private void ExpectVersionExtension(byte type)
+    {
+        if (type != VersionExtension)
+        {
+            throw Error($"unsupported extension type {type}");
+        }
     }
 
     private FormatException Error(string message)

@@ -113,12 +113,34 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_StoredOlderVersion_RunsMigrationsInOrder()
+    public void Serialize_VersionedType_WritesEnvelope()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        var json = Encoding.UTF8.GetString(serializer.Serialize(new TestSave { Name = "hero", Level = 2, Gold = 3 }));
+
+        Assert.Equal("{\"$v\":3,\"data\":{\"name\":\"hero\",\"level\":2,\"gold\":3}}", json);
+    }
+
+    [Fact]
+    public void Deserialize_VersionedType_RoundTrips()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        var result = serializer.Deserialize<TestSave>(serializer.Serialize(new TestSave { Name = "hero", Level = 9, Gold = long.MaxValue }));
+
+        Assert.Equal("hero", result!.Name);
+        Assert.Equal(9, result.Level);
+        Assert.Equal(long.MaxValue, result.Gold);
+    }
+
+    [Fact]
+    public void Deserialize_DataWithoutVersion_MigratesFromVersionOne()
     {
         var serializer = new JsonSerializer(CreateSaveRegistry());
         var json = "{\"name\":\"hero\",\"xp\":4500,\"coins\":30}";
 
-        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json), version: 1);
+        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json));
 
         Assert.Equal("hero", result!.Name);
         Assert.Equal(5, result.Level);
@@ -126,11 +148,35 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_StoredNewerVersion_ThrowsNotSupportedException()
+    public void Deserialize_OlderEnvelope_RunsRemainingMigrations()
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+        var json = "{\"$v\":2,\"data\":{\"name\":\"hero\",\"xp\":4500,\"gold\":30}}";
+
+        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json));
+
+        Assert.Equal(5, result!.Level);
+        Assert.Equal(30, result.Gold);
+    }
+
+    [Fact]
+    public void Deserialize_NewerEnvelope_ThrowsNotSupportedException()
     {
         var serializer = new JsonSerializer(CreateSaveRegistry());
 
-        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes("{}"), version: 4));
+        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes("{\"$v\":4,\"data\":{}}")));
+    }
+
+    [Theory]
+    [InlineData("{\"$v\":0,\"data\":{}}")]
+    [InlineData("{\"$v\":3,\"data\":{}}{}")]
+    [InlineData("{\"$v\":3}")]
+    [InlineData("{\"$v\":\"3\",\"data\":{}}")]
+    public void Deserialize_MalformedEnvelope_ThrowsFormatException(string json)
+    {
+        var serializer = new JsonSerializer(CreateSaveRegistry());
+
+        Assert.Throws<FormatException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json)));
     }
 
     [Fact]

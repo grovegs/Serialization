@@ -5,6 +5,8 @@ namespace GroveGames.Serialization.MessagePack;
 
 internal struct MessagePackWriter : IDocumentWriter
 {
+    private const byte VersionExtension = 0x56;
+
     private readonly ByteBuffer _output;
     private readonly MessagePackStack _stack;
     private int _depth;
@@ -16,17 +18,25 @@ internal struct MessagePackWriter : IDocumentWriter
         _depth = 0;
     }
 
-    public void BeginEnvelope(int version)
+    public readonly void BeginEnvelope(int version)
     {
-        BeginObject(2);
-        WriteField(Envelope.Fields[Envelope.VersionField]);
-        WriteInt32(version);
-        WriteField(Envelope.Fields[Envelope.DataField]);
+        if (version <= byte.MaxValue)
+        {
+            var span = _output.Take(3);
+            span[0] = 0xd4;
+            span[1] = VersionExtension;
+            span[2] = (byte)version;
+            return;
+        }
+
+        var wide = _output.Take(6);
+        wide[0] = 0xd6;
+        wide[1] = VersionExtension;
+        BinaryPrimitives.WriteUInt32BigEndian(wide.Slice(2), (uint)version);
     }
 
-    public void EndEnvelope()
+    public readonly void EndEnvelope()
     {
-        EndObject();
     }
 
     public void BeginObject(int fieldCount)

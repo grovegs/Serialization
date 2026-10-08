@@ -23,12 +23,6 @@ public sealed class Converter : IConverter
 
     public void Convert<T>(ReadOnlyMemory<byte> data, IBufferWriter<byte> output)
     {
-        FormatOperations.Convert<T>(_from, _to, data, output, _registry, _registry.GetVersion<T>(), versioned: false);
-    }
-
-    public void Convert<T>(ReadOnlyMemory<byte> data, int version, IBufferWriter<byte> output)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(version);
-        FormatOperations.Convert<T>(_from, _to, data, output, _registry, version, versioned: false);
+        FormatOperations.Convert<T>(_from, _to, data, output, _registry);
     }
 }

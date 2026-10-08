@@ -2,10 +2,11 @@
 
 internal static class Pipeline
 {
-    public static void Write<T, TWriter>(ref TWriter writer, T? value, SerializerRegistry registry, bool versioned)
+    public static void Write<T, TWriter>(ref TWriter writer, T? value, SerializerRegistry registry)
         where TWriter : struct, IDocumentWriter
     {
         var registration = registry.GetRegistration<T>();
+        var versioned = registration.Version > 1;
 
         if (versioned)
         {
@@ -20,11 +21,11 @@ internal static class Pipeline
         }
     }
 
-    public static T? Read<T, TReader>(ref TReader reader, SerializerRegistry registry, int? version)
+    public static T? Read<T, TReader>(ref TReader reader, SerializerRegistry registry)
         where TReader : struct, IDocumentReader
     {
         var registration = registry.GetRegistration<T>();
-        var stored = version ?? reader.ReadEnvelope();
+        var enveloped = reader.TryReadEnvelope(out var stored);
         T? result;
 
         if (stored == registration.Version)
@@ -43,7 +44,7 @@ internal static class Pipeline
             throw Newer<T>(stored, registration.Version);
         }
 
-        if (version == null)
+        if (enveloped)
         {
             reader.EndEnvelope();
         }
@@ -52,12 +53,13 @@ internal static class Pipeline
         return result;
     }
 
-    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry, int? version, bool versioned)
+    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, SerializerRegistry registry)
         where TReader : struct, IDocumentReader
         where TWriter : struct, IDocumentWriter
     {
         var registration = registry.GetRegistration<T>();
-        var stored = version ?? reader.ReadEnvelope();
+        var enveloped = reader.TryReadEnvelope(out var stored);
+        var versioned = registration.Version > 1;
 
         if (stored > registration.Version)
         {
@@ -86,7 +88,7 @@ internal static class Pipeline
             writer.EndEnvelope();
         }
 
-        if (version == null)
+        if (enveloped)
         {
             reader.EndEnvelope();
         }

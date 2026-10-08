@@ -7,5 +7,4 @@ public interface ISerializer
     public SerializerRegistry Registry { get; }
     public void Serialize<T>(T? value, IBufferWriter<byte> output);
     public T? Deserialize<T>(ReadOnlyMemory<byte> data);
-    public T? Deserialize<T>(ReadOnlyMemory<byte> data, int version);
 }

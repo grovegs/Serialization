@@ -86,6 +86,43 @@ public sealed class MessagePackSerializerTests
         Assert.Equal(items.Select(i => i.Id), result!.Select(i => i.Id));
     }
 
+    [Theory]
+    [InlineData(2, new byte[] { 0xd4, 0x56, 0x02 })]
+    [InlineData(300, new byte[] { 0xd6, 0x56, 0x00, 0x00, 0x01, 0x2c })]
+    public void Serialize_VersionedType_WritesVersionExtensionPrefix(int version, byte[] prefix)
+    {
+        var registry = new SerializerRegistryBuilder().AddFormatter(new TestItemFormatter(), version).Build();
+        var serializer = new MessagePackSerializer(registry);
+
+        var bytes = serializer.Serialize(new TestItem { Id = "a" });
+
+        Assert.Equal(prefix, bytes.AsSpan(0, prefix.Length).ToArray());
+        Assert.Equal("a", serializer.Deserialize<TestItem>(bytes)!.Id);
+    }
+
+    [Fact]
+    public void Deserialize_VersionedEveryTruncation_ThrowsFormatException()
+    {
+        var registry = new SerializerRegistryBuilder().AddFormatter(new TestItemFormatter(), version: 2).Build();
+        var serializer = new MessagePackSerializer(registry);
+        var bytes = serializer.Serialize(new TestItem { Id = "potion", Count = 70_000 });
+
+        for (var length = 0; length < bytes.Length; length++)
+        {
+            var truncated = bytes.AsMemory(0, length);
+            Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(truncated));
+        }
+    }
+
+    [Fact]
+    public void Deserialize_UnknownExtension_ThrowsFormatException()
+    {
+        var serializer = CreateSerializer();
+        byte[] bytes = [0xd4, 0x01, 0x02, 0x80];
+
+        Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(bytes));
+    }
+
     private static MessagePackSerializer CreateSerializer()
     {
         var registry = new SerializerRegistryBuilder()

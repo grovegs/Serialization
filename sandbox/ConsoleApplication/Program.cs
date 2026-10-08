@@ -40,13 +40,11 @@ public static class Program
 
         Console.WriteLine($"CSV rows:\n{Encoding.UTF8.GetString(csv.Serialize(save.Items))}");
 
-        var storedRecord = Encoding.UTF8.GetBytes("{\"name\":\"Veteran\",\"xp\":7200,\"coins\":90}");
-        var record = json.Deserialize<PlayerSave>(storedRecord, version: 1)!;
-        Console.WriteLine($"Record stored at v1, read at v3: {record.Name}, level {record.Level}, gold {record.Gold}");
+        var item = json.Serialize(new Item { Id = "shield", Count = 1 });
+        Console.WriteLine($"v1 item has no version: {Encoding.UTF8.GetString(item)}");
 
-        var file = new VersionedSerializer(json);
-        var fileBytes = file.Serialize(save);
-        Console.WriteLine($"Versioned file: {Encoding.UTF8.GetString(fileBytes)[..40]}...");
-        Console.WriteLine($"Versioned file reads back: {file.Deserialize<PlayerSave>(fileBytes)!.Name}");
+        var oldSave = Encoding.UTF8.GetBytes("{\"name\":\"Veteran\",\"xp\":7200,\"coins\":90}");
+        var migrated = json.Deserialize<PlayerSave>(oldSave)!;
+        Console.WriteLine($"Save without a version is v1, migrated to v3: {migrated.Name}, level {migrated.Level}, gold {migrated.Gold}");
     }
 }

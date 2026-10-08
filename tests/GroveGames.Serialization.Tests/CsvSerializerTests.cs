@@ -42,7 +42,7 @@ public sealed class CsvSerializerTests
         var serializer = new CsvSerializer(registry);
         var csv = "id,count,weight,score\n007,1,2.5,0.5\n";
 
-        var result = serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv), version: 1);
+        var result = serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv));
 
         Assert.Equal("007", result![0].Id);
         Assert.Equal(1, result[0].Count);
@@ -52,7 +52,6 @@ public sealed class CsvSerializerTests
     [Theory]
     [InlineData("id,count\na,notanumber\n")]
     [InlineData("id,count\na,99999999999\n")]
-    [InlineData("#v=1\nid,count\na,1\n")]
     [InlineData("#v=x\nid,count\na,1\n")]
     [InlineData("id,count\n\"open,1\n")]
     public void Deserialize_MalformedCsv_ThrowsFormatException(string csv)
@@ -60,6 +59,16 @@ public sealed class CsvSerializerTests
         var serializer = CreateSerializer(version: 1);
 
         Assert.Throws<FormatException>(() => serializer.Deserialize<List<TestItem>>(Encoding.UTF8.GetBytes(csv)));
+    }
+
+    [Fact]
+    public void Serialize_VersionedRows_WritesVersionLine()
+    {
+        var serializer = CreateSerializer(version: 2);
+
+        var csv = Encoding.UTF8.GetString(serializer.Serialize(new List<TestItem> { new() { Id = "a", Count = 1 } }));
+
+        Assert.StartsWith("#v=2\nid,count,weight,score\n", csv);
     }
 
     [Fact]

@@ -9,7 +9,6 @@ internal struct CsvReader : IDocumentReader
     private readonly List<string[]> _rows;
     private readonly int _version;
     private readonly bool _hasVersionLine;
-    private bool _envelopeRead;
     private int _row;
     private int _column;
     private int _depth;
@@ -19,7 +18,6 @@ internal struct CsvReader : IDocumentReader
         var records = Parse(Encoding.UTF8.GetString(data.Span));
         _version = 1;
         _hasVersionLine = false;
-        _envelopeRead = false;
 
         if (records.Count > 0 && records[0][0].StartsWith("#v=", StringComparison.Ordinal))
         {
@@ -39,10 +37,10 @@ internal struct CsvReader : IDocumentReader
         _depth = 0;
     }
 
-    public int ReadEnvelope()
+    public readonly bool TryReadEnvelope(out int version)
     {
-        _envelopeRead = true;
-        return _version;
+        version = _version;
+        return _hasVersionLine;
     }
 
     public readonly void EndEnvelope()
@@ -51,10 +49,6 @@ internal struct CsvReader : IDocumentReader
 
     public readonly void EndDocument()
     {
-        if (_hasVersionLine && !_envelopeRead)
-        {
-            throw new FormatException("CSV starts with a version line, so it must be read with a VersionedSerializer.");
-        }
     }
 
     public readonly TokenType Peek()
