@@ -16,7 +16,7 @@ High-performance JSON, MessagePack and CSV serialization for .NET, Unity and God
 - **Format conversion**: Convert JSON, MessagePack and CSV into each other without creating the objects.
 - **Versioned migrations**: Older data is upgraded step by step on load and on conversion. Data without a version counts as v1.
 - **Safe on corrupt data**: Malformed or truncated input throws `FormatException` and never reads out of range or overflows the stack.
-- **DI friendly**: No global state. Formatters and migrations live in an immutable `FormatterRegistry` that each serializer receives in its constructor.
+- **No configuration**: Formatters, versions and migrations register themselves the first time a type is used. Serializers need no setup, and finding a formatter is a static field read.
 - **Unity integration**: Formatters for Unity and Unity.Mathematics types, plus a GroveGames.DependencyInjection integration.
 
 ## .NET
@@ -49,32 +49,25 @@ Every public field and every public property with a public getter and setter is 
 
 Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>` and `DataValue`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
-The generator also adds one registration method per assembly, which registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types:
-
-```csharp
-var registry = new FormatterRegistryBuilder()
-    .AddGameFormatters()
-    .Build();
-```
-
-The method is named after the assembly, so an assembly called `Game` gets `AddGameFormatters` and `Game.Data` gets `AddGameDataFormatters`.
+The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Nothing needs to be called: the registration runs when the assembly starts.
 
 | Diagnostic | Severity | Meaning                                                                 |
 | ---------- | -------- | ----------------------------------------------------------------------- |
 | GGS001     | Error    | Nested and generic types cannot be schema types                         |
 | GGS002     | Error    | Two members map to the same field name                                  |
 | GGS003     | Error    | A member type is not supported, including `ulong` and init-only setters |
-| GGS004     | Info     | A member uses a registered formatter because its type has no `[Schema]` |
+| GGS004     | Info     | A member uses a `[Formatter]` because its type has no `[Schema]`        |
 | GGS005     | Error    | A migration for a schema type has no parameterless constructor          |
 | GGS006     | Error    | A schema class has no parameterless constructor                         |
-| GGS007     | Error    | A schema version is below 1                                             |
+| GGS007     | Error    | A schema or formatter version is below 1                                |
+| GGS008     | Error    | A `[Formatter]` class is not a valid formatter                          |
 
 ### Type Schemas
 
 Generated formatters describe their type at runtime:
 
 ```csharp
-TypeSchema schema = registry.GetSchema<PlayerSave>();
+TypeSchema schema = Formatters.GetSchema<PlayerSave>();
 FieldType level = schema.Fields[schema.IndexOf("level")].Type;
 ulong fingerprint = schema.Fingerprint;
 ```
@@ -83,18 +76,31 @@ ulong fingerprint = schema.Fingerprint;
 
 ### Custom Formatters
 
-A type can also have a hand-written `IFormatter<T>`, registered with `AddFormatter`. See the tests for complete examples.
+A type can also have a hand-written `IFormatter<T>`. Mark it with `[Formatter]`, or `[Formatter(version: 2)]` for a versioned type, and the generator registers it with its list formatter and its migrations:
+
+```csharp
+[Formatter]
+internal sealed class PointFormatter : IFormatter<Point>
+{
+}
+```
+
+A formatter needs a parameterless constructor and must be public or internal. See the Unity package's formatters for complete examples.
+
+### Registration
+
+The generator writes the registration of each assembly's `[Schema]` types and `[Formatter]` classes at compile time, and runs it at startup: with `RuntimeInitializeOnLoadMethod` (and `InitializeOnLoadMethod` in the editor) when the assembly is compiled by Unity, and with a module initializer everywhere else. There is no reflection or assembly scanning. In Unity, a DLL that was compiled outside Unity is registered the first time one of its types is used, because Unity does not run module initializers on its own.
+
+`Formatters.Get<T>()`, `GetVersion<T>()` and `GetSchema<T>()` return what is registered for a type. Each type's registration is cached in a static field, so a lookup is a field read.
+
+Each type has exactly one formatter. Registering a type twice throws, naming the type.
 
 ### Serializing
 
 ```csharp
-var registry = new FormatterRegistryBuilder()
-    .AddGameFormatters()
-    .Build();
-
-var json = new JsonSerializer(registry);
-var messagePack = new MessagePackSerializer(registry);
-var csv = new CsvSerializer(registry);
+var json = new JsonSerializer();
+var messagePack = new MessagePackSerializer();
+var csv = new CsvSerializer();
 
 byte[] bytes = messagePack.Serialize(save);
 PlayerSave? loaded = messagePack.Deserialize<PlayerSave>(bytes);
@@ -112,11 +118,11 @@ var toJson = new Converter(messagePack, json);
 byte[] jsonBytes = toJson.Convert<PlayerSave>(bytes);
 ```
 
-Both serializers must share the same registry. Older data is migrated while converting.
+Older data is migrated while converting.
 
 ### Versions and Migrations
 
-Each root type has a version in the registry, and the version is written with the value only when it is above 1:
+Each root type has a version, and the version is written with the value only when it is above 1:
 
 | Format      | Version 1 | Version 3                          |
 | ----------- | --------- | ---------------------------------- |
@@ -158,9 +164,10 @@ Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, list
 
 ### Core Components
 
-- **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `FormatterRegistry`
+- **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`
 - **`IConverter`** / **`Converter`**: Converts data between two serializers without creating objects
-- **`FormatterRegistryBuilder`** / **`FormatterRegistry`**: Registers formatters, versions and migrations, then freezes them
+- **`Formatters`**: The formatter, version and schema registered for each type
+- **`[Formatter]`**: Registers a hand-written formatter
 - **`[Schema]`**: Generates a formatter, a `TypeSchema` and a registration method at compile time
 - **`IFormatter<T>`** / **`ISchemaFormatter<T>`**: Writes, reads and transcodes one type over any format; schema formatters also describe the type
 - **`TypeSchema`** / **`SchemaField`** / **`FieldType`**: Runtime description of a type's fields
@@ -183,22 +190,14 @@ Install the core through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForU
 
 ### Unity Formatters
 
-```csharp
-var registry = new FormatterRegistryBuilder()
-    .AddUnityFormatters()
-    .AddMathematicsFormatters()
-    .AddGameFormatters()
-    .Build();
-```
-
-`AddUnityFormatters` registers `Vector2`, `Vector3`, `Vector4`, `Vector2Int`, `Vector3Int`, `Quaternion`, `Color`, `Color32`, `Rect` and `Bounds`. `AddMathematicsFormatters` registers `float2`, `float3`, `float4`, `int2`, `int3` and `quaternion`, and compiles only when `com.unity.mathematics` is installed. Each value is an object of named components, such as `{"x":1,"y":2,"z":3}`, so it is not supported in CSV rows.
+The package registers `Vector2`, `Vector3`, `Vector4`, `Vector2Int`, `Vector3Int`, `Quaternion`, `Color`, `Color32`, `Rect` and `Bounds` at startup, and `float2`, `float3`, `float4`, `int2`, `int3` and `quaternion` when `com.unity.mathematics` is installed, each with its list formatter. Each value is an object of named components, such as `{"x":1,"y":2,"z":3}`, so it is not supported in CSV rows.
 
 ### Dependency Injection
 
-With [GroveGames.DependencyInjection](https://github.com/grovegs/DependencyInjection) installed, register the registry and the three serializers in an installer:
+With [GroveGames.DependencyInjection](https://github.com/grovegs/DependencyInjection) installed, register the three serializers in an installer:
 
 ```csharp
-builder.AddSerialization(registry);
+builder.AddSerialization();
 ```
 
 Inject `JsonSerializer`, `MessagePackSerializer` or `CsvSerializer` where you need them.
