@@ -1,31 +1,31 @@
 ﻿namespace GroveGames.Serialization;
 
-public sealed class FormatterRegistryBuilder
+public sealed class FormatterRegistrar
 {
-    private readonly Dictionary<Type, Func<Dictionary<Type, List<object>>, object>> _registrations;
+    private readonly Dictionary<Type, Func<Dictionary<Type, List<object>>, Action>> _formatters;
     private readonly Dictionary<Type, List<object>> _migrations;
 
-    public FormatterRegistryBuilder()
+    internal FormatterRegistrar()
     {
-        _registrations = [];
+        _formatters = [];
         _migrations = [];
     }
 
-    public FormatterRegistryBuilder AddFormatter<T>(IFormatter<T> formatter, int version = 1)
+    public FormatterRegistrar AddFormatter<T>(IFormatter<T> formatter, int version = 1)
     {
         ArgumentNullException.ThrowIfNull(formatter);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(version);
 
-        if (_registrations.ContainsKey(typeof(T)))
+        if (_formatters.ContainsKey(typeof(T)))
         {
             throw new InvalidOperationException($"{typeof(T)} already has a formatter.");
         }
 
-        _registrations.Add(typeof(T), migrations => CreateRegistration(formatter, version, migrations));
+        _formatters.Add(typeof(T), migrations => Prepare(formatter, version, migrations));
         return this;
     }
 
-    public FormatterRegistryBuilder AddMigration<T>(IMigration<T> migration)
+    public FormatterRegistrar AddMigration<T>(IMigration<T> migration)
     {
         ArgumentNullException.ThrowIfNull(migration);
 
@@ -39,28 +39,36 @@ public sealed class FormatterRegistryBuilder
         return this;
     }
 
-    public FormatterRegistry Build()
+    internal void Commit()
     {
         foreach (var type in _migrations.Keys)
         {
-            if (!_registrations.ContainsKey(type))
+            if (!_formatters.ContainsKey(type))
             {
                 throw new InvalidOperationException($"{type} has migrations but no formatter.");
             }
         }
 
-        var registrations = new Dictionary<Type, object>(_registrations.Count);
+        var publishers = new List<Action>(_formatters.Count);
 
-        foreach (var pair in _registrations)
+        foreach (var prepare in _formatters.Values)
         {
-            registrations.Add(pair.Key, pair.Value(_migrations));
+            publishers.Add(prepare(_migrations));
         }
 
-        return new FormatterRegistry(registrations);
+        foreach (var publish in publishers)
+        {
+            publish();
+        }
     }
 
-    private static TypeRegistration<T> CreateRegistration<T>(IFormatter<T> formatter, int version, Dictionary<Type, List<object>> allMigrations)
+    private static Action Prepare<T>(IFormatter<T> formatter, int version, Dictionary<Type, List<object>> allMigrations)
     {
+        if (Volatile.Read(ref FormatterCache<T>.Registration) != null)
+        {
+            throw new InvalidOperationException($"{typeof(T)} already has a formatter.");
+        }
+
         var migrations = new IMigration<T>?[version];
 
         if (allMigrations.TryGetValue(typeof(T), out var registered))
@@ -84,6 +92,7 @@ public sealed class FormatterRegistryBuilder
             }
         }
 
-        return new TypeRegistration<T>(formatter, version, migrations);
+        var registration = new TypeRegistration<T>(formatter, version, migrations);
+        return () => Volatile.Write(ref FormatterCache<T>.Registration, registration);
     }
 }

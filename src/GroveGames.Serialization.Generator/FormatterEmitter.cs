@@ -111,7 +111,7 @@ internal static class FormatterEmitter
 
     private static void EmitWrite(CodeBuilder code, SchemaTypeModel model)
     {
-        code.Open($"public void Write<TWriter>(ref TWriter writer, {model.FullName} value, {Core}FormatterRegistry registry) where TWriter : struct, {Core}IFormatWriter");
+        code.Open($"public void Write<TWriter>(ref TWriter writer, {model.FullName} value) where TWriter : struct, {Core}IFormatWriter");
 
         if (!model.IsValueType)
         {
@@ -135,7 +135,7 @@ internal static class FormatterEmitter
 
     private static void EmitRead(CodeBuilder code, SchemaTypeModel model)
     {
-        code.Open($"public {model.FullName} Read<TReader>(ref TReader reader, {Core}FormatterRegistry registry) where TReader : struct, {Core}IFormatReader");
+        code.Open($"public {model.FullName} Read<TReader>(ref TReader reader) where TReader : struct, {Core}IFormatReader");
         code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line("return default;").Close().Line();
         code.Line($"var value = new {model.FullName}();");
         code.Line("reader.ReadObjectStart();");
@@ -164,7 +164,7 @@ internal static class FormatterEmitter
 
     private static void EmitTranscode(CodeBuilder code, SchemaTypeModel model)
     {
-        code.Open($"public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, {Core}FormatterRegistry registry) where TReader : struct, {Core}IFormatReader where TWriter : struct, {Core}IFormatWriter");
+        code.Open($"public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, {Core}IFormatReader where TWriter : struct, {Core}IFormatWriter");
         code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line("writer.WriteNull();").Line("return;").Close().Line();
         code.Line("reader.ReadObjectStart();");
         code.Line("writer.BeginObject(-1);");
@@ -223,13 +223,13 @@ internal static class FormatterEmitter
                 code.Open("else").Line("writer.WriteNull();").Close();
                 break;
             case ShapeKind.Schema:
-                code.Line($"{shape.FormatterName}.Instance.Write(ref writer, {expression}, registry);");
+                code.Line($"{shape.FormatterName}.Instance.Write(ref writer, {expression});");
                 break;
             case ShapeKind.DataValue:
-                code.Line($"s_dataValue.Write(ref writer, {expression}, registry);");
+                code.Line($"s_dataValue.Write(ref writer, {expression});");
                 break;
             case ShapeKind.Registered:
-                code.Line($"registry.GetFormatter<{shape.TypeName}>().Write(ref writer, {expression}, registry);");
+                code.Line($"{Core}Formatters.Get<{shape.TypeName}>().Write(ref writer, {expression});");
                 break;
             case ShapeKind.List:
             case ShapeKind.Array:
@@ -299,13 +299,13 @@ internal static class FormatterEmitter
                 code.Close();
                 break;
             case ShapeKind.Schema:
-                code.Line($"{target} = {shape.FormatterName}.Instance.Read(ref reader, registry);");
+                code.Line($"{target} = {shape.FormatterName}.Instance.Read(ref reader);");
                 break;
             case ShapeKind.DataValue:
-                code.Line($"{target} = s_dataValue.Read(ref reader, registry);");
+                code.Line($"{target} = s_dataValue.Read(ref reader);");
                 break;
             case ShapeKind.Registered:
-                code.Line($"{target} = registry.GetFormatter<{shape.TypeName}>().Read(ref reader, registry);");
+                code.Line($"{target} = {Core}Formatters.Get<{shape.TypeName}>().Read(ref reader);");
                 break;
             case ShapeKind.List:
             case ShapeKind.Array:
@@ -376,13 +376,13 @@ internal static class FormatterEmitter
                 code.Close();
                 break;
             case ShapeKind.Schema:
-                code.Line($"{shape.FormatterName}.Instance.Transcode(ref reader, ref writer, registry);");
+                code.Line($"{shape.FormatterName}.Instance.Transcode(ref reader, ref writer);");
                 break;
             case ShapeKind.DataValue:
-                code.Line("s_dataValue.Transcode(ref reader, ref writer, registry);");
+                code.Line("s_dataValue.Transcode(ref reader, ref writer);");
                 break;
             case ShapeKind.Registered:
-                code.Line($"registry.GetFormatter<{shape.TypeName}>().Transcode(ref reader, ref writer, registry);");
+                code.Line($"{Core}Formatters.Get<{shape.TypeName}>().Transcode(ref reader, ref writer);");
                 break;
             case ShapeKind.List:
             case ShapeKind.Array:

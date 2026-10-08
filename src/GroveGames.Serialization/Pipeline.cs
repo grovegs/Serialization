@@ -2,10 +2,10 @@
 
 internal static class Pipeline
 {
-    public static void Write<T, TWriter>(ref TWriter writer, T? value, FormatterRegistry registry)
+    public static void Write<T, TWriter>(ref TWriter writer, T? value)
         where TWriter : struct, IDocumentWriter
     {
-        var registration = registry.GetRegistration<T>();
+        var registration = Formatters.GetRegistration<T>();
         var versioned = registration.Version > 1;
 
         if (versioned)
@@ -13,7 +13,7 @@ internal static class Pipeline
             writer.BeginEnvelope(registration.Version);
         }
 
-        registration.Formatter.Write(ref writer, value, registry);
+        registration.Formatter.Write(ref writer, value);
 
         if (versioned)
         {
@@ -21,23 +21,23 @@ internal static class Pipeline
         }
     }
 
-    public static T? Read<T, TReader>(ref TReader reader, FormatterRegistry registry)
+    public static T? Read<T, TReader>(ref TReader reader)
         where TReader : struct, IDocumentReader
     {
-        var registration = registry.GetRegistration<T>();
+        var registration = Formatters.GetRegistration<T>();
         var enveloped = reader.TryReadEnvelope(out var stored);
         T? result;
 
         if (stored == registration.Version)
         {
-            result = registration.Formatter.Read(ref reader, registry);
+            result = registration.Formatter.Read(ref reader);
         }
         else if (stored < registration.Version)
         {
             var node = DataValue.Read(ref reader);
             registration.Migrate(node, stored);
             var nodeReader = new DataValueReader(node);
-            result = registration.Formatter.Read(ref nodeReader, registry);
+            result = registration.Formatter.Read(ref nodeReader);
         }
         else
         {
@@ -53,11 +53,11 @@ internal static class Pipeline
         return result;
     }
 
-    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
+    public static void Convert<T, TReader, TWriter>(ref TReader reader, ref TWriter writer)
         where TReader : struct, IDocumentReader
         where TWriter : struct, IDocumentWriter
     {
-        var registration = registry.GetRegistration<T>();
+        var registration = Formatters.GetRegistration<T>();
         var enveloped = reader.TryReadEnvelope(out var stored);
         var versioned = registration.Version > 1;
 
@@ -73,14 +73,14 @@ internal static class Pipeline
 
         if (stored == registration.Version)
         {
-            registration.Formatter.Transcode(ref reader, ref writer, registry);
+            registration.Formatter.Transcode(ref reader, ref writer);
         }
         else
         {
             var node = DataValue.Read(ref reader);
             registration.Migrate(node, stored);
             var nodeReader = new DataValueReader(node);
-            registration.Formatter.Transcode(ref nodeReader, ref writer, registry);
+            registration.Formatter.Transcode(ref nodeReader, ref writer);
         }
 
         if (versioned)

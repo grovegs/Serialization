@@ -13,17 +13,17 @@ namespace GroveGames.Serialization.Unity
             _vector3Formatter = new Vector3Formatter();
         }
 
-        public void Write<TWriter>(ref TWriter writer, Bounds value, FormatterRegistry registry) where TWriter : struct, IFormatWriter
+        public void Write<TWriter>(ref TWriter writer, Bounds value) where TWriter : struct, IFormatWriter
         {
             writer.BeginObject(2);
             writer.WriteField(s_fields[0]);
-            _vector3Formatter.Write(ref writer, value.center, registry);
+            _vector3Formatter.Write(ref writer, value.center);
             writer.WriteField(s_fields[1]);
-            _vector3Formatter.Write(ref writer, value.size, registry);
+            _vector3Formatter.Write(ref writer, value.size);
             writer.EndObject();
         }
 
-        public Bounds Read<TReader>(ref TReader reader, FormatterRegistry registry) where TReader : struct, IFormatReader
+        public Bounds Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
         {
             if (reader.Peek() == TokenType.Null)
             {
@@ -40,10 +40,10 @@ namespace GroveGames.Serialization.Unity
                 switch (index)
                 {
                     case 0:
-                        center = _vector3Formatter.Read(ref reader, registry);
+                        center = _vector3Formatter.Read(ref reader);
                         break;
                     case 1:
-                        size = _vector3Formatter.Read(ref reader, registry);
+                        size = _vector3Formatter.Read(ref reader);
                         break;
                     default:
                         reader.Skip();
@@ -54,11 +54,11 @@ namespace GroveGames.Serialization.Unity
             return new Bounds(center, size);
         }
 
-        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer, FormatterRegistry registry)
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
             where TReader : struct, IFormatReader
             where TWriter : struct, IFormatWriter
         {
-            Write(ref writer, Read(ref reader, registry), registry);
+            Write(ref writer, Read(ref reader));
         }
     }
 }

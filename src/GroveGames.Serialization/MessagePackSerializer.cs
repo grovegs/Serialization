@@ -5,32 +5,24 @@ namespace GroveGames.Serialization;
 
 public sealed class MessagePackSerializer : ISerializer, IFormat
 {
-    public MessagePackSerializer(FormatterRegistry registry)
-    {
-        ArgumentNullException.ThrowIfNull(registry);
-        Registry = registry;
-    }
-
-    public FormatterRegistry Registry { get; }
-
     public void Serialize<T>(T? value, IBufferWriter<byte> output)
     {
-        FormatOperations.Serialize(this, value, output, Registry);
+        FormatOperations.Serialize(this, value, output);
     }
 
     public T? Deserialize<T>(ReadOnlyMemory<byte> data)
     {
-        return ((IFormat)this).Deserialize<T>(data, Registry);
+        return ((IFormat)this).Deserialize<T>(data);
     }
 
-    void IFormat.Serialize<T>(T? value, ByteBuffer output, FormatterRegistry registry) where T : default
+    void IFormat.Serialize<T>(T? value, ByteBuffer output) where T : default
     {
         var stack = MessagePackStack.Rent();
 
         try
         {
             var writer = new MessagePackWriter(output, stack);
-            Pipeline.Write(ref writer, value, registry);
+            Pipeline.Write(ref writer, value);
         }
         finally
         {
@@ -38,14 +30,14 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
     }
 
-    T? IFormat.Deserialize<T>(ReadOnlyMemory<byte> data, FormatterRegistry registry) where T : default
+    T? IFormat.Deserialize<T>(ReadOnlyMemory<byte> data) where T : default
     {
         var stack = MessagePackStack.Rent();
 
         try
         {
             var reader = new MessagePackReader(data, stack);
-            return Pipeline.Read<T, MessagePackReader>(ref reader, registry);
+            return Pipeline.Read<T, MessagePackReader>(ref reader);
         }
         finally
         {
@@ -53,14 +45,14 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
     }
 
-    void IFormat.Convert<T>(ReadOnlyMemory<byte> data, IFormat target, ByteBuffer output, FormatterRegistry registry)
+    void IFormat.Convert<T>(ReadOnlyMemory<byte> data, IFormat target, ByteBuffer output)
     {
         var stack = MessagePackStack.Rent();
 
         try
         {
             var reader = new MessagePackReader(data, stack);
-            target.ConvertFrom<T, MessagePackReader>(ref reader, output, registry);
+            target.ConvertFrom<T, MessagePackReader>(ref reader, output);
         }
         finally
         {
@@ -68,14 +60,14 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
     }
 
-    void IFormat.ConvertFrom<T, TReader>(ref TReader reader, ByteBuffer output, FormatterRegistry registry)
+    void IFormat.ConvertFrom<T, TReader>(ref TReader reader, ByteBuffer output)
     {
         var stack = MessagePackStack.Rent();
 
         try
         {
             var writer = new MessagePackWriter(output, stack);
-            Pipeline.Convert<T, TReader, MessagePackWriter>(ref reader, ref writer, registry);
+            Pipeline.Convert<T, TReader, MessagePackWriter>(ref reader, ref writer);
         }
         finally
         {

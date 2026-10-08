@@ -7,10 +7,9 @@ public sealed class GeneratedFormatterTests
     [Fact]
     public void Serialize_EveryMemberKind_RoundTripsThroughEveryBinaryFormat()
     {
-        var registry = CreateRegistry();
         var value = CreateSample();
 
-        foreach (var serializer in new ISerializer[] { new JsonSerializer(registry), new MessagePackSerializer(registry) })
+        foreach (var serializer in new ISerializer[] { new JsonSerializer(), new MessagePackSerializer() })
         {
             var result = serializer.Deserialize<GeneratedSample>(serializer.Serialize(value))!;
 
@@ -43,7 +42,7 @@ public sealed class GeneratedFormatterTests
     [Fact]
     public void Serialize_GeneratedType_UsesCamelCaseNamesInDeclarationOrder()
     {
-        var json = new JsonSerializer(CreateRegistry());
+        var json = new JsonSerializer();
 
         var text = Encoding.UTF8.GetString(json.Serialize(new GeneratedChild { Name = "a", URLPath = "b", HP = 3 }));
 
@@ -53,9 +52,8 @@ public sealed class GeneratedFormatterTests
     [Fact]
     public void Convert_GeneratedType_PreservesData()
     {
-        var registry = CreateRegistry();
-        var json = new JsonSerializer(registry);
-        var messagePack = new MessagePackSerializer(registry);
+        var json = new JsonSerializer();
+        var messagePack = new MessagePackSerializer();
         var original = json.Serialize(CreateSample());
 
         var packed = new Converter(json, messagePack).Convert<GeneratedSample>(original);
@@ -67,7 +65,7 @@ public sealed class GeneratedFormatterTests
     [Fact]
     public void Deserialize_OlderGeneratedType_RunsGeneratedMigration()
     {
-        var json = new JsonSerializer(CreateRegistry());
+        var json = new JsonSerializer();
 
         var result = json.Deserialize<GeneratedChild>(Encoding.UTF8.GetBytes("{\"label\":\"old\"}"));
 
@@ -77,7 +75,7 @@ public sealed class GeneratedFormatterTests
     [Fact]
     public void Deserialize_OutOfRangeSmallInteger_ThrowsFormatException()
     {
-        var json = new JsonSerializer(CreateRegistry());
+        var json = new JsonSerializer();
 
         Assert.Throws<FormatException>(() => json.Deserialize<GeneratedSample>(Encoding.UTF8.GetBytes("{\"small\":40000}")));
     }
@@ -85,9 +83,8 @@ public sealed class GeneratedFormatterTests
     [Fact]
     public void GetSchema_GeneratedType_DescribesFields()
     {
-        var registry = CreateRegistry();
 
-        var schema = registry.GetSchema<GeneratedSample>();
+        var schema = Formatters.GetSchema<GeneratedSample>();
 
         Assert.Equal(1, schema.Version);
         Assert.Equal(FieldTypeKind.Int32, schema.Fields[schema.IndexOf("small")].Type.Kind);
@@ -99,12 +96,7 @@ public sealed class GeneratedFormatterTests
         Assert.Equal(FieldTypeKind.Map, schema.Fields[schema.IndexOf("stats")].Type.Kind);
         Assert.Equal(FieldTypeKind.Any, schema.Fields[schema.IndexOf("extra")].Type.Kind);
         Assert.Equal(-1, schema.IndexOf("ignored"));
-        Assert.NotEqual(schema.Fingerprint, registry.GetSchema<GeneratedChild>().Fingerprint);
-    }
-
-    private static FormatterRegistry CreateRegistry()
-    {
-        return new FormatterRegistryBuilder().AddGroveGamesSerializationTestsFormatters().Build();
+        Assert.NotEqual(schema.Fingerprint, Formatters.GetSchema<GeneratedChild>().Fingerprint);
     }
 
     private static GeneratedSample CreateSample()
