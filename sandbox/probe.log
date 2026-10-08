@@ -1,0 +1,856 @@
+.. is not a valid directory name. Please make sure there are no unallowed characters in the name.
+.. is not a valid directory name. Please make sure there are no unallowed characters in the name.
+Unity Editor version:    6000.3.6f1 (bbb010bdb8a3)
+Branch:                  6000.3/respin/6000.3.6f1-732c1ec89f18
+Build type:              Release
+Batch mode:              YES
+macOS version:           Version 15.4.1 (Build 24E263)
+Darwin version:          24.4.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        16384 MB
+Date:                    2026-10-08T18:30:34Z
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-onurtnrkl" at "2026-10-08T18:30:34.010342Z"
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              c865df0813a74a2e9170e7f932c562ac
+  Correlation Id:          ca7370e9f8787a0df61e1dbccb5fe84c
+  External correlation Id: 6930100154306000798
+  Machine Id:              7avj8FuBN6Z0B9VLrAzsAxQ+wgg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-onurtnrkl" (connect: 0.00s, validation: 0.00s, handshake: 0.00s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-onurtnrkl-notifications" at "2026-10-08T18:30:34.014482Z"
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: F4-D52U-95QS-QFUP-DMBS-XXXX
+  Product: Unity Personal
+  Type: ULF
+  Expiration: Unlimited
+[Licensing::Module] License group:
+  Id: 18968305347275-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: F4-D52U-95QS-QFUP-DMBS-XXXX
+  Product: Unity Personal
+  Type: ULF
+  Expiration: Unlimited
+[Licensing::Module] License group:
+  Id: 18968305347275-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Module] Licensing Background thread has ended after 0.01s
+Launching external process: /Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/PackageManager/Server/UnityPackageManager
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/MacOS/Unity
+-batchmode
+-nographics
+-projectPath
+/Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication
+-executeMethod
+DefaultRegistryProbe.Run
+-quit
+-logFile
+/Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/../probe.log
+Successfully changed project path to: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication
+/Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [8580156544]  Target information:
+
+Player connection [8580156544]  * "[IP] 192.168.68.50 [Port] 55505 [Flags] 2 [Guid] 758515903 [EditorId] 758515903 [Version] 1048832 [Id] OSXEditor(0,Onurs-MacBook-Pro.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8580156544]  * "[IP] 10.7.0.2 [Port] 55505 [Flags] 2 [Guid] 758515903 [EditorId] 758515903 [Version] 1048832 [Id] OSXEditor(0,Onurs-MacBook-Pro.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8580156544] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8580156544] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-78174" after 0.1 seconds.
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: F4-D52U-95QS-QFUP-DMBS-XXXX
+  Product: Unity Personal
+  Type: ULF
+  Expiration: Unlimited
+[Licensing::Module] License group:
+  Id: 18968305347275-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Refreshing native plugins compatible for Editor in 0.10 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.3.6f1 (bbb010bdb8a3)
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Assets
+Forcing GfxDevice: Null
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56174
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: F4-D52U-95QS-QFUP-DMBS-XXXX
+  Product: Unity Personal
+  Type: ULF
+  Expiration: Unlimited
+[Licensing::Module] License group:
+  Id: 18968305347275-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+Register platform support module: /Applications/Unity/Hub/Editor/6000.3.6f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: F4-D52U-95QS-QFUP-DMBS-XXXX
+  Product: Unity Personal
+  Type: ULF
+  Expiration: Unlimited
+[Licensing::Module] License group:
+  Id: 18968305347275-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+Register platform support module: /Applications/Unity/Hub/Editor/6000.3.6f1/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.dll
+Registered in 0.003326 seconds.
+- Loaded All Assemblies, in  0.317 seconds
+[usbmuxd] Start listen thread
+[usbmuxd] Listen thread started
+[usbmuxd] Send listen message
+Native extension for iOS target not found
+Native extension for Android target not found
+Android Extension - Scanning For ADB Devices 3069 ms
+Native extension for OSXStandalone target not found
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:False
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  3.434 seconds
+Domain Reload Profiling: 3751ms
+	BeginReloadAssembly (107ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (13ms)
+	RebuildCommonClasses (31ms)
+	RebuildNativeTypeToScriptingClass (10ms)
+	initialDomainReloadingComplete (32ms)
+	LoadAllAssembliesAndSetupDomain (138ms)
+		LoadAssemblies (95ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (135ms)
+			TypeCache.Refresh (134ms)
+				TypeCache.ScanAssembly (123ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (0ms)
+	FinalizeReload (3434ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (3406ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3181ms)
+			SetLoadedEditorAssemblies (6ms)
+			BeforeProcessingInitializeOnLoad (79ms)
+			ProcessInitializeOnLoadAttributes (90ms)
+			ProcessInitializeOnLoadMethodAttributes (51ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: F4-D52U-95QS-QFUP-DMBS-XXXX
+  Product: Unity Personal
+  Type: ULF
+  Expiration: Unlimited
+[Licensing::Module] License group:
+  Id: 18968305347275-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+Application.AssetDatabase Initial Refresh Start
+Package Manager log level set to [2]
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 56 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.ads@4.16.4 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ads@e89225828059)
+    com.unity.ai.navigation@2.0.9 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ai.navigation@5218e4bf7edc)
+    com.unity.analytics@3.8.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.analytics@c9d14a6bdec6)
+    com.unity.collab-proxy@2.11.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.collab-proxy@1ec4e416a4af)
+    com.unity.ide.rider@3.0.38 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ide.rider@1f60b3138684)
+    com.unity.ide.visualstudio@2.0.26 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ide.visualstudio@a99d56dec63f)
+    com.unity.mathematics@1.3.3 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.mathematics@19a9377c4ffa)
+    com.unity.purchasing@4.14.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.purchasing@039fd41c6e81)
+    com.unity.timeline@1.8.10 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.timeline@7f8b2fb101b6)
+    com.unity.xr.legacyinputhelpers@2.1.13 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.xr.legacyinputhelpers@9535ff2c27ac)
+    com.unity.services.core@1.16.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.services.core@8ba50f624741)
+    com.unity.services.analytics@6.2.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.services.analytics@b6335889ba61)
+    com.unity.nuget.newtonsoft-json@3.2.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.nuget.newtonsoft-json@4dfd81071c64)
+  Built-in packages:
+    com.unity.2d.sprite@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.2d.sprite@82f01c8c75ca)
+    com.unity.2d.tilemap@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.2d.tilemap@2428aeee2f73)
+    com.unity.multiplayer.center@1.0.1 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.multiplayer.center@f01f4ba8d00a)
+    com.unity.test-framework@1.6.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.test-framework@0b7a23ab2e1d)
+    com.unity.ugui@2.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ugui@b9d1dd437cb9)
+    com.unity.modules.accessibility@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.accessibility)
+    com.unity.modules.adaptiveperformance@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.adaptiveperformance)
+    com.unity.modules.ai@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.ai)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.animation@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.assetbundle@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.assetbundle)
+    com.unity.modules.audio@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.cloth@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.cloth)
+    com.unity.modules.director@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.director)
+    com.unity.modules.imageconversion@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.particlesystem@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.particlesystem)
+    com.unity.modules.physics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.screencapture@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.screencapture)
+    com.unity.modules.terrain@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.terrain)
+    com.unity.modules.terrainphysics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.terrainphysics)
+    com.unity.modules.tilemap@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.tilemap)
+    com.unity.modules.ui@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.umbra@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.umbra)
+    com.unity.modules.unityanalytics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unityanalytics)
+    com.unity.modules.unitywebrequest@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequest)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequestassetbundle)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequestaudio)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequesttexture)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequestwww)
+    com.unity.modules.vectorgraphics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.vectorgraphics)
+    com.unity.modules.vehicles@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.vehicles)
+    com.unity.modules.video@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.video)
+    com.unity.modules.vr@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.vr)
+    com.unity.modules.wind@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.wind)
+    com.unity.modules.xr@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.hierarchycore)
+    com.unity.ext.nunit@2.0.5 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ext.nunit@d8c07649098d)
+  Embedded packages:
+    com.grovegames.serialization@file:/Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Packages/com.grovegames.serialization (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Packages/com.grovegames.serialization)
+[Package Manager] com.unity.purchasing@4.14.2 is deprecated: Unity IAP 4 is unsupported as of June 8, 2026. IAP 5 is the supported version going forward.
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.01 seconds
+[Package Manager] Done resolving packages in 2.12 seconds
+[Package Manager] Registered 56 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.ads@4.16.4 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ads@e89225828059)
+    com.unity.ai.navigation@2.0.9 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ai.navigation@5218e4bf7edc)
+    com.unity.analytics@3.8.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.analytics@c9d14a6bdec6)
+    com.unity.collab-proxy@2.11.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.collab-proxy@1ec4e416a4af)
+    com.unity.ide.rider@3.0.38 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ide.rider@1f60b3138684)
+    com.unity.ide.visualstudio@2.0.26 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ide.visualstudio@a99d56dec63f)
+    com.unity.mathematics@1.3.3 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.mathematics@19a9377c4ffa)
+    com.unity.purchasing@4.14.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.purchasing@039fd41c6e81)
+    com.unity.timeline@1.8.10 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.timeline@7f8b2fb101b6)
+    com.unity.xr.legacyinputhelpers@2.1.13 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.xr.legacyinputhelpers@9535ff2c27ac)
+    com.unity.services.core@1.16.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.services.core@8ba50f624741)
+    com.unity.services.analytics@6.2.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.services.analytics@b6335889ba61)
+    com.unity.nuget.newtonsoft-json@3.2.2 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.nuget.newtonsoft-json@4dfd81071c64)
+  Built-in packages:
+    com.unity.2d.sprite@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.2d.sprite@82f01c8c75ca)
+    com.unity.2d.tilemap@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.2d.tilemap@2428aeee2f73)
+    com.unity.multiplayer.center@1.0.1 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.multiplayer.center@f01f4ba8d00a)
+    com.unity.test-framework@1.6.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.test-framework@0b7a23ab2e1d)
+    com.unity.ugui@2.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ugui@b9d1dd437cb9)
+    com.unity.modules.accessibility@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.accessibility)
+    com.unity.modules.adaptiveperformance@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.adaptiveperformance)
+    com.unity.modules.ai@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.ai)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.animation@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.assetbundle@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.assetbundle)
+    com.unity.modules.audio@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.cloth@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.cloth)
+    com.unity.modules.director@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.director)
+    com.unity.modules.imageconversion@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.particlesystem@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.particlesystem)
+    com.unity.modules.physics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.screencapture@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.screencapture)
+    com.unity.modules.terrain@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.terrain)
+    com.unity.modules.terrainphysics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.terrainphysics)
+    com.unity.modules.tilemap@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.tilemap)
+    com.unity.modules.ui@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.umbra@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.umbra)
+    com.unity.modules.unityanalytics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unityanalytics)
+    com.unity.modules.unitywebrequest@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequest)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequestassetbundle)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequestaudio)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequesttexture)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.unitywebrequestwww)
+    com.unity.modules.vectorgraphics@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.vectorgraphics)
+    com.unity.modules.vehicles@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.vehicles)
+    com.unity.modules.video@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.video)
+    com.unity.modules.vr@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.vr)
+    com.unity.modules.wind@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.wind)
+    com.unity.modules.xr@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.modules.hierarchycore)
+    com.unity.ext.nunit@2.0.5 (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/PackageCache/com.unity.ext.nunit@d8c07649098d)
+  Embedded packages:
+    com.grovegames.serialization@file:/Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Packages/com.grovegames.serialization (location: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Packages/com.grovegames.serialization)
+[Package Manager] com.unity.purchasing@4.14.2 is deprecated: Unity IAP 4 is unsupported as of June 8, 2026. IAP 5 is the supported version going forward.
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.00 seconds
+Packages/com.grovegames.serialization is a symbolic link. Using symlinks in Unity projects may cause your project to become corrupted if you create multiple references to the same asset, use recursive symlinks or use symlinks to share assets between projects used with different versions of Unity. Make sure you know what you are doing.
+[API Updater] Processing imported assemblies took 39 ms (0/0 assembly(ies)).
+Assembly Updater Post Process Assets time: 0.040302s
+[ScriptCompilation] Requested script compilation because: Assetdatabase observed changes in script compilation related files
+Assembly for Assembly Definition File 'Packages/com.grovegames.serialization/Tests/Runtime/GroveGames.Serialization.Unity.Tests.asmdef' will not be compiled, because it has no scripts associated with it.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:LogFormat (UnityEngine.LogType,string,object[])
+UnityEngine.Debug:LogWarningFormat (string,object[])
+UnityEditor.Scripting.ScriptCompilation.EditorCompilation:WarnIfThereAreAssembliesWithoutAnyScripts (UnityEditor.Scripting.ScriptCompilation.ScriptAssemblySettings,UnityEditor.Scripting.ScriptCompilation.ScriptAssembly[]) (at /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilation.cs:780)
+UnityEditor.Scripting.ScriptCompilation.EditorCompilation:CompileScriptsWithSettings (UnityEditor.Scripting.ScriptCompilation.ScriptAssemblySettings) (at /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilation.cs:833)
+UnityEditor.Scripting.ScriptCompilation.EditorCompilation:CompileScripts (UnityEditor.Scripting.ScriptCompilation.EditorScriptCompilationOptions,UnityEditor.BuildTarget,int,string[]) (at /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilation.cs:716)
+UnityEditor.Scripting.ScriptCompilation.EditorCompilationInterface/<>c__DisplayClass21_0:<CompileScripts>b__0 () (at /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilationInterface.cs:184)
+UnityEditor.Scripting.ScriptCompilation.EditorCompilationInterface:EmitExceptionAsError<UnityEditor.Scripting.ScriptCompilation.EditorCompilation/CompileStatus> (System.Func`1<UnityEditor.Scripting.ScriptCompilation.EditorCompilation/CompileStatus>,UnityEditor.Scripting.ScriptCompilation.EditorCompilation/CompileStatus) (at /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilationInterface.cs:49)
+UnityEditor.Scripting.ScriptCompilation.EditorCompilationInterface:CompileScripts (UnityEditor.Scripting.ScriptCompilation.EditorScriptCompilationOptions,UnityEditor.BuildTarget,int,string[]) (at /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilationInterface.cs:184)
+
+(Filename: /Users/bokken/build/output/unity/unity/Editor/Mono/Scripting/ScriptCompilation/EditorCompilation.cs Line: 780)
+
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://unix:/tmp/ilpp.sock-6f63cb114db610c026edfeda81acc987
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 32.5698ms
+Starting: /Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication
+DisplayProgressbar: Compiling Scripts
+ExitCode: 4 Duration: 2s105ms
+Rebuilding DAG because FileSignature timestamp changed: Library/Bee/200b0aE-inputdata.json
+[439/762    2s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.UI.dll (+2 others)
+[440/762    2s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.TestRunner.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.TestRunner.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.UI.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+*** Tundra requires additional run (2.09 seconds), 2 items updated, 438 evaluated
+Starting: /Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/Scripting/netcorerun/netcorerun "/Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/BuildPipeline/ScriptCompilationBuildProgram.exe" "Library/Bee/200b0aE.dag.json" "Library/Bee/200b0aE-inputdata.json" "Library/Bee/buildprogram0.traceevents"
+WorkingDir: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication
+ExitCode: 0 Duration: 0s537ms
+Starting: /Applications/Unity/Hub/Editor/6000.3.6f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --dagfilejson="Library/Bee/200b0aE.dag.json" --profile="Library/Bee/backend2.traceevents" ScriptAssemblies
+WorkingDir: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication
+ExitCode: 0 Duration: 5s177ms
+Finished compiling graph: 791 nodes, 14317 flattened edges (13201 ToBuild, 144 ToUse), maximum node priority 540
+[435/788    0s] WriteText Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.UnityAdditionalFile.txt
+[436/788    0s] WriteText Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.rsp2
+[437/788    0s] WriteText Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll.mvfrm.rsp
+[438/788    0s] WriteText Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.rsp
+[439/788    0s] WriteText Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.rsp
+[440/788    0s] WriteText Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Mathematics.rsp
+[449/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.UI.dll
+[450/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.UI.pdb
+[452/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.TestRunner.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.TestRunner.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[457/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.UI.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.UI.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[462/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.dll
+[463/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.pdb
+[482/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.SecurityCore.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.SecurityCore.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[485/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[488/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.Editor.ConversionSystem.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.Editor.ConversionSystem.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[491/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.InternalAPIEngineBridge.004.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.InternalAPIEngineBridge.004.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[494/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.SpatialTracking.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.SpatialTracking.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[497/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Analytics.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Analytics.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[499/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.SecurityStub.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.SecurityStub.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[501/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Internal.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Internal.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[504/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Timeline.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Timeline.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[506/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.XR.LegacyInputHelpers.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.XR.LegacyInputHelpers.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[508/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.SpatialTracking.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.SpatialTracking.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[510/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Purchasing.Common.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Purchasing.Common.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[511/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Rider.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Rider.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[514/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Configuration.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Configuration.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[515/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Environments.dll (+2 others)
+[516/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Analytics.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Environments.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Analytics.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[523/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.AppleCore.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.AppleCore.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[527/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.WinRTCore.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.WinRTCore.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[528/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Scheduler.dll (+2 others)
+[529/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Telemetry.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Scheduler.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Telemetry.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[532/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.dll (+2 others)
+[533/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Multiplayer.Center.Common.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Multiplayer.Center.Common.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[539/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.AppleMacosStub.dll (+2 others)
+[540/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Threading.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.AppleMacosStub.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Threading.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[544/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.WinRTStub.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.WinRTStub.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[552/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.TextMeshPro.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.TextMeshPro.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[556/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[559/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Components.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Components.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[561/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Networking.dll (+2 others)
+[562/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Environments.Internal.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Environments.Internal.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Networking.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[565/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Device.dll (+2 others)
+[566/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Device.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[570/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.AppleStub.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.AppleStub.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[573/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Configuration.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Configuration.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[575/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.UI.Analytics.dll (+2 others)
+[576/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Multiplayer.Center.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.UI.Analytics.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[577/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.XR.LegacyInputHelpers.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Multiplayer.Center.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.XR.LegacyInputHelpers.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[578/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Registration.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Registration.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[581/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Analytics.DataPrivacy.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Analytics.DataPrivacy.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[582/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[585/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Advertisements.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Advertisements.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[586/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.VisualStudio.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.VisualStudio.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[590/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.2D.Sprite.AIIntegration.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.2D.Sprite.AIIntegration.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[591/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.Updater.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.AI.Navigation.Updater.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[592/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.2D.Sprite.AIIntegration.Editor.ref.dll_5FFAA0D4416982CE.mvfrm
+[593/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.AI.Navigation.Updater.ref.dll_C51C3847CE9500F9.mvfrm
+[594/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.TextMeshPro.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.TextMeshPro.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[595/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[596/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.VisualStudio.Editor.ref.dll_F37C0F1BA2EC04B9.mvfrm
+[597/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEngine.Advertisements.Editor.ref.dll_A6829E08F6151F73.mvfrm
+[598/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.Stores.dll (+2 others)
+[599/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.TextMeshPro.Editor.ref.dll_C5B7873C632B963A.mvfrm
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.Stores.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[602/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.XR.LegacyInputHelpers.ref.dll_4FD78BAE77B2E289.mvfrm
+[603/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Analytics.DataPrivacy.ref.dll_44AF57CB458B4B6A.mvfrm
+[604/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Advertisements.dll (+2 others)
+[605/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Multiplayer.Center.Editor.ref.dll_6DAF32D8644B89D6.mvfrm
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Advertisements.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[606/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.UI.Analytics.ref.dll_EB7E26C292B13811.mvfrm
+[607/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.SpatialTracking.ref.dll_19754CF7735CAD7C.mvfrm
+[608/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Services.Core.Analytics.ref.dll_2B40CF9C4928A9CB.mvfrm
+[611/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEngine.Advertisements.ref.dll_A9AFFBAE3539D41E.mvfrm
+[612/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Rider.Editor.ref.dll_A276D0F1D4D046E3.mvfrm
+[613/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Device.dll
+[614/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Advertisements.dll
+[615/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Telemetry.dll
+[617/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Networking.dll
+[618/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.dll
+[619/788    0s] CopyFiles Library/ScriptAssemblies/Purchasing.Common.dll
+[620/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Environments.Internal.dll
+[621/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Components.dll
+[622/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Scheduler.dll
+[623/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Configuration.dll
+[624/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.dll
+[625/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Environments.dll
+[626/788    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.dll
+[627/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.WinRTStub.dll
+[628/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.SecurityCore.dll
+[629/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Threading.dll
+[630/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.SecurityStub.dll
+[631/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Analytics.dll
+[632/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll
+[633/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Registration.dll
+[634/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.AppleMacosStub.dll
+[635/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Common.dll
+[636/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Timeline.dll
+[637/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.AppleCore.dll
+[638/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Internal.dll
+[639/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.SpatialTracking.dll
+[640/788    0s] CopyFiles Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.004.dll
+[642/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.dll
+[643/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.WinRTCore.dll
+[644/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.AppleStub.dll
+[645/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.dll
+[646/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.dll
+[647/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Advertisements.pdb
+[649/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.Editor.pdb
+[650/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.Editor.dll
+[651/788    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.Editor.pdb
+[652/788    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll
+[653/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.Updater.dll
+[654/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.Updater.pdb
+[655/788    0s] CopyFiles Library/ScriptAssemblies/Unity.2D.Sprite.AIIntegration.Editor.dll
+[656/788    0s] CopyFiles Library/ScriptAssemblies/Unity.2D.Sprite.AIIntegration.Editor.pdb
+[659/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Advertisements.Editor.dll
+[660/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Advertisements.Editor.pdb
+[661/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.Editor.dll
+[662/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.Editor.pdb
+[663/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.pdb
+[664/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Registration.pdb
+[665/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.XR.LegacyInputHelpers.dll
+[666/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.XR.LegacyInputHelpers.pdb
+[667/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Editor.pdb
+[668/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Editor.dll
+[669/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.Analytics.pdb
+[670/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.Analytics.dll
+[671/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Configuration.Editor.pdb
+[672/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Configuration.Editor.dll
+[673/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.AppleStub.pdb
+[674/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.pdb
+[675/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Device.pdb
+[676/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Networking.pdb
+[677/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Environments.Internal.pdb
+[678/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Components.pdb
+[679/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.pdb
+[680/788    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.pdb
+[681/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.WinRTStub.pdb
+[682/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Threading.pdb
+[683/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.AppleMacosStub.pdb
+[684/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Common.pdb
+[685/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.pdb
+[686/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Telemetry.pdb
+[687/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Scheduler.pdb
+[688/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.WinRTCore.pdb
+[689/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.AppleCore.pdb
+[691/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Environments.pdb
+[692/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Configuration.pdb
+[695/788    0s] CopyFiles Library/ScriptAssemblies/Purchasing.Common.pdb
+[696/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.SpatialTracking.dll
+[697/788    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.SpatialTracking.pdb
+[698/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.pdb
+[699/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Timeline.pdb
+[700/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Internal.pdb
+[701/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.SecurityStub.pdb
+[702/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Analytics.pdb
+[703/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.SpatialTracking.pdb
+[704/788    0s] CopyFiles Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.004.pdb
+[705/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.Editor.ConversionSystem.dll
+[706/788    0s] CopyFiles Library/ScriptAssemblies/Unity.AI.Navigation.Editor.ConversionSystem.pdb
+[707/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.pdb
+[708/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.SecurityCore.pdb
+[709/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.Codeless.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Purchasing.Codeless.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[711/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.Codeless.pdb
+[712/788    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.Purchasing.Codeless.dll
+[713/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/PluginBuilder.Editor.dll (+2 others)
+Assets/Editor/PluginBuilder/PluginBuilder.cs(137,20): warning CS8603: Possible null reference return.
+[714/788    0s] CopyFiles Library/ScriptAssemblies/PluginBuilder.Editor.pdb
+[715/788    0s] CopyFiles Library/ScriptAssemblies/PluginBuilder.Editor.dll
+[716/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.2D.Sprite.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.2D.Sprite.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[717/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Analytics.dll (+2 others)
+[718/788    0s] CopyFiles Library/ScriptAssemblies/Unity.2D.Sprite.Editor.pdb
+[719/788    0s] CopyFiles Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll
+[720/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/IAPResolver.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Analytics.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[721/788    0s] CopyFiles Library/ScriptAssemblies/Analytics.pdb
+[722/788    0s] CopyFiles Library/ScriptAssemblies/Analytics.dll
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/IAPResolver.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[723/788    0s] CopyFiles Library/ScriptAssemblies/IAPResolver.dll
+[724/788    0s] CopyFiles Library/ScriptAssemblies/IAPResolver.pdb
+[725/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Editor.Tests.dll (+2 others)
+Packages/com.grovegames.serialization/Tests/Editor/GeneratedSchemaTests.cs(31,24): info GGS004: 'GroveGames.Serialization.Unity.Editor.Tests.GeneratedUnitySample.Position' has type 'UnityEngine.Vector3', which has no [Schema], so its formatter must be registered
+Packages/com.grovegames.serialization/Tests/Editor/GeneratedSchemaTests.cs(20,38): warning CS8602: Dereference of a possibly null reference.
+Packages/com.grovegames.serialization/Tests/Editor/GeneratedSchemaTests.cs(30,23): warning CS8618: Non-nullable field 'Name' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Editor.Tests.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[726/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.Editor.Tests.dll
+[727/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.Editor.Tests.pdb
+[728/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.2D.Sprite.Editor.ref.dll_A298F0F0964CDA5C.mvfrm
+[729/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.2D.Tilemap.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.2D.Tilemap.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[730/788    0s] CopyFiles Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.pdb
+[731/788    0s] CopyFiles Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll
+[732/788    3s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.PlasticSCM.Editor.dll (+2 others)
+[733/788    1s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.PlasticSCM.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[743/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Editor.pdb
+[744/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Editor.dll
+[745/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.2D.Tilemap.Editor.ref.dll_E9EA3AB45900FF1D.mvfrm
+[746/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.CollabProxy.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.CollabProxy.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[747/788    0s] CopyFiles Library/ScriptAssemblies/Unity.CollabProxy.Editor.pdb
+[748/788    0s] CopyFiles Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll
+[749/788    2s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Timeline.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Timeline.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[750/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Timeline.Editor.dll
+[751/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Timeline.Editor.pdb
+[752/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.PlasticSCM.Editor.Entities.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.PlasticSCM.Editor.Entities.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[753/788    0s] CopyFiles Library/ScriptAssemblies/Unity.PlasticSCM.Editor.Entities.dll
+[754/788    0s] CopyFiles Library/ScriptAssemblies/Unity.PlasticSCM.Editor.Entities.pdb
+[755/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Advertisements.DevX.Editor.dll (+2 others)
+[756/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Environments.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEngine.Advertisements.DevX.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Core.Environments.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[760/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Environments.Editor.pdb
+[761/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Core.Environments.Editor.dll
+[763/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Timeline.Editor.ref.dll_1305DD42619CF31E.mvfrm
+[764/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.Purchasing.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/UnityEditor.Purchasing.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[767/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.Purchasing.ref.dll_4F3335059BFB15F3.mvfrm
+[768/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Analytics.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Services.Analytics.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[769/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Analytics.Editor.pdb
+[770/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Services.Analytics.Editor.dll
+[771/788    3s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Mathematics.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Mathematics.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[775/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Mathematics.pdb
+[776/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Mathematics.dll
+[777/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Mathematics.dll (+2 others)
+[778/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Mathematics.Editor.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/GroveGames.Serialization.Unity.Mathematics.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.Mathematics.Editor.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[779/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.Mathematics.pdb
+[780/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Mathematics.Editor.dll
+[781/788    0s] CopyFiles Library/ScriptAssemblies/GroveGames.Serialization.Unity.Mathematics.dll
+[782/788    0s] CopyFiles Library/ScriptAssemblies/Unity.Mathematics.Editor.pdb
+[783/788    0s] MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Mathematics.Editor.ref.dll_4A3A50F3774BA9F7.mvfrm
+[784/788    0s] MovedFromExtractor-Combine Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll.mvfrm
+[785/788    0s] Csc Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+[786/788    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[787/788    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (5.16 seconds), 221 items updated, 788 evaluated
+Assets/Editor/PluginBuilder/PluginBuilder.cs(137,20): warning CS8603: Possible null reference return.
+Packages/com.grovegames.serialization/Tests/Editor/GeneratedSchemaTests.cs(20,38): warning CS8602: Dereference of a possibly null reference.
+Packages/com.grovegames.serialization/Tests/Editor/GeneratedSchemaTests.cs(30,23): warning CS8618: Non-nullable field 'Name' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+AssetDatabase: script compilation time: 8.312600s
+Begin MonoManager ReloadAssembly
+Assembly 'Assets/Plugins/GroveGames.Serialization.Generator.dll' will not be loaded due to errors:
+Unable to resolve reference 'Microsoft.CodeAnalysis'. Is the assembly missing or incompatible with the current platform?
+Reference validation can be disabled in the Plugin Inspector.
+Unable to resolve reference 'Microsoft.CodeAnalysis.CSharp'. Is the assembly missing or incompatible with the current platform?
+Reference validation can be disabled in the Plugin Inspector.
+Unable to resolve reference 'System.Collections.Immutable'. Is the assembly missing or incompatible with the current platform?
+Reference validation can be disabled in the Plugin Inspector.
+Symbol file LoadedFromMemory is not a mono symbol file
+- Loaded All Assemblies, in  0.564 seconds
+Refreshing native plugins compatible for Editor in 4.25 ms, found 1 plugins.
+Native extension for iOS target not found
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Refreshing native plugins compatible for Editor in 0.97 ms, found 1 plugins.
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.610 seconds
+Domain Reload Profiling: 1174ms
+	BeginReloadAssembly (254ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (7ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (152ms)
+	RebuildCommonClasses (27ms)
+	RebuildNativeTypeToScriptingClass (10ms)
+	initialDomainReloadingComplete (15ms)
+	LoadAllAssembliesAndSetupDomain (259ms)
+		LoadAssemblies (219ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (106ms)
+			TypeCache.Refresh (79ms)
+				TypeCache.ScanAssembly (68ms)
+			BuildScriptInfoCaches (23ms)
+			ResolveRequiredComponents (2ms)
+	FinalizeReload (610ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (525ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (26ms)
+			SetLoadedEditorAssemblies (3ms)
+			BeforeProcessingInitializeOnLoad (121ms)
+			ProcessInitializeOnLoadAttributes (247ms)
+			ProcessInitializeOnLoadMethodAttributes (128ms)
+			AfterProcessingInitializeOnLoad (1ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (2ms)
+Start importing Packages/com.grovegames.serialization/LICENSE using Guid(c2b232dd2649f4d61bf95ed72a7b9065) (DefaultImporter) -> (artifact id: 'e3515ef0d9de4d13fe0df2d3d18139ab') in 0.013513667 seconds
+Start importing Assets/Plugins/GroveGames.Serialization.Generator.pdb using Guid(58a73061e3ffe42f7b8bb4d471c2aad2) (DefaultImporter) -> (artifact id: '1894eab9f11e9e7db1f280cc241e9202') in 0.172599 seconds
+Start importing Assets/Plugins/GroveGames.Serialization.pdb using Guid(3fb6c138a3c204a7c950541ea24e4d97) (DefaultImporter) -> (artifact id: '5948db8b21ad7d51666ce89b5b17a41d') in 0.001369208 seconds
+Start importing Assets/Plugins/Analyzers/GroveGames.Serialization.Generator.pdb using Guid(1b5c7c42dda4841a89a59d78c66fabe6) (DefaultImporter) -> (artifact id: '2696cc1455f2625e2577625940f56a6c') in 0.000573084 seconds
+Start importing Assets/Plugins/GroveGames.Serialization.deps.json using Guid(c1474725da5034eb5bd6713e38187077) (TextScriptImporter) -> (artifact id: 'd38523de34d978d2e136efa7070d9e07') in 0.00094575 seconds
+Start importing Packages/com.grovegames.serialization/README.md using Guid(16119d8b699c14cedbe36fa61fb93e57) (TextScriptImporter) -> (artifact id: '53de0f94abf91434b6f25c0e34eee497') in 0.001071667 seconds
+Start importing Assets/Plugins/GroveGames.Serialization.Generator.deps.json using Guid(07df0555b5f7940f0800b38efeb32f76) (TextScriptImporter) -> (artifact id: 'dcaa7ea567eb8b4267fbecf622af6512') in 0.000532375 seconds
+Start importing Assets/Plugins/Analyzers/GroveGames.Serialization.Generator.deps.json using Guid(59b8fdf5c7e8b4a32bc8049193d47050) (TextScriptImporter) -> (artifact id: 'bedecb0ffd1ccd754d634a8fd917be2d') in 0.000507042 seconds
+Start importing Packages/com.grovegames.serialization/package.json using Guid(5a298b47daf74bac99cb33afdfd9ea46) (PackageManifestImporter) -> (artifact id: '3ca678d838cab9641ba12e89641d94af') in 0.000577583 seconds
+Refreshing native plugins compatible for Editor in 1.12 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=531e7e1ba9b4c478a90e1fa1b7bd19a4): Total: 12.536 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=9 (actual=9, local cache=0, cache server=0)
+		Asset DB Process Time: managed=1 ms, native=1262 ms
+		Asset DB Callback time: managed=175 ms, native=2147 ms
+		Scripting: domain reloads=1, domain reload time=564 ms, compile time=8354 ms, other=30 ms
+		Project Asset Count: scripts=852, non-scripts=1007
+		Asset File Changes: new=5, changed=17, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokeCustomDependenciesCallbacks: 0.000ms
+	InvokePackagesCallback: 2143.705ms
+	ApplyChangesToAssetFolders: 0.395ms
+	Scan: 318.221ms
+	OnSourceAssetsModified: 0.386ms
+	CategorizeAssetsWithTransientArtifact: 17.756ms
+	ProcessAssetsWithTransientArtifactChanges: 20.515ms
+	CategorizeAssets: 12.379ms
+	ImportOutOfDateAssets: 812.288ms (-7736.877ms without children)
+		ImportManagerImport: 194.586ms (0.770ms without children)
+			ImportInProcess: 193.772ms
+			UpdateCategorizedAssets: 0.043ms
+		CompileScripts: 8353.927ms
+		ReloadNativeAssets: 0.000ms
+		UnloadImportedAssets: 0.205ms
+		ReloadImportedAssets: 0.000ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.231ms
+		InitializingProgressBar: 0.003ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.000ms
+		OnDemandSchedulerStart: 0.212ms
+	PostProcessAllAssets: 177.262ms
+	Hotreload: 2.210ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.000ms
+	UnloadStreamsBegin: 1.070ms
+	PersistCurrentRevisions: 0.092ms
+	UnloadStreamsEnd: 0.000ms
+	GenerateScriptTypeHashes: 1.109ms
+	Untracked: 9029.675ms
+
+Application.AssetDatabase Initial Refresh End
+Scanning for USB devices : 0.040ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-UnityApplication
+Unloading 12 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 3212 unused Assets / (2.4 MB). Loaded Objects now: 3776.
+Memory consumption went from 144.6 MB to 142.2 MB.
+Total: 9.396792 ms (FindLiveObjects: 0.166708 ms CreateObjectMapping: 0.092042 ms MarkObjects: 8.171417 ms  DeleteObjects: 0.966208 ms)
+
+PROBE assemblies=254 build=14.73 ms vector3=True
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+DefaultRegistryProbe:Run () (at Assets/Editor/DefaultRegistryProbe.cs:11)
+
+(Filename: Assets/Editor/DefaultRegistryProbe.cs Line: 11)
+
+Batchmode quit successfully invoked - shutting down!
+Curl error 42: Callback aborted
+Killing ADB server in 0.029594 seconds.
+Thread 0x33de87000 may have been prematurely finalized
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+[Licensing::IpcConnector] LicenseClient-onurtnrkl-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-onurtnrkl channel disconnected successfully.
+Thread 0x17c813000 may have been prematurely finalized
+Thread 0x17c89f000 may have been prematurely finalized
+AcceleratorClientConnectionCallback - disconnected - :0
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+Cleanup mono
+debugger-agent: Unable to listen on 44
+[usbmuxd] Stop listen thread
+[usbmuxd] Error: 
+[usbmuxd] Listen thread exiting
+Exiting batchmode successfully now!
+[Package Manager] Server process was shutdown

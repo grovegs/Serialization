@@ -5,6 +5,11 @@ namespace GroveGames.Serialization;
 
 public sealed class CsvSerializer : ISerializer, IFormat
 {
+    public CsvSerializer()
+        : this(FormatterRegistry.Default)
+    {
+    }
+
     public CsvSerializer(FormatterRegistry registry)
     {
         ArgumentNullException.ThrowIfNull(registry);

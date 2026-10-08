@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="6" result="Passed" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.0450498">
+  <test-suite type="TestSuite" id="1000" name="UnityApplication" fullname="UnityApplication" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.045050" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1009" name="GroveGames.Serialization.Unity.Editor.Tests.dll" fullname="/Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/Library/ScriptAssemblies/GroveGames.Serialization.Unity.Editor.Tests.dll" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.040615" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="78462" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1010" name="GroveGames" fullname="GroveGames" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.040313" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1011" name="Serialization" fullname="GroveGames.Serialization" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.040113" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1012" name="Unity" fullname="GroveGames.Serialization.Unity" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.039920" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1013" name="Editor" fullname="GroveGames.Serialization.Unity.Editor" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.039722" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestSuite" id="1014" name="Tests" fullname="GroveGames.Serialization.Unity.Editor.Tests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.039520" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-suite type="TestFixture" id="1001" name="GeneratedSchemaTests" fullname="GroveGames.Serialization.Unity.Editor.Tests.GeneratedSchemaTests" classname="GroveGames.Serialization.Unity.Editor.Tests.GeneratedSchemaTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.023073" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1002" name="GeneratedFormatter_UnityMember_RoundTrips" fullname="GroveGames.Serialization.Unity.Editor.Tests.GeneratedSchemaTests.GeneratedFormatter_UnityMember_RoundTrips" methodname="GeneratedFormatter_UnityMember_RoundTrips" classname="GroveGames.Serialization.Unity.Editor.Tests.GeneratedSchemaTests" runstate="Runnable" seed="1169627757" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.016513" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="TestFixture" id="1003" name="UnityFormatterRegistryBuilderExtensionsTests" fullname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" classname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.015818" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1005" name="AddUnityFormatters_Bounds_RoundTripsThroughJsonAndMessagePack" fullname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests.AddUnityFormatters_Bounds_RoundTripsThroughJsonAndMessagePack" methodname="AddUnityFormatters_Bounds_RoundTripsThroughJsonAndMessagePack" classname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" runstate="Runnable" seed="1261278746" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.004337" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1008" name="AddUnityFormatters_Color32_RoundTrips" fullname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests.AddUnityFormatters_Color32_RoundTrips" methodname="AddUnityFormatters_Color32_RoundTrips" classname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" runstate="Runnable" seed="749192663" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.000691" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1007" name="AddUnityFormatters_UnknownAndMissingComponents_SkipsAndDefaults" fullname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests.AddUnityFormatters_UnknownAndMissingComponents_SkipsAndDefaults" methodname="AddUnityFormatters_UnknownAndMissingComponents_SkipsAndDefaults" classname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" runstate="Runnable" seed="1323837882" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.000348" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1006" name="AddUnityFormatters_Vector3_WritesNamedComponents" fullname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests.AddUnityFormatters_Vector3_WritesNamedComponents" methodname="AddUnityFormatters_Vector3_WritesNamedComponents" classname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" runstate="Runnable" seed="1915848843" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.000313" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1004" name="Default_IncludesUnityFormatters" fullname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests.Default_IncludesUnityFormatters" methodname="Default_IncludesUnityFormatters" classname="GroveGames.Serialization.Unity.Editor.Tests.UnityFormatterRegistryBuilderExtensionsTests" runstate="Runnable" seed="862736083" result="Passed" start-time="2026-10-08 18:31:00Z" end-time="2026-10-08 18:31:00Z" duration="0.009318" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                    <output><![CDATA[Saving results to: /Users/onurtnrkl/Documents/Repositories/GroveGames/Serialization/sandbox/UnityApplication/../results.xml
+]]></output>
+                  </test-case>
+                </test-suite>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -1,4 +1,6 @@
-﻿namespace GroveGames.Serialization;
+﻿using System.Reflection;
+
+namespace GroveGames.Serialization;
 
 public sealed class FormatterRegistryBuilder
 {
@@ -36,6 +38,39 @@ public sealed class FormatterRegistryBuilder
         }
 
         migrations.Add(migration);
+        return this;
+    }
+
+    public FormatterRegistryBuilder AddAllFormatters()
+    {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        Array.Sort(assemblies, static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
+
+        foreach (var assembly in assemblies)
+        {
+            if (assembly.IsDynamic)
+            {
+                continue;
+            }
+
+            foreach (var attribute in assembly.GetCustomAttributes<FormatterModuleAttribute>())
+            {
+                if (Activator.CreateInstance(attribute.Type) is not IFormatterModule module)
+                {
+                    throw new InvalidOperationException($"{attribute.Type} in {assembly.GetName().Name} is not an {nameof(IFormatterModule)}.");
+                }
+
+                try
+                {
+                    module.Register(this);
+                }
+                catch (InvalidOperationException exception)
+                {
+                    throw new InvalidOperationException($"{assembly.GetName().Name}: {exception.Message}", exception);
+                }
+            }
+        }
+
         return this;
     }
 

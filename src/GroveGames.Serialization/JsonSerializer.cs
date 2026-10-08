@@ -5,6 +5,11 @@ namespace GroveGames.Serialization;
 
 public sealed class JsonSerializer : ISerializer, IFormat
 {
+    public JsonSerializer()
+        : this(FormatterRegistry.Default)
+    {
+    }
+
     public JsonSerializer(FormatterRegistry registry)
     {
         ArgumentNullException.ThrowIfNull(registry);

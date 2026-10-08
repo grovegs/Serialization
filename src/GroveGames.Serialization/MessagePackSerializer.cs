@@ -5,6 +5,11 @@ namespace GroveGames.Serialization;
 
 public sealed class MessagePackSerializer : ISerializer, IFormat
 {
+    public MessagePackSerializer()
+        : this(FormatterRegistry.Default)
+    {
+    }
+
     public MessagePackSerializer(FormatterRegistry registry)
     {
         ArgumentNullException.ThrowIfNull(registry);

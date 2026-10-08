@@ -11,6 +11,43 @@ public sealed class FormatterRegistryBuilderTests
     }
 
     [Fact]
+    public void AddAllFormatters_RegistersGeneratedModules()
+    {
+        var registry = new FormatterRegistryBuilder().AddAllFormatters().Build();
+
+        Assert.True(registry.TryGetFormatter<GeneratedSample>(out _));
+        Assert.True(registry.TryGetFormatter<List<GeneratedSample>>(out _));
+        Assert.Equal(2, registry.GetVersion<GeneratedChild>());
+    }
+
+    [Fact]
+    public void Default_RegistersGeneratedModulesOnce()
+    {
+        Assert.Same(FormatterRegistry.Default, FormatterRegistry.Default);
+        Assert.True(FormatterRegistry.Default.TryGetFormatter<GeneratedSample>(out _));
+    }
+
+    [Fact]
+    public void Serializer_WithoutRegistry_UsesDefault()
+    {
+        var serializer = new MessagePackSerializer();
+        var bytes = serializer.Serialize(new GeneratedSample { Title = "hero" });
+
+        Assert.Same(FormatterRegistry.Default, serializer.Registry);
+        Assert.Equal("hero", serializer.Deserialize<GeneratedSample>(bytes)!.Title);
+    }
+
+    [Fact]
+    public void AddAllFormatters_AfterSameRegistration_ThrowsWithAssemblyName()
+    {
+        var builder = new FormatterRegistryBuilder().AddGroveGamesSerializationTestsFormatters();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.AddAllFormatters());
+
+        Assert.StartsWith("GroveGames.Serialization.Tests:", exception.Message);
+    }
+
+    [Fact]
     public void AddFormatter_ZeroVersion_ThrowsArgumentOutOfRangeException()
     {
         var builder = new FormatterRegistryBuilder();

@@ -44,6 +44,7 @@ public sealed class SchemaGeneratorTests
         Assert.Empty(result.CompilationErrors);
         Assert.Contains(result.GeneratedSources, source => source.Contains("internal sealed class SaveFormatter"));
         Assert.Contains(result.GeneratedSources, source => source.Contains("AddTestsFormatters") && source.Contains("new global::Game.SaveMigration()"));
+        Assert.Contains(result.GeneratedSources, source => source.Contains("[assembly: global::GroveGames.Serialization.FormatterModule(typeof(global::GroveGames.Serialization.TestsFormatterModule))]") && source.Contains("internal sealed class TestsFormatterModule"));
     }
 
     [Theory]

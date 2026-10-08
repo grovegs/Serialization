@@ -35,6 +35,7 @@ internal static class RegistrationEmitter
         var name = MethodName(assemblyName);
         var code = new CodeBuilder();
         code.Line("#nullable disable");
+        code.Line($"[assembly: global::GroveGames.Serialization.FormatterModule(typeof(global::GroveGames.Serialization.{name}FormatterModule))]");
         code.Open("namespace GroveGames.Serialization");
         code.Open($"public static class {name}FormatterRegistryBuilderExtensions");
         code.Open($"public static global::GroveGames.Serialization.FormatterRegistryBuilder Add{name}Formatters(this global::GroveGames.Serialization.FormatterRegistryBuilder builder)");
@@ -51,6 +52,15 @@ internal static class RegistrationEmitter
         }
 
         code.Line("return builder;");
+        code.Close();
+        code.Close();
+        code.Line("[global::GroveGames.Serialization.Preserve]");
+        code.Open($"internal sealed class {name}FormatterModule : global::GroveGames.Serialization.IFormatterModule");
+        code.Line("[global::GroveGames.Serialization.Preserve]");
+        code.Open($"public {name}FormatterModule()");
+        code.Close();
+        code.Open("public void Register(global::GroveGames.Serialization.FormatterRegistryBuilder builder)");
+        code.Line($"builder.Add{name}Formatters();");
         code.Close();
         code.Close();
         code.Close();

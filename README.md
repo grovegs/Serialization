@@ -49,15 +49,27 @@ Every public field and every public property with a public getter and setter is 
 
 Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>` and `DataValue`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
-The generator also adds one registration method per assembly, which registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types:
+The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Serializers created without a registry find these registrations on their own:
+
+```csharp
+var json = new JsonSerializer();
+```
+
+### Registries
+
+`FormatterRegistry.Default` is built once, on first use, from every loaded assembly that declares `[assembly: FormatterModule(...)]`. The generator declares one for each assembly with schema types, and the Unity package declares one for its formatters. Assemblies loaded after that first use are not included.
+
+To choose the formatters yourself, for example in tests, build a registry and pass it to the serializer:
 
 ```csharp
 var registry = new FormatterRegistryBuilder()
     .AddGameFormatters()
     .Build();
+
+var json = new JsonSerializer(registry);
 ```
 
-The method is named after the assembly, so an assembly called `Game` gets `AddGameFormatters` and `Game.Data` gets `AddGameDataFormatters`.
+Each assembly's method is named after it, so an assembly called `Game` gets `AddGameFormatters` and `Game.Data` gets `AddGameDataFormatters`. `AddAllFormatters()` adds every module, like the default registry.
 
 | Diagnostic | Severity | Meaning                                                                 |
 | ---------- | -------- | ----------------------------------------------------------------------- |
@@ -83,18 +95,14 @@ ulong fingerprint = schema.Fingerprint;
 
 ### Custom Formatters
 
-A type can also have a hand-written `IFormatter<T>`, registered with `AddFormatter`. See the tests for complete examples.
+A type can also have a hand-written `IFormatter<T>`, registered with `AddFormatter`. To include it in the default registry, register it from an `IFormatterModule` declared with `[assembly: FormatterModule(typeof(GameFormatterModule))]`, and mark the module and its constructor `[Preserve]` so IL2CPP stripping keeps them. See the tests for complete examples.
 
 ### Serializing
 
 ```csharp
-var registry = new FormatterRegistryBuilder()
-    .AddGameFormatters()
-    .Build();
-
-var json = new JsonSerializer(registry);
-var messagePack = new MessagePackSerializer(registry);
-var csv = new CsvSerializer(registry);
+var json = new JsonSerializer();
+var messagePack = new MessagePackSerializer();
+var csv = new CsvSerializer();
 
 byte[] bytes = messagePack.Serialize(save);
 PlayerSave? loaded = messagePack.Deserialize<PlayerSave>(bytes);
@@ -160,7 +168,8 @@ Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, list
 
 - **`ISerializer`**: `JsonSerializer`, `MessagePackSerializer` and `CsvSerializer`, each built with a `FormatterRegistry`
 - **`IConverter`** / **`Converter`**: Converts data between two serializers without creating objects
-- **`FormatterRegistryBuilder`** / **`FormatterRegistry`**: Registers formatters, versions and migrations, then freezes them
+- **`FormatterRegistryBuilder`** / **`FormatterRegistry`**: Registers formatters, versions and migrations, then freezes them; `FormatterRegistry.Default` collects every module
+- **`IFormatterModule`** / **`[FormatterModule]`**: Registers an assembly's formatters in the default registry
 - **`[Schema]`**: Generates a formatter, a `TypeSchema` and a registration method at compile time
 - **`IFormatter<T>`** / **`ISchemaFormatter<T>`**: Writes, reads and transcodes one type over any format; schema formatters also describe the type
 - **`TypeSchema`** / **`SchemaField`** / **`FieldType`**: Runtime description of a type's fields
@@ -183,6 +192,8 @@ Install the core through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForU
 
 ### Unity Formatters
 
+The default registry includes these formatters. To build a registry yourself, add them with:
+
 ```csharp
 var registry = new FormatterRegistryBuilder()
     .AddUnityFormatters()
@@ -195,11 +206,13 @@ var registry = new FormatterRegistryBuilder()
 
 ### Dependency Injection
 
-With [GroveGames.DependencyInjection](https://github.com/grovegs/DependencyInjection) installed, register the registry and the three serializers in an installer:
+With [GroveGames.DependencyInjection](https://github.com/grovegs/DependencyInjection) installed, register the default registry and the three serializers in an installer:
 
 ```csharp
-builder.AddSerialization(registry);
+builder.AddSerialization();
 ```
+
+`AddSerialization(registry)` registers a registry you built instead.
 
 Inject `JsonSerializer`, `MessagePackSerializer` or `CsvSerializer` where you need them.
 

@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -6,6 +6,13 @@ namespace GroveGames.Serialization.Unity.Editor.Tests
 {
     public sealed class UnityFormatterRegistryBuilderExtensionsTests
     {
+        [Test]
+        public void Default_IncludesUnityFormatters()
+        {
+            Assert.IsTrue(FormatterRegistry.Default.TryGetFormatter<Vector3>(out _));
+            Assert.IsTrue(FormatterRegistry.Default.TryGetFormatter<Bounds>(out _));
+        }
+
         [Test]
         public void AddUnityFormatters_Bounds_RoundTripsThroughJsonAndMessagePack()
         {
