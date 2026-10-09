@@ -95,6 +95,7 @@ internal static class FormatterEmitter
             ShapeKind.List or ShapeKind.Array => $"{Core}FieldType.Array({FieldTypeExpression(shape.Element!, false)}, true)",
             ShapeKind.Dictionary => $"{Core}FieldType.Map({FieldTypeExpression(shape.Element!, false)}, true)",
             ShapeKind.DataValue => $"{Core}FieldType.Any()",
+            ShapeKind.Builtin => Primitive("String", isNullable),
             _ => $"{Core}FieldType.Object(typeof({shape.TypeName}), {Bool(isNullable)})"
         };
     }
@@ -228,6 +229,7 @@ internal static class FormatterEmitter
             case ShapeKind.DataValue:
                 code.Line($"s_dataValue.Write(ref writer, {expression});");
                 break;
+            case ShapeKind.Builtin:
             case ShapeKind.Registered:
                 code.Line($"{Core}Formatters.Get<{shape.TypeName}>().Write(ref writer, {expression});");
                 break;
@@ -304,6 +306,7 @@ internal static class FormatterEmitter
             case ShapeKind.DataValue:
                 code.Line($"{target} = s_dataValue.Read(ref reader);");
                 break;
+            case ShapeKind.Builtin:
             case ShapeKind.Registered:
                 code.Line($"{target} = {Core}Formatters.Get<{shape.TypeName}>().Read(ref reader);");
                 break;
@@ -381,6 +384,7 @@ internal static class FormatterEmitter
             case ShapeKind.DataValue:
                 code.Line("s_dataValue.Transcode(ref reader, ref writer);");
                 break;
+            case ShapeKind.Builtin:
             case ShapeKind.Registered:
                 code.Line($"{Core}Formatters.Get<{shape.TypeName}>().Transcode(ref reader, ref writer);");
                 break;

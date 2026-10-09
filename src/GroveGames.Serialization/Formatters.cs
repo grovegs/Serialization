@@ -64,6 +64,14 @@ public static class Formatters
                 var registrar = new FormatterRegistrar();
                 registrar.AddFormatter(new DataValueFormatter());
                 registrar.AddFormatter(new ListFormatter<DataValue>());
+                registrar.AddFormatter(new GuidFormatter());
+                registrar.AddFormatter(new ListFormatter<Guid>());
+                registrar.AddFormatter(new DateTimeFormatter());
+                registrar.AddFormatter(new ListFormatter<DateTime>());
+                registrar.AddFormatter(new DateTimeOffsetFormatter());
+                registrar.AddFormatter(new ListFormatter<DateTimeOffset>());
+                registrar.AddFormatter(new TimeSpanFormatter());
+                registrar.AddFormatter(new ListFormatter<TimeSpan>());
                 registrar.Commit();
             }
         }

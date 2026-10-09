@@ -8,6 +8,8 @@ internal static class TypeShapes
     private const string SchemaAttribute = "GroveGames.Serialization.SchemaAttribute";
     private const string DataValue = "GroveGames.Serialization.DataValue";
 
+    private static readonly HashSet<string> s_builtins = ["System.Guid", "System.DateTime", "System.DateTimeOffset", "System.TimeSpan"];
+
     public static TypeShape? Create(ITypeSymbol type, Compilation compilation, out string? error)
     {
         error = null;
@@ -115,6 +117,11 @@ internal static class TypeShapes
         if (named.ToDisplayString() == DataValue)
         {
             return new TypeShape(ShapeKind.DataValue, name, null, null, true, null);
+        }
+
+        if (s_builtins.Contains(named.ToDisplayString()))
+        {
+            return new TypeShape(ShapeKind.Builtin, name, null, null, true, null);
         }
 
         if (named.IsGenericType || named.TypeKind is TypeKind.Interface or TypeKind.Delegate or TypeKind.TypeParameter)

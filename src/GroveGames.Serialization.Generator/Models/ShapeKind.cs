@@ -15,5 +15,6 @@ internal enum ShapeKind
     Array,
     Dictionary,
     DataValue,
+    Builtin,
     Registered
 }
