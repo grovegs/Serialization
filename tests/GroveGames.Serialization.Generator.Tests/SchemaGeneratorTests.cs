@@ -152,7 +152,7 @@ public sealed class SchemaGeneratorTests
     [InlineData("[Schema] public sealed class Grid { public int[,] Cells; }", "GGS003")]
     [InlineData("[Schema] public sealed class Keyed { public System.Collections.Generic.Dictionary<int, int> Map; }", "GGS003")]
     [InlineData("[Schema] public sealed class Frozen { public int Value { get; init; } }", "GGS003")]
-    [InlineData("[Schema] public sealed class Identified { public System.Guid Id; }", "GGS004")]
+    [InlineData("[Schema] public sealed class Located { public System.Uri Address; }", "GGS004")]
     [InlineData("[Schema] public sealed class Target { } public sealed class Bad : IMigration<Target> { public Bad(int value) { } public int FromVersion => 1; public void Apply(DataValue root) { } }", "GGS005")]
     [InlineData("[Schema] public sealed class NoDefault { public NoDefault(int value) { } }", "GGS006")]
     [InlineData("[Schema(version: 0)] public sealed class Zero { }", "GGS007")]
@@ -163,6 +163,32 @@ public sealed class SchemaGeneratorTests
         var result = Run("using GroveGames.Serialization;\nnamespace Game;\n" + declarations);
 
         Assert.Contains(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == id);
+    }
+
+    [Fact]
+    public void Generate_BuiltinMembers_NeedNoFormatter()
+    {
+        var result = Run("""
+            using System;
+            using System.Collections.Generic;
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            [Schema]
+            public sealed class Session
+            {
+                public Guid Id;
+                public DateTime Start;
+                public DateTimeOffset At;
+                public TimeSpan Length;
+                public Guid? Parent;
+                public List<DateTime> Dates;
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
     }
 
     [Fact]
