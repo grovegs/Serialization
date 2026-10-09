@@ -47,7 +47,7 @@ public sealed class PlayerSave
 
 Every public field and every public property with a public getter and setter is serialized under its camelCase name (`Gold` → `gold`, `URLPath` → `urlPath`), in declaration order. `[Ignore]` excludes a member.
 
-Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>` and `DataValue`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
+Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>`, `DataValue`, `Guid`, `DateTime`, `DateTimeOffset` and `TimeSpan`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
 The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Nothing needs to be called: the registration runs when the assembly starts.
 
@@ -161,6 +161,8 @@ Versions belong to the root type. A change inside a nested type is migrated by t
 | CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`.                                  |
 
 Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, lists and `null`.
+
+`Guid`, `DateTime`, `DateTimeOffset` and `TimeSpan` are strings in every format: `Guid` as `6f9619ff-8b86-d011-b42d-00c04fc964ff`, `DateTime` and `DateTimeOffset` in ISO 8601 round-trip form (`2026-10-09T10:30:15.2500000Z`), which keeps the `DateTimeKind` or offset, and `TimeSpan` as `[-][d.]hh:mm:ss[.fffffff]`. They are formatted and parsed as UTF-8 without allocating. Reading also accepts any form .NET parses with the invariant culture, such as `2026-10-09`, so hand-written JSON and CSV work.
 
 ### Core Components
 

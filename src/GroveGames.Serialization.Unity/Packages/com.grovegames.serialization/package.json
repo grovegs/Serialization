@@ -1,6 +1,6 @@
 {
   "name": "com.grovegames.serialization",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "displayName": "GroveGames.Serialization",
   "description": "High-performance JSON, MessagePack and CSV serialization with format conversion and versioned migrations",
   "unity": "2021.3",
