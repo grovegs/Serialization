@@ -1,13 +1,16 @@
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace GroveGames.Serialization.Unity
 {
+    [Preserve]
     internal static class UnityFormatterRegistration
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
+        [Preserve]
         internal static void Register()
         {
             Formatters.Register(Configure);

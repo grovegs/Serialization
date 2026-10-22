@@ -93,6 +93,100 @@ public sealed class SchemaGeneratorTests
     }
 
     [Fact]
+    public void Generate_UnityCompilation_KeepsRegistrationThroughStripping()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace UnityEngine
+            {
+                public enum RuntimeInitializeLoadType { SubsystemRegistration }
+
+                public sealed class RuntimeInitializeOnLoadMethodAttribute : System.Attribute
+                {
+                    public RuntimeInitializeOnLoadMethodAttribute(RuntimeInitializeLoadType loadType)
+                    {
+                    }
+                }
+            }
+
+            namespace UnityEngine.Scripting
+            {
+                [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = false)]
+                public sealed class AlwaysLinkAssemblyAttribute : System.Attribute
+                {
+                }
+
+                public sealed class PreserveAttribute : System.Attribute
+                {
+                }
+            }
+
+            namespace Game
+            {
+                [Schema]
+                public sealed class Save
+                {
+                    public int Level;
+                }
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("[assembly: global::UnityEngine.Scripting.AlwaysLinkAssembly]")
+            && source.Contains("[global::UnityEngine.Scripting.Preserve]"));
+    }
+
+    [Fact]
+    public void Generate_AssemblyAlreadyAlwaysLinked_DoesNotRepeatAttribute()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            [assembly: UnityEngine.Scripting.AlwaysLinkAssembly]
+
+            namespace UnityEngine
+            {
+                public enum RuntimeInitializeLoadType { SubsystemRegistration }
+
+                public sealed class RuntimeInitializeOnLoadMethodAttribute : System.Attribute
+                {
+                    public RuntimeInitializeOnLoadMethodAttribute(RuntimeInitializeLoadType loadType)
+                    {
+                    }
+                }
+            }
+
+            namespace UnityEngine.Scripting
+            {
+                [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = false)]
+                public sealed class AlwaysLinkAssemblyAttribute : System.Attribute
+                {
+                }
+
+                public sealed class PreserveAttribute : System.Attribute
+                {
+                }
+            }
+
+            namespace Game
+            {
+                [Schema]
+                public sealed class Save
+                {
+                    public int Level;
+                }
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("AlwaysLinkAssembly"));
+    }
+
+    [Fact]
     public void Generate_MarkedFormatter_IsRegisteredWithVersionListAndMigrations()
     {
         var result = Run("""

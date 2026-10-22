@@ -45,7 +45,18 @@ internal static class RegistrationEmitter
             code.Close();
         }
 
+        if (target.HasUnityEngine && target.NeedsAlwaysLinkAssembly)
+        {
+            code.Line("[assembly: global::UnityEngine.Scripting.AlwaysLinkAssembly]");
+        }
+
         code.Open("namespace GroveGames.Serialization");
+
+        if (target.HasUnityEngine && target.HasPreserve)
+        {
+            code.Line("[global::UnityEngine.Scripting.Preserve]");
+        }
+
         code.Open($"internal static class {name}");
         if (target.HasUnityEngine)
         {
@@ -59,6 +70,11 @@ internal static class RegistrationEmitter
         else
         {
             code.Line("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        }
+
+        if (target.HasUnityEngine && target.HasPreserve)
+        {
+            code.Line("[global::UnityEngine.Scripting.Preserve]");
         }
 
         code.Open("internal static void Register()");

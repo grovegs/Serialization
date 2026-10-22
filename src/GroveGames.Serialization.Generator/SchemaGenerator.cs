@@ -50,13 +50,35 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         var registration = schemas.Collect()
             .Combine(formatters.Collect())
             .Combine(migrations.Collect())
-            .Combine(context.CompilationProvider.Select(static (compilation, _) => new TargetModel(
-                compilation.AssemblyName ?? "Assembly",
-                compilation.GetTypeByMetadataName("UnityEngine.RuntimeInitializeOnLoadMethodAttribute") != null,
-                compilation.GetTypeByMetadataName("UnityEditor.InitializeOnLoadMethodAttribute") != null,
-                compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.ModuleInitializerAttribute") != null)));
+            .Combine(context.CompilationProvider.Select(static (compilation, _) => CreateTarget(compilation)));
 
         context.RegisterSourceOutput(registration, static (context, data) => Register(context, data.Left.Left.Left, data.Left.Left.Right!, data.Left.Right!, data.Right));
+    }
+
+    private static TargetModel CreateTarget(Compilation compilation)
+    {
+        var alwaysLinkAssembly = compilation.GetTypeByMetadataName("UnityEngine.Scripting.AlwaysLinkAssemblyAttribute");
+        var isAlwaysLinked = false;
+
+        if (alwaysLinkAssembly != null)
+        {
+            foreach (var attribute in compilation.Assembly.GetAttributes())
+            {
+                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, alwaysLinkAssembly))
+                {
+                    isAlwaysLinked = true;
+                    break;
+                }
+            }
+        }
+
+        return new TargetModel(
+            compilation.AssemblyName ?? "Assembly",
+            compilation.GetTypeByMetadataName("UnityEngine.RuntimeInitializeOnLoadMethodAttribute") != null,
+            compilation.GetTypeByMetadataName("UnityEditor.InitializeOnLoadMethodAttribute") != null,
+            compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.ModuleInitializerAttribute") != null,
+            alwaysLinkAssembly != null && !isAlwaysLinked,
+            compilation.GetTypeByMetadataName("UnityEngine.Scripting.PreserveAttribute") != null);
     }
 
     private static void Register(SourceProductionContext context, ImmutableArray<SchemaTypeModel> schemas, ImmutableArray<FormatterModel?> formatters, ImmutableArray<MigrationModel?> migrations, TargetModel target)
