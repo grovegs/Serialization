@@ -61,9 +61,50 @@ public sealed class FormattersTests
 
         Assert.Throws<InvalidOperationException>(() => Formatters.Register(registrar => registrar
             .AddFormatter(new TestSaveFormatter<SecondSave>())
-            .AddFormatter(new TestSaveFormatter<FirstSave>())));
+            .AddFormatter(new TestOtherSaveFormatter<FirstSave>())));
 
         Assert.False(Formatters.TryGet<SecondSave>(out _));
+    }
+
+    [Fact]
+    public void Register_SameFormatterAndVersionTwice_KeepsFirstRegistration()
+    {
+        var first = new TestSaveFormatter<RepeatedSave>();
+        Formatters.Register(registrar => registrar.AddFormatter(first, version: 2));
+
+        Formatters.Register(registrar => registrar.AddFormatter(new TestSaveFormatter<RepeatedSave>(), version: 2));
+
+        Assert.Same(first, Formatters.Get<RepeatedSave>());
+        Assert.Equal(2, Formatters.GetVersion<RepeatedSave>());
+    }
+
+    [Fact]
+    public void Register_SameFormatterWithOtherVersion_ThrowsInvalidOperationException()
+    {
+        Formatters.Register(registrar => registrar.AddFormatter(new TestSaveFormatter<ReversionedSave>()));
+
+        Assert.Throws<InvalidOperationException>(() => Formatters.Register(registrar => registrar.AddFormatter(new TestSaveFormatter<ReversionedSave>(), version: 2)));
+    }
+
+    [Fact]
+    public void Register_FailedConfiguration_CanBeRetried()
+    {
+        var attempts = 0;
+        Action<FormatterRegistrar> configure = registrar =>
+        {
+            attempts++;
+            registrar.AddFormatter(new TestSaveFormatter<RetriedSave>(), version: attempts);
+
+            if (attempts == 1)
+            {
+                registrar.AddMigration(new TestSaveRenameCoins<RetriedSave>());
+            }
+        };
+        Assert.Throws<InvalidOperationException>(() => Formatters.Register(configure));
+
+        Formatters.Register(configure);
+
+        Assert.True(Formatters.TryGet<RetriedSave>(out _));
     }
 
     [Fact]
@@ -129,7 +170,41 @@ public sealed class FormattersTests
     {
     }
 
+    private sealed class RepeatedSave : TestSave
+    {
+    }
+
+    private sealed class RetriedSave : TestSave
+    {
+    }
+
+    private sealed class ReversionedSave : TestSave
+    {
+    }
+
     private sealed class TestSaveFormatter<T> : IFormatter<T>
+        where T : TestSave, new()
+    {
+        public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter
+        {
+            writer.WriteNull();
+        }
+
+        public T? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
+        {
+            reader.Skip();
+            return new T();
+        }
+
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
+            where TReader : struct, IFormatReader
+            where TWriter : struct, IFormatWriter
+        {
+            Write(ref writer, Read(ref reader));
+        }
+    }
+
+    private sealed class TestOtherSaveFormatter<T> : IFormatter<T>
         where T : TestSave, new()
     {
         public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter
