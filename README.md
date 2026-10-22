@@ -93,7 +93,7 @@ The generator writes the registration of each assembly's `[Schema]` types and `[
 
 `Formatters.Get<T>()`, `GetVersion<T>()` and `GetSchema<T>()` return what is registered for a type. Each type's registration is cached in a static field, so a lookup is a field read.
 
-Each type has exactly one formatter. Registering the same configuration again, such as one registration method called by two startup hooks, does nothing. Registering a second formatter for a type throws, naming the type.
+Each type has exactly one formatter. Registering the same formatter class with the same version again, such as from a registration method that two startup hooks both call, does nothing. Registering a different formatter or version for a registered type throws, naming the type.
 
 ### Serializing
 

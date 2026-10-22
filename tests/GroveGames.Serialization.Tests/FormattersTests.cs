@@ -61,20 +61,29 @@ public sealed class FormattersTests
 
         Assert.Throws<InvalidOperationException>(() => Formatters.Register(registrar => registrar
             .AddFormatter(new TestSaveFormatter<SecondSave>())
-            .AddFormatter(new TestSaveFormatter<FirstSave>())));
+            .AddFormatter(new TestOtherSaveFormatter<FirstSave>())));
 
         Assert.False(Formatters.TryGet<SecondSave>(out _));
     }
 
     [Fact]
-    public void Register_SameConfigurationTwice_RegistersOnce()
+    public void Register_SameFormatterAndVersionTwice_KeepsFirstRegistration()
     {
-        Formatters.Register(ConfigureRepeatedSave);
-        var formatter = Formatters.Get<RepeatedSave>();
+        var first = new TestSaveFormatter<RepeatedSave>();
+        Formatters.Register(registrar => registrar.AddFormatter(first, version: 2));
 
-        Formatters.Register(ConfigureRepeatedSave);
+        Formatters.Register(registrar => registrar.AddFormatter(new TestSaveFormatter<RepeatedSave>(), version: 2));
 
-        Assert.Same(formatter, Formatters.Get<RepeatedSave>());
+        Assert.Same(first, Formatters.Get<RepeatedSave>());
+        Assert.Equal(2, Formatters.GetVersion<RepeatedSave>());
+    }
+
+    [Fact]
+    public void Register_SameFormatterWithOtherVersion_ThrowsInvalidOperationException()
+    {
+        Formatters.Register(registrar => registrar.AddFormatter(new TestSaveFormatter<ReversionedSave>()));
+
+        Assert.Throws<InvalidOperationException>(() => Formatters.Register(registrar => registrar.AddFormatter(new TestSaveFormatter<ReversionedSave>(), version: 2)));
     }
 
     [Fact]
@@ -126,11 +135,6 @@ public sealed class FormattersTests
         Assert.Equal(3, result.AsObject["level"].AsInt64);
     }
 
-    private static void ConfigureRepeatedSave(FormatterRegistrar registrar)
-    {
-        registrar.AddFormatter(new TestSaveFormatter<RepeatedSave>());
-    }
-
     private class TestSave
     {
         public string? Name;
@@ -174,7 +178,33 @@ public sealed class FormattersTests
     {
     }
 
+    private sealed class ReversionedSave : TestSave
+    {
+    }
+
     private sealed class TestSaveFormatter<T> : IFormatter<T>
+        where T : TestSave, new()
+    {
+        public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter
+        {
+            writer.WriteNull();
+        }
+
+        public T? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
+        {
+            reader.Skip();
+            return new T();
+        }
+
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
+            where TReader : struct, IFormatReader
+            where TWriter : struct, IFormatWriter
+        {
+            Write(ref writer, Read(ref reader));
+        }
+    }
+
+    private sealed class TestOtherSaveFormatter<T> : IFormatter<T>
         where T : TestSave, new()
     {
         public void Write<TWriter>(ref TWriter writer, T? value) where TWriter : struct, IFormatWriter

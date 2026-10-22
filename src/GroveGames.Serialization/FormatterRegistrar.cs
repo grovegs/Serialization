@@ -64,8 +64,15 @@ public sealed class FormatterRegistrar
 
     private static Action Prepare<T>(IFormatter<T> formatter, int version, Dictionary<Type, List<object>> allMigrations)
     {
-        if (Volatile.Read(ref FormatterCache<T>.Registration) != null)
+        var existing = Volatile.Read(ref FormatterCache<T>.Registration);
+
+        if (existing != null)
         {
+            if (existing.Formatter.GetType() == formatter.GetType() && existing.Version == version)
+            {
+                return static () => { };
+            }
+
             throw new InvalidOperationException($"{typeof(T)} already has a formatter.");
         }
 
