@@ -8,6 +8,7 @@ public static class Formatters
 {
     private static readonly object s_lock = new();
     private static bool s_coreRegistered;
+    private static bool s_moduleInitializersUnsupported;
 
     public static IFormatter<T> Get<T>()
     {
@@ -86,7 +87,10 @@ public static class Formatters
 
     private static void InitializeAssemblies(Type type)
     {
-        RuntimeHelpers.RunModuleConstructor(type.Assembly.ManifestModule.ModuleHandle);
+        if (!TryRunModuleConstructor(type))
+        {
+            return;
+        }
 
         if (type.IsArray)
         {
@@ -98,6 +102,25 @@ public static class Formatters
             {
                 InitializeAssemblies(argument);
             }
+        }
+    }
+
+    private static bool TryRunModuleConstructor(Type type)
+    {
+        if (Volatile.Read(ref s_moduleInitializersUnsupported))
+        {
+            return false;
+        }
+
+        try
+        {
+            RuntimeHelpers.RunModuleConstructor(type.Module.ModuleHandle);
+            return true;
+        }
+        catch (NotSupportedException)
+        {
+            Volatile.Write(ref s_moduleInitializersUnsupported, true);
+            return false;
         }
     }
 
