@@ -7,6 +7,7 @@ namespace GroveGames.Serialization;
 public static class Formatters
 {
     private static readonly object s_lock = new();
+    private static readonly List<Action<FormatterRegistrar>> s_registrations = new();
     private static bool s_coreRegistered;
 
     public static IFormatter<T> Get<T>()
@@ -43,9 +44,15 @@ public static class Formatters
 
         lock (s_lock)
         {
+            if (s_registrations.Contains(configure))
+            {
+                return;
+            }
+
             var registrar = new FormatterRegistrar();
             configure(registrar);
             registrar.Commit();
+            s_registrations.Add(configure);
         }
     }
 

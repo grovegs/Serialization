@@ -4,20 +4,12 @@ namespace GroveGames.Serialization.Unity
 {
     internal static class MathematicsFormatterRegistration
     {
-        private static bool s_registered;
-
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
         internal static void Register()
         {
-            if (s_registered)
-            {
-                return;
-            }
-
-            s_registered = true;
             Formatters.Register(Configure);
         }
 

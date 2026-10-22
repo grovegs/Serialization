@@ -47,9 +47,6 @@ internal static class RegistrationEmitter
 
         code.Open("namespace GroveGames.Serialization");
         code.Open($"internal static class {name}");
-        code.Line("private static bool s_registered;");
-        code.Line();
-
         if (target.HasUnityEngine)
         {
             code.Line("[global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]");
@@ -65,8 +62,6 @@ internal static class RegistrationEmitter
         }
 
         code.Open("internal static void Register()");
-        code.Open("if (s_registered)").Line("return;").Close().Line();
-        code.Line("s_registered = true;");
         code.Line("global::GroveGames.Serialization.Formatters.Register(Configure);");
         code.Close();
         code.Line();

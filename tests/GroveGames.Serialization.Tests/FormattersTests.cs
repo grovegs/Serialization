@@ -67,6 +67,38 @@ public sealed class FormattersTests
     }
 
     [Fact]
+    public void Register_SameConfigurationTwice_RegistersOnce()
+    {
+        Formatters.Register(ConfigureRepeatedSave);
+        var formatter = Formatters.Get<RepeatedSave>();
+
+        Formatters.Register(ConfigureRepeatedSave);
+
+        Assert.Same(formatter, Formatters.Get<RepeatedSave>());
+    }
+
+    [Fact]
+    public void Register_FailedConfiguration_CanBeRetried()
+    {
+        var attempts = 0;
+        Action<FormatterRegistrar> configure = registrar =>
+        {
+            attempts++;
+            registrar.AddFormatter(new TestSaveFormatter<RetriedSave>(), version: attempts);
+
+            if (attempts == 1)
+            {
+                registrar.AddMigration(new TestSaveRenameCoins<RetriedSave>());
+            }
+        };
+        Assert.Throws<InvalidOperationException>(() => Formatters.Register(configure));
+
+        Formatters.Register(configure);
+
+        Assert.True(Formatters.TryGet<RetriedSave>(out _));
+    }
+
+    [Fact]
     public void Get_UnregisteredType_ThrowsInvalidOperationException()
     {
         Assert.Throws<InvalidOperationException>(() => Formatters.Get<UnregisteredSave>());
@@ -92,6 +124,11 @@ public sealed class FormattersTests
 
         Assert.Equal("hero", result.AsObject["name"].AsString);
         Assert.Equal(3, result.AsObject["level"].AsInt64);
+    }
+
+    private static void ConfigureRepeatedSave(FormatterRegistrar registrar)
+    {
+        registrar.AddFormatter(new TestSaveFormatter<RepeatedSave>());
     }
 
     private class TestSave
@@ -126,6 +163,14 @@ public sealed class FormattersTests
     }
 
     private sealed class UnregisteredSave : TestSave
+    {
+    }
+
+    private sealed class RepeatedSave : TestSave
+    {
+    }
+
+    private sealed class RetriedSave : TestSave
     {
     }
 
