@@ -1,13 +1,18 @@
 using UnityEngine;
+using UnityEngine.Scripting;
+
+[assembly: AlwaysLinkAssembly]
 
 namespace GroveGames.Serialization.Unity
 {
+    [Preserve]
     internal static class MathematicsFormatterRegistration
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
+        [Preserve]
         internal static void Register()
         {
             Formatters.Register(Configure);
