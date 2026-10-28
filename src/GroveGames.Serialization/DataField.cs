@@ -2,12 +2,15 @@
 
 public readonly struct DataField
 {
-    public readonly string Name;
-    public readonly DataValue Value;
+    private readonly string _name;
+    private readonly DataValue _value;
+
+    public string Name => _name;
+    public DataValue Value => _value;
 
     public DataField(string name, DataValue value)
     {
-        Name = name;
-        Value = value;
+        _name = name;
+        _value = value;
     }
 }

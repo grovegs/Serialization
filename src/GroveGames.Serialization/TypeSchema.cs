@@ -6,6 +6,9 @@ public sealed class TypeSchema
     private const ulong FnvPrime = 1099511628211;
 
     private readonly SchemaField[] _fields;
+    private readonly Type _type;
+    private readonly int _version;
+    private readonly ulong _fingerprint;
 
     public TypeSchema(Type type, int version, params SchemaField[] fields)
     {
@@ -24,19 +27,19 @@ public sealed class TypeSchema
             }
         }
 
-        Type = type;
-        Version = version;
+        _type = type;
+        _version = version;
         _fields = fields;
-        Fingerprint = ComputeFingerprint(fields);
+        _fingerprint = ComputeFingerprint(fields);
     }
 
-    public Type Type { get; }
+    public Type Type => _type;
 
-    public int Version { get; }
+    public int Version => _version;
 
     public IReadOnlyList<SchemaField> Fields => _fields;
 
-    public ulong Fingerprint { get; }
+    public ulong Fingerprint => _fingerprint;
 
     public int IndexOf(string name)
     {

@@ -3,17 +3,19 @@
 internal sealed class TypeRegistration<T>
 {
     private readonly IMigration<T>?[] _migrations;
+    private readonly IFormatter<T> _formatter;
+    private readonly int _version;
 
     public TypeRegistration(IFormatter<T> formatter, int version, IMigration<T>?[] migrations)
     {
-        Formatter = formatter;
-        Version = version;
+        _formatter = formatter;
+        _version = version;
         _migrations = migrations;
     }
 
-    public IFormatter<T> Formatter { get; }
+    public IFormatter<T> Formatter => _formatter;
 
-    public int Version { get; }
+    public int Version => _version;
 
     public void Migrate(DataValue root, int fromVersion)
     {

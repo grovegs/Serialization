@@ -2,15 +2,18 @@
 
 public readonly struct SchemaField
 {
-    public readonly string Name;
-    public readonly FieldType Type;
+    private readonly string _name;
+    private readonly FieldType _type;
+
+    public string Name => _name;
+    public FieldType Type => _type;
 
     public SchemaField(string name, FieldType type)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentNullException.ThrowIfNull(type);
 
-        Name = name;
-        Type = type;
+        _name = name;
+        _type = type;
     }
 }

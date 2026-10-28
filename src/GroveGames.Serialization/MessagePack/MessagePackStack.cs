@@ -2,6 +2,10 @@
 
 internal sealed class MessagePackStack
 {
+    private readonly int[] _positions;
+    private readonly int[] _counts;
+    private readonly bool[] _isArray;
+
     public const int MaxDepth = 63;
 
     [ThreadStatic]
@@ -12,16 +16,16 @@ internal sealed class MessagePackStack
 
     private MessagePackStack()
     {
-        Positions = new int[MaxDepth + 1];
-        Counts = new int[MaxDepth + 1];
-        IsArray = new bool[MaxDepth + 1];
+        _positions = new int[MaxDepth + 1];
+        _counts = new int[MaxDepth + 1];
+        _isArray = new bool[MaxDepth + 1];
     }
 
-    public int[] Positions { get; }
+    public int[] Positions => _positions;
 
-    public int[] Counts { get; }
+    public int[] Counts => _counts;
 
-    public bool[] IsArray { get; }
+    public bool[] IsArray => _isArray;
 
     public static MessagePackStack Rent()
     {
