@@ -2,21 +2,26 @@
 
 public sealed class FieldType
 {
+    private readonly FieldTypeKind _kind;
+    private readonly bool _isNullable;
+    private readonly FieldType? _elementType;
+    private readonly Type? _objectType;
+
     private FieldType(FieldTypeKind kind, bool isNullable, FieldType? elementType, Type? objectType)
     {
-        Kind = kind;
-        IsNullable = isNullable;
-        ElementType = elementType;
-        ObjectType = objectType;
+        _kind = kind;
+        _isNullable = isNullable;
+        _elementType = elementType;
+        _objectType = objectType;
     }
 
-    public FieldTypeKind Kind { get; }
+    public FieldTypeKind Kind => _kind;
 
-    public bool IsNullable { get; }
+    public bool IsNullable => _isNullable;
 
-    public FieldType? ElementType { get; }
+    public FieldType? ElementType => _elementType;
 
-    public Type? ObjectType { get; }
+    public Type? ObjectType => _objectType;
 
     public static FieldType Any()
     {

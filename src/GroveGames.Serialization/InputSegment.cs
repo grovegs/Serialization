@@ -4,23 +4,27 @@ namespace GroveGames.Serialization;
 
 internal readonly struct InputSegment
 {
-    public readonly byte[] Buffer;
-    public readonly int Start;
-    public readonly int End;
+    private readonly byte[] _buffer;
+    private readonly int _start;
+    private readonly int _end;
+
+    public byte[] Buffer => _buffer;
+    public int Start => _start;
+    public int End => _end;
 
     public InputSegment(ReadOnlyMemory<byte> data)
     {
         if (MemoryMarshal.TryGetArray(data, out var segment) && segment.Array != null)
         {
-            Buffer = segment.Array;
-            Start = segment.Offset;
-            End = segment.Offset + segment.Count;
+            _buffer = segment.Array;
+            _start = segment.Offset;
+            _end = segment.Offset + segment.Count;
         }
         else
         {
-            Buffer = data.ToArray();
-            Start = 0;
-            End = Buffer.Length;
+            _buffer = data.ToArray();
+            _start = 0;
+            _end = Buffer.Length;
         }
     }
 }
