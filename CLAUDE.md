@@ -131,3 +131,9 @@ Settled decisions. Ask before changing any of them.
 - Unity.Mathematics formatters are in `Integrations/Unity.Mathematics/`, compiled only when `com.unity.mathematics` is installed, and registered the same way by `MathematicsFormatterRegistration`.
 - The GroveGames.DependencyInjection integration is in `Integrations/GroveGames.DependencyInjection/` and adds `AddSerialization()`.
 - Every file and folder in the package needs a `.meta` with a 32-character lowercase hex GUID.
+
+## Agent Skills
+
+- The rules for game code that uses this package are an agent skill. Its source is `skills/grovegames-serialization/`: `SKILL.md` holds the rules that apply everywhere, `unity.md` holds only what differs in Unity. It is optional.
+- The release writes the skill the Unity package ships, the same way it copies the README and the license: `SKILL.md` followed by `unity.md`, when there is one. Never edit the copy under `Skills~/`; the next release replaces it.
+- The NuGet package ships `skills/grovegames-serialization/SKILL.md` as it is.
