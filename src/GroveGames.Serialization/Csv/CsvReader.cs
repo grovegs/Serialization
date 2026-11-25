@@ -121,7 +121,7 @@ internal struct CsvReader : IDocumentReader
     public void ReadObjectStart(out int count)
     {
         ReadObjectStart();
-        count = _headers.Length;
+        count = Math.Min(_headers.Length, _rows[_row].Length);
     }
 
     public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)

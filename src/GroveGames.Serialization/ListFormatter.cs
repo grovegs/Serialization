@@ -33,7 +33,7 @@ public sealed class ListFormatter<T> : IFormatter<List<T>>
 
         var formatter = Formatters.Get<T>();
         reader.ReadArrayStart(out var count);
-        var list = new List<T>(Math.Max(count, 0));
+        var list = new List<T>(Math.Min(Math.Max(count, 0), 1024));
 
         while (reader.TryReadNextElement())
         {

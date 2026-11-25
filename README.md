@@ -1,4 +1,4 @@
-﻿# GroveGames.Serialization
+# GroveGames.Serialization
 
 High-performance JSON, MessagePack and CSV serialization for .NET, Unity and Godot, with conversion between formats and versioned migrations.
 

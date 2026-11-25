@@ -11,7 +11,9 @@ public sealed class CsvSerializerTests
             .AddFormatter(new ListFormatter<TestItem>())
             .AddFormatter(new TestItemFormatter<TestItemV2>())
             .AddFormatter(new ListFormatter<TestItemV2>(), version: 2)
-            .AddMigration(new TestRowsNoChange()));
+            .AddMigration(new TestRowsNoChange())
+            .AddFormatter(new TestCellsFormatter())
+            .AddFormatter(new ListFormatter<TestCells>()));
     }
 
     [Fact]
@@ -77,6 +79,33 @@ public sealed class CsvSerializerTests
     }
 
     [Fact]
+    public void Serialize_HeaderNeedingQuotes_QuotesItAndRoundTrips()
+    {
+        var serializer = new CsvSerializer();
+        var row = new DataObject { ["a,b"] = "1", ["say \"hi\""] = "2" };
+
+        var csv = serializer.Serialize(new List<DataValue> { DataValue.FromObject(row) });
+
+        Assert.StartsWith("\"a,b\",\"say \"\"hi\"\"\"\n", Encoding.UTF8.GetString(csv));
+        var result = serializer.Deserialize<List<DataValue>>(csv)![0].AsObject;
+        Assert.Equal("1", result["a,b"].AsString);
+        Assert.Equal("2", result["say \"hi\""].AsString);
+    }
+
+    [Fact]
+    public void Convert_ShortRowWithKnownFieldCount_WritesOnlyItsColumns()
+    {
+        var csv = Encoding.UTF8.GetBytes("a,b,c\n1,2,3\n4\n");
+
+        var packed = new Converter(new CsvSerializer(), new MessagePackSerializer()).Convert<List<TestCells>>(csv);
+
+        var rows = new MessagePackSerializer().Deserialize<DataValue>(packed).AsArray;
+        Assert.Equal(3, rows[0].AsObject.Count);
+        Assert.Equal(1, rows[1].AsObject.Count);
+        Assert.Equal("4", rows[1].AsObject["a"].AsString);
+    }
+
+    [Fact]
     public void ReadVersion_VersionLine_ReturnsStoredVersion()
     {
         var serializer = new CsvSerializer();
@@ -104,6 +133,41 @@ public sealed class CsvSerializerTests
 
         public void Apply(DataValue root)
         {
+        }
+    }
+
+    private sealed class TestCells
+    {
+    }
+
+    private sealed class TestCellsFormatter : IFormatter<TestCells>
+    {
+        public void Write<TWriter>(ref TWriter writer, TestCells? value) where TWriter : struct, IFormatWriter
+        {
+            writer.WriteNull();
+        }
+
+        public TestCells? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
+        {
+            reader.Skip();
+            return null;
+        }
+
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
+            where TReader : struct, IFormatReader
+            where TWriter : struct, IFormatWriter
+        {
+            reader.ReadObjectStart(out var count);
+            writer.BeginObject(count);
+
+            while (reader.TryReadFieldNameUtf8(out var name))
+            {
+                writer.WriteFieldNameUtf8(name);
+                reader.ReadStringUtf8(out var cell);
+                writer.WriteStringUtf8(cell);
+            }
+
+            writer.EndObject();
         }
     }
 

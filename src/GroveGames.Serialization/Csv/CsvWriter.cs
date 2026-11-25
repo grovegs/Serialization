@@ -106,7 +106,7 @@ internal struct CsvWriter : IDocumentWriter
                     _output.Write((byte)',');
                 }
 
-                _output.Write(_header[i]);
+                WriteCell(_output, _header[i]);
             }
 
             _output.Write((byte)'\n');
@@ -166,13 +166,13 @@ internal struct CsvWriter : IDocumentWriter
         var buffer = ScratchBuffers.Text();
         var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer.GetSpan(Encoding.UTF8.GetMaxByteCount(value.Length)));
         buffer.Advance(written);
-        WriteCell(buffer.WrittenSpan);
+        WriteCell(_row, buffer.WrittenSpan);
     }
 
     public void WriteStringUtf8(ReadOnlySpan<byte> utf8)
     {
         EnsureCell();
-        WriteCell(utf8);
+        WriteCell(_row, utf8);
     }
 
     private static NotSupportedException NotFlat(string what)
@@ -188,7 +188,7 @@ internal struct CsvWriter : IDocumentWriter
         }
     }
 
-    private readonly void WriteCell(ReadOnlySpan<byte> utf8)
+    private static void WriteCell(ByteBuffer output, ReadOnlySpan<byte> utf8)
     {
         var quote = false;
 
@@ -205,22 +205,22 @@ internal struct CsvWriter : IDocumentWriter
 
         if (!quote)
         {
-            _row.Write(utf8);
+            output.Write(utf8);
             return;
         }
 
-        _row.Write((byte)'"');
+        output.Write((byte)'"');
 
         for (var i = 0; i < utf8.Length; i++)
         {
             if (utf8[i] == '"')
             {
-                _row.Write((byte)'"');
+                output.Write((byte)'"');
             }
 
-            _row.Write(utf8[i]);
+            output.Write(utf8[i]);
         }
 
-        _row.Write((byte)'"');
+        output.Write((byte)'"');
     }
 }

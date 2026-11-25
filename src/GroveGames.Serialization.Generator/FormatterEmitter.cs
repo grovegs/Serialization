@@ -320,7 +320,7 @@ internal static class FormatterEmitter
                 code.Open("else");
                 var count = "count" + depth;
                 code.Line($"reader.ReadArrayStart(out var {count});");
-                code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>(global::System.Math.Max({count}, 0));");
+                code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>(global::System.Math.Min(global::System.Math.Max({count}, 0), 1024));");
                 code.Open("while (reader.TryReadNextElement())");
                 code.Line($"{shape.Element!.TypeName} {item} = default;");
                 ReadValue(code, shape.Element!, item, depth + 1);
@@ -337,7 +337,7 @@ internal static class FormatterEmitter
                 code.Open("else");
                 var fields = "fields" + depth;
                 code.Line($"reader.ReadObjectStart(out var {fields});");
-                code.Line($"var {map} = new global::System.Collections.Generic.Dictionary<string, {shape.Element!.TypeName}>(global::System.Math.Max({fields}, 0));");
+                code.Line($"var {map} = new global::System.Collections.Generic.Dictionary<string, {shape.Element!.TypeName}>(global::System.Math.Min(global::System.Math.Max({fields}, 0), 1024));");
                 code.Open($"while (reader.TryReadFieldName(out var {key}))");
                 code.Line($"{shape.Element!.TypeName} {entry} = default;");
                 ReadValue(code, shape.Element!, entry, depth + 1);
