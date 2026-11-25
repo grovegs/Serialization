@@ -25,10 +25,17 @@ internal sealed class TypeRegistration<T>
 
             if (migration == null)
             {
-                throw new NotSupportedException($"{typeof(T).Name} data is v{fromVersion}, but there is no migration from v{version} to v{version + 1}.");
+                throw new FormatException($"{typeof(T).Name} data is v{fromVersion}, but there is no migration from v{version} to v{version + 1}.");
             }
 
-            migration.Apply(root);
+            try
+            {
+                migration.Apply(root);
+            }
+            catch (Exception exception) when (exception is not FormatException)
+            {
+                throw new FormatException($"{typeof(T).Name} data could not be migrated from v{version} to v{version + 1}.", exception);
+            }
         }
     }
 }

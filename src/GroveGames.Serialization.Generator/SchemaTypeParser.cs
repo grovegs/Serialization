@@ -115,7 +115,7 @@ internal static class SchemaTypeParser
 
     private static SchemaTypeModel Model(string ns, INamedTypeSymbol type, string fullName, int version, List<SchemaMemberModel> members, List<DiagnosticInfo> diagnostics)
     {
-        return new SchemaTypeModel(ns, type.Name, fullName, type.IsValueType, version, new EquatableArray<SchemaMemberModel>([.. members]), new EquatableArray<DiagnosticInfo>([.. diagnostics]));
+        return new SchemaTypeModel(ns, type.Name, fullName, type.IsValueType, version, new EquatableArray<SchemaMemberModel>([.. members]), new EquatableArray<DiagnosticInfo>([.. diagnostics]), LocationInfo.From(type.Locations.FirstOrDefault()));
     }
 
     private static bool HasParameterlessConstructor(INamedTypeSymbol type)

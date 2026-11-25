@@ -251,12 +251,80 @@ public sealed class SchemaGeneratorTests
     [InlineData("[Schema] public sealed class NoDefault { public NoDefault(int value) { } }", "GGS006")]
     [InlineData("[Schema(version: 0)] public sealed class Zero { }", "GGS007")]
     [InlineData("[Formatter] public sealed class NotAFormatter { }", "GGS008")]
+    [InlineData("[Schema(version: 2)] public sealed class Bumped { }", "GGS009")]
+    [InlineData("[Schema(version: 3)] public sealed class Gap { } public sealed class GapFromOne : IMigration<Gap> { public int FromVersion => 1; public void Apply(DataValue root) { } }", "GGS009")]
     [InlineData("public sealed class Outer { [Formatter] private sealed class Hidden : IFormatter<int> { public void Write<TWriter>(ref TWriter writer, int value) where TWriter : struct, IFormatWriter { } public int Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => 0; public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { } } }", "GGS008")]
     public void Generate_InvalidSchema_ReportsDiagnostic(string declarations, string id)
     {
         var result = Run("using GroveGames.Serialization;\nnamespace Game;\n" + declarations);
 
         Assert.Contains(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == id);
+    }
+
+    [Fact]
+    public void Generate_EveryVersionMigrated_ReportsNoMissingMigration()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            [Schema(version: 3)]
+            public sealed class Save
+            {
+            }
+
+            public sealed class SaveFromOne : IMigration<Save>
+            {
+                public int FromVersion => 1;
+
+                public void Apply(DataValue root)
+                {
+                }
+            }
+
+            public sealed class SaveFromTwo : IMigration<Save>
+            {
+                public int FromVersion
+                {
+                    get { return 2; }
+                }
+
+                public void Apply(DataValue root)
+                {
+                }
+            }
+            """);
+
+        Assert.DoesNotContain(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == "GGS009");
+    }
+
+    [Fact]
+    public void Generate_MigrationVersionNotConstant_SkipsMissingMigrationCheck()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            [Schema(version: 3)]
+            public sealed class Save
+            {
+            }
+
+            public sealed class SaveMigration : IMigration<Save>
+            {
+                private readonly int _from = 1;
+
+                public int FromVersion => _from;
+
+                public void Apply(DataValue root)
+                {
+                }
+            }
+            """);
+
+        Assert.DoesNotContain(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == "GGS009");
     }
 
     [Fact]

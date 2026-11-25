@@ -169,11 +169,11 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
-    public void Deserialize_NewerEnvelope_ThrowsNotSupportedException()
+    public void Deserialize_NewerEnvelope_ThrowsFormatException()
     {
         var serializer = CreateSerializer();
 
-        Assert.Throws<NotSupportedException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes("{\"$v\":4,\"data\":{}}")));
+        Assert.Throws<FormatException>(() => serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes("{\"$v\":4,\"data\":{}}")));
     }
 
     [Theory]

@@ -44,6 +44,18 @@ public sealed class FormattersTests
     }
 
     [Fact]
+    public void Deserialize_MigrationThrows_ThrowsFormatExceptionWithCause()
+    {
+        Formatters.Register(registrar => registrar
+            .AddFormatter(new TestSaveFormatter<BrokenMigrationSave>(), version: 2)
+            .AddMigration(new FakeThrowingMigration<BrokenMigrationSave>()));
+
+        var exception = Assert.Throws<FormatException>(() => new JsonSerializer().Deserialize<BrokenMigrationSave>(System.Text.Encoding.UTF8.GetBytes("{}")));
+
+        Assert.IsType<InvalidOperationException>(exception.InnerException);
+    }
+
+    [Fact]
     public void Register_Formatter_IsReturnedWithVersion()
     {
         var formatter = new TestSaveFormatter<VersionedSave>();
@@ -182,6 +194,10 @@ public sealed class FormattersTests
     {
     }
 
+    private sealed class BrokenMigrationSave : TestSave
+    {
+    }
+
     private sealed class TestSaveFormatter<T> : IFormatter<T>
         where T : TestSave, new()
     {
@@ -234,6 +250,17 @@ public sealed class FormattersTests
         public void Apply(DataValue root)
         {
             root.AsObject.Rename("coins", "gold");
+        }
+    }
+
+    private sealed class FakeThrowingMigration<T> : IMigration<T>
+        where T : TestSave
+    {
+        public int FromVersion => 1;
+
+        public void Apply(DataValue root)
+        {
+            throw new InvalidOperationException("broken migration");
         }
     }
 }

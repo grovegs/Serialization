@@ -133,6 +133,8 @@ public sealed class SchemaGenerator : IIncrementalGenerator
             validMigrations.Add(migration);
         }
 
+        ReportMissingMigrations(context, validSchemas, validMigrations);
+
         if (validSchemas.Count == 0 && validFormatters.Count == 0)
         {
             return;
@@ -142,6 +144,52 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         validFormatters.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
         validMigrations.Sort(static (left, right) => string.CompareOrdinal(left.FullName, right.FullName));
         context.AddSource("FormatterRegistration.g.cs", RegistrationEmitter.Emit(target, validSchemas, validFormatters, validMigrations));
+    }
+
+    private static void ReportMissingMigrations(SourceProductionContext context, List<SchemaTypeModel> schemas, List<MigrationModel> migrations)
+    {
+        foreach (var schema in schemas)
+        {
+            if (schema.Version <= 1)
+            {
+                continue;
+            }
+
+            var covered = new bool[schema.Version];
+            var isKnown = true;
+
+            foreach (var migration in migrations)
+            {
+                if (migration.TargetFullName != schema.FullName)
+                {
+                    continue;
+                }
+
+                if (migration.FromVersion is not int from)
+                {
+                    isKnown = false;
+                    break;
+                }
+
+                if (from >= 1 && from < schema.Version)
+                {
+                    covered[from] = true;
+                }
+            }
+
+            if (!isKnown)
+            {
+                continue;
+            }
+
+            for (var version = 1; version < schema.Version; version++)
+            {
+                if (!covered[version])
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.MissingMigration, schema.Location?.ToLocation(), schema.FullName.Replace("global::", string.Empty), schema.Version, version));
+                }
+            }
+        }
     }
 
     private static string HintName(SchemaTypeModel model)
