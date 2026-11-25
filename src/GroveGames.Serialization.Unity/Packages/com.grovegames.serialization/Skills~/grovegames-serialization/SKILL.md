@@ -13,7 +13,8 @@ Rules for game code that uses this package. They hold in every game. The API is 
 - Exclude runtime-only members with `[Ignore]`.
 - Use `[Formatter]` on an `IFormatter<T>` only for a type you do not own.
 - Create each serializer once and reuse it, and write into a `ByteBuffer` you keep. Do not call `Serialize(value)` on a hot path; it returns a new array.
-- Treat `FormatException` from `Deserialize` as corrupt data and recover; never let it crash the game.
+- Treat `FormatException` from `Deserialize` as unreadable data and recover; never let it crash the game. It covers corrupt bytes, data from a newer build, and a migration that is missing or throws.
+- Give every `IMigration<T>` a constant `FromVersion` (`public int FromVersion => 1;`) so the generator can report a missing step (`GGS009`) at compile time.
 
 ## Unity
 
