@@ -39,12 +39,30 @@ internal struct DataValueReader : IFormatReader
         Push(DataKind.Object);
     }
 
+    public void ReadObjectStart(out int count)
+    {
+        Push(DataKind.Object);
+        count = _containers[_depth].AsObject.Count;
+    }
+
     public void ReadArrayStart()
     {
         Push(DataKind.Array);
     }
 
+    public void ReadArrayStart(out int count)
+    {
+        Push(DataKind.Array);
+        count = _containers[_depth].AsArray.Count;
+    }
+
     public bool TryReadField(FieldTable fields, out int index)
+    {
+        index = -1;
+        return TryReadNextField(fields, ref index);
+    }
+
+    public bool TryReadNextField(FieldTable fields, ref int index)
     {
         if (!TryReadFieldName(out var name))
         {
@@ -52,7 +70,7 @@ internal struct DataValueReader : IFormatReader
             return false;
         }
 
-        index = fields.IndexOf(name);
+        index = fields.IndexOf(name, index + 1);
         return true;
     }
 
@@ -70,6 +88,21 @@ internal struct DataValueReader : IFormatReader
         var field = container[_indices[_depth]];
         _current = field.Value;
         name = field.Name;
+        return true;
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!TryReadFieldName(out var name))
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        var buffer = ScratchBuffers.Text();
+        var written = Encoding.UTF8.GetBytes(name.AsSpan(), buffer.GetSpan(Encoding.UTF8.GetMaxByteCount(name.Length)));
+        buffer.Advance(written);
+        utf8Name = buffer.WrittenSpan;
         return true;
     }
 

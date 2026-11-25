@@ -38,7 +38,7 @@ public sealed class DataValueFormatter : IFormatter<DataValue>
                 for (var i = 0; i < obj.Count; i++)
                 {
                     var field = obj[i];
-                    writer.WriteField(System.Text.Encoding.UTF8.GetBytes(field.Name));
+                    writer.WriteFieldName(field.Name);
                     Write(ref writer, field.Value);
                 }
 

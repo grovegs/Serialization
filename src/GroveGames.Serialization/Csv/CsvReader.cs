@@ -72,6 +72,12 @@ internal struct CsvReader : IDocumentReader
         _row = -1;
     }
 
+    public void ReadArrayStart(out int count)
+    {
+        ReadArrayStart();
+        count = _rows.Count;
+    }
+
     public bool TryReadNextElement()
     {
         if (++_row < _rows.Count)
@@ -96,13 +102,37 @@ internal struct CsvReader : IDocumentReader
 
     public bool TryReadField(FieldTable fields, out int index)
     {
+        index = -1;
+        return TryReadNextField(fields, ref index);
+    }
+
+    public bool TryReadNextField(FieldTable fields, ref int index)
+    {
         if (!NextColumn())
         {
             index = -1;
             return false;
         }
 
-        index = fields.IndexOf(_headers[_column]);
+        index = fields.IndexOf(_headers[_column], index + 1);
+        return true;
+    }
+
+    public void ReadObjectStart(out int count)
+    {
+        ReadObjectStart();
+        count = Math.Min(_headers.Length, _rows[_row].Length);
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!NextColumn())
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        utf8Name = Encoding.UTF8.GetBytes(_headers[_column]);
         return true;
     }
 

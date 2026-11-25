@@ -63,6 +63,24 @@ public sealed class GeneratedFormatterTests
     }
 
     [Fact]
+    public void Serialize_DictionaryKeyNeedingEscapes_WritesValidJsonAndRoundTrips()
+    {
+        var json = new JsonSerializer();
+        var messagePack = new MessagePackSerializer();
+        var sample = CreateSample();
+        sample.Stats = new Dictionary<string, int> { ["say \"hi\"\\\n"] = 1, ["ı"] = 2 };
+
+        var text = json.Serialize(sample);
+        var packed = new Converter(json, messagePack).Convert<GeneratedSample>(text);
+        var back = new Converter(messagePack, json).Convert<GeneratedSample>(packed);
+
+        using var document = System.Text.Json.JsonDocument.Parse(text);
+        Assert.Equal(1, json.Deserialize<GeneratedSample>(text)!.Stats!["say \"hi\"\\\n"]);
+        Assert.Equal(2, messagePack.Deserialize<GeneratedSample>(packed)!.Stats!["ı"]);
+        Assert.Equal(Encoding.UTF8.GetString(text), Encoding.UTF8.GetString(back));
+    }
+
+    [Fact]
     public void Deserialize_OlderGeneratedType_RunsGeneratedMigration()
     {
         var json = new JsonSerializer();

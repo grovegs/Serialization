@@ -98,8 +98,11 @@ public sealed class ByteBuffer : IBufferWriter<byte>
         }
     }
 
-    internal Span<byte> Slice(int start, int length)
+    public Span<byte> Slice(int start, int length)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(start);
+        ArgumentOutOfRangeException.ThrowIfNegative(length);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(length, _length - start);
         return new Span<byte>(_buffer, start, length);
     }
 

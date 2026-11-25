@@ -126,14 +126,34 @@ internal struct JsonReader : IDocumentReader
         Push();
     }
 
+    public void ReadObjectStart(out int count)
+    {
+        ReadObjectStart();
+        count = -1;
+    }
+
     public void ReadArrayStart()
     {
         Expect((byte)'[');
         Push();
     }
 
+    public void ReadArrayStart(out int count)
+    {
+        ReadArrayStart();
+        count = -1;
+    }
+
     public bool TryReadField(FieldTable fields, out int index)
     {
+        index = -1;
+        return TryReadNextField(fields, ref index);
+    }
+
+    public bool TryReadNextField(FieldTable fields, ref int index)
+    {
+        var expected = index + 1;
+
         if (!Next((byte)'}'))
         {
             index = -1;
@@ -159,11 +179,11 @@ internal struct JsonReader : IDocumentReader
         {
             _position = start - 1;
             ReadStringUtf8(out var name);
-            index = fields.IndexOf(name);
+            index = fields.IndexOf(name, expected);
         }
         else
         {
-            index = fields.IndexOf(new ReadOnlySpan<byte>(_buffer, start, _position - start));
+            index = fields.IndexOf(new ReadOnlySpan<byte>(_buffer, start, _position - start), expected);
             _position++;
         }
 
@@ -180,6 +200,23 @@ internal struct JsonReader : IDocumentReader
         }
 
         name = ReadString() ?? throw Error("a field name is null");
+        Expect((byte)':');
+        return true;
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!Next((byte)'}'))
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        if (!ReadStringUtf8(out utf8Name))
+        {
+            throw Error("a field name is null");
+        }
+
         Expect((byte)':');
         return true;
     }

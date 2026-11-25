@@ -15,6 +15,13 @@ public sealed class CsvSerializer : ISerializer, IFormat
         return ((IFormat)this).Deserialize<T>(data);
     }
 
+    public int ReadVersion(ReadOnlyMemory<byte> data)
+    {
+        var reader = new CsvReader(data);
+        reader.TryReadEnvelope(out var version);
+        return version;
+    }
+
     void IFormat.Serialize<T>(T? value, ByteBuffer output) where T : default
     {
         var writer = new CsvWriter(output);

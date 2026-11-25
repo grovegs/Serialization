@@ -137,15 +137,45 @@ internal struct MessagePackReader : IDocumentReader
 
     public void ReadObjectStart()
     {
-        Push(ReadMapHeader());
+        ReadObjectStart(out _);
+    }
+
+    public void ReadObjectStart(out int count)
+    {
+        count = ReadMapHeader();
+
+        if (count > (_end - _position) / 2)
+        {
+            throw Error($"a map of {count} fields is longer than the data");
+        }
+
+        Push(count);
     }
 
     public void ReadArrayStart()
     {
-        Push(ReadArrayHeader());
+        ReadArrayStart(out _);
+    }
+
+    public void ReadArrayStart(out int count)
+    {
+        count = ReadArrayHeader();
+
+        if (count > _end - _position)
+        {
+            throw Error($"an array of {count} items is longer than the data");
+        }
+
+        Push(count);
     }
 
     public bool TryReadField(FieldTable fields, out int index)
+    {
+        index = -1;
+        return TryReadNextField(fields, ref index);
+    }
+
+    public bool TryReadNextField(FieldTable fields, ref int index)
     {
         if (!NextItem())
         {
@@ -158,7 +188,7 @@ internal struct MessagePackReader : IDocumentReader
             throw Error("a field name is null");
         }
 
-        index = fields.IndexOf(name);
+        index = fields.IndexOf(name, index + 1);
         return true;
     }
 
@@ -171,6 +201,22 @@ internal struct MessagePackReader : IDocumentReader
         }
 
         name = ReadString() ?? throw Error("a field name is null");
+        return true;
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!NextItem())
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        if (!ReadStringUtf8(out utf8Name))
+        {
+            throw Error("a field name is null");
+        }
+
         return true;
     }
 

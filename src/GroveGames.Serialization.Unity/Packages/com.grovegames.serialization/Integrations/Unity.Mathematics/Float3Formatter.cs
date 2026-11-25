@@ -31,7 +31,9 @@ namespace GroveGames.Serialization.Unity
             var z = 0f;
             reader.ReadObjectStart();
 
-            while (reader.TryReadField(s_fields, out var index))
+            var index = -1;
+
+            while (reader.TryReadNextField(s_fields, ref index))
             {
                 switch (index)
                 {

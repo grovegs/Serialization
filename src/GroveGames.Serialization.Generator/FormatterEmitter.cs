@@ -141,7 +141,8 @@ internal static class FormatterEmitter
         code.Line($"var value = new {model.FullName}();");
         code.Line("reader.ReadObjectStart();");
         code.Line();
-        code.Open("while (reader.TryReadField(s_fields, out var index))");
+        code.Line("var index = -1;");
+        code.Open("while (reader.TryReadNextField(s_fields, ref index))");
         code.Open("switch (index)");
 
         for (var i = 0; i < model.Members.Count; i++)
@@ -170,7 +171,8 @@ internal static class FormatterEmitter
         code.Line("reader.ReadObjectStart();");
         code.Line("writer.BeginObject(-1);");
         code.Line();
-        code.Open("while (reader.TryReadField(s_fields, out var index))");
+        code.Line("var index = -1;");
+        code.Open("while (reader.TryReadNextField(s_fields, ref index))");
         code.Open("switch (index)");
 
         for (var i = 0; i < model.Members.Count; i++)
@@ -256,7 +258,7 @@ internal static class FormatterEmitter
                 code.Open("else");
                 code.Line($"writer.BeginObject({map}.Count);");
                 code.Open($"foreach (var {pair} in {map})");
-                code.Line($"writer.WriteField(global::System.Text.Encoding.UTF8.GetBytes({pair}.Key));");
+                code.Line($"writer.WriteFieldName({pair}.Key);");
                 WriteValue(code, shape.Element!, pair + ".Value", depth + 1);
                 code.Close();
                 code.Line("writer.EndObject();");
@@ -316,8 +318,9 @@ internal static class FormatterEmitter
                 var item = "item" + depth;
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line($"{target} = null;").Close();
                 code.Open("else");
-                code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>();");
-                code.Line("reader.ReadArrayStart();");
+                var count = "count" + depth;
+                code.Line($"reader.ReadArrayStart(out var {count});");
+                code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>(global::System.Math.Min(global::System.Math.Max({count}, 0), 1024));");
                 code.Open("while (reader.TryReadNextElement())");
                 code.Line($"{shape.Element!.TypeName} {item} = default;");
                 ReadValue(code, shape.Element!, item, depth + 1);
@@ -332,8 +335,9 @@ internal static class FormatterEmitter
                 var entry = "entry" + depth;
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line($"{target} = null;").Close();
                 code.Open("else");
-                code.Line($"var {map} = new global::System.Collections.Generic.Dictionary<string, {shape.Element!.TypeName}>();");
-                code.Line("reader.ReadObjectStart();");
+                var fields = "fields" + depth;
+                code.Line($"reader.ReadObjectStart(out var {fields});");
+                code.Line($"var {map} = new global::System.Collections.Generic.Dictionary<string, {shape.Element!.TypeName}>(global::System.Math.Min(global::System.Math.Max({fields}, 0), 1024));");
                 code.Open($"while (reader.TryReadFieldName(out var {key}))");
                 code.Line($"{shape.Element!.TypeName} {entry} = default;");
                 ReadValue(code, shape.Element!, entry, depth + 1);
@@ -392,8 +396,9 @@ internal static class FormatterEmitter
             case ShapeKind.Array:
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line("writer.WriteNull();").Close();
                 code.Open("else");
-                code.Line("reader.ReadArrayStart();");
-                code.Line("writer.BeginArray(-1);");
+                var items = "items" + depth;
+                code.Line($"reader.ReadArrayStart(out var {items});");
+                code.Line($"writer.BeginArray({items});");
                 code.Open("while (reader.TryReadNextElement())");
                 TranscodeValue(code, shape.Element!, depth + 1);
                 code.Close();
@@ -404,10 +409,11 @@ internal static class FormatterEmitter
                 var key = "key" + depth;
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line("writer.WriteNull();").Close();
                 code.Open("else");
-                code.Line("reader.ReadObjectStart();");
-                code.Line("writer.BeginObject(-1);");
-                code.Open($"while (reader.TryReadFieldName(out var {key}))");
-                code.Line($"writer.WriteField(global::System.Text.Encoding.UTF8.GetBytes({key}));");
+                var entries = "entries" + depth;
+                code.Line($"reader.ReadObjectStart(out var {entries});");
+                code.Line($"writer.BeginObject({entries});");
+                code.Open($"while (reader.TryReadFieldNameUtf8(out var {key}))");
+                code.Line($"writer.WriteFieldNameUtf8({key});");
                 TranscodeValue(code, shape.Element!, depth + 1);
                 code.Close();
                 code.Line("writer.EndObject();");

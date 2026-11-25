@@ -13,6 +13,18 @@ public sealed class ByteBufferTests
     }
 
     [Fact]
+    public void Slice_WrittenRange_WritesIntoBuffer()
+    {
+        var buffer = new ByteBuffer(4);
+        buffer.Write([1, 2, 3]);
+
+        buffer.Slice(1, 2)[0] = 9;
+
+        Assert.Equal(new byte[] { 1, 9, 3 }, buffer.ToArray());
+        Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Slice(2, 2));
+    }
+
+    [Fact]
     public void Advance_BeyondCapacity_ThrowsArgumentOutOfRangeException()
     {
         var buffer = new ByteBuffer(4);

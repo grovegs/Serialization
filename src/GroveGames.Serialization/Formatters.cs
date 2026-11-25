@@ -57,32 +57,49 @@ public static class Formatters
 
     private static TypeRegistration<T>? Load<T>()
     {
+        if (!Volatile.Read(ref s_coreRegistered))
+        {
+            RegisterCore();
+        }
+
+        if (Volatile.Read(ref FormatterCache<T>.Registration) == null && !Volatile.Read(ref FormatterCache<T>.AssembliesInitialized))
+        {
+            InitializeAssemblies(typeof(T));
+            Volatile.Write(ref FormatterCache<T>.AssembliesInitialized, true);
+        }
+
+        return Volatile.Read(ref FormatterCache<T>.Registration);
+    }
+
+    private static void RegisterCore()
+    {
         lock (s_lock)
         {
             if (!s_coreRegistered)
             {
-                s_coreRegistered = true;
                 var registrar = new FormatterRegistrar();
-                registrar.AddFormatter(new DataValueFormatter());
-                registrar.AddFormatter(new ListFormatter<DataValue>());
-                registrar.AddFormatter(new GuidFormatter());
-                registrar.AddFormatter(new ListFormatter<Guid>());
-                registrar.AddFormatter(new DateTimeFormatter());
-                registrar.AddFormatter(new ListFormatter<DateTime>());
-                registrar.AddFormatter(new DateTimeOffsetFormatter());
-                registrar.AddFormatter(new ListFormatter<DateTimeOffset>());
-                registrar.AddFormatter(new TimeSpanFormatter());
-                registrar.AddFormatter(new ListFormatter<TimeSpan>());
+                AddCore(registrar, new DataValueFormatter());
+                AddCore(registrar, new ListFormatter<DataValue>());
+                AddCore(registrar, new GuidFormatter());
+                AddCore(registrar, new ListFormatter<Guid>());
+                AddCore(registrar, new DateTimeFormatter());
+                AddCore(registrar, new ListFormatter<DateTime>());
+                AddCore(registrar, new DateTimeOffsetFormatter());
+                AddCore(registrar, new ListFormatter<DateTimeOffset>());
+                AddCore(registrar, new TimeSpanFormatter());
+                AddCore(registrar, new ListFormatter<TimeSpan>());
                 registrar.Commit();
+                Volatile.Write(ref s_coreRegistered, true);
             }
         }
+    }
 
+    private static void AddCore<T>(FormatterRegistrar registrar, IFormatter<T> formatter)
+    {
         if (Volatile.Read(ref FormatterCache<T>.Registration) == null)
         {
-            InitializeAssemblies(typeof(T));
+            registrar.AddFormatter(formatter);
         }
-
-        return Volatile.Read(ref FormatterCache<T>.Registration);
     }
 
     private static void InitializeAssemblies(Type type)
