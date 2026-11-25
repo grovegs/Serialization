@@ -4,9 +4,11 @@ public interface IFormatReader
 {
     public TokenType Peek();
     public void ReadObjectStart();
+    public void ReadObjectStart(out int count);
     public bool TryReadField(FieldTable fields, out int index);
     public bool TryReadNextField(FieldTable fields, ref int index);
     public bool TryReadFieldName(out string name);
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name);
     public void ReadArrayStart();
     public void ReadArrayStart(out int count);
     public bool TryReadNextElement();

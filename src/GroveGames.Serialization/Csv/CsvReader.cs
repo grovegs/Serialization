@@ -118,6 +118,24 @@ internal struct CsvReader : IDocumentReader
         return true;
     }
 
+    public void ReadObjectStart(out int count)
+    {
+        ReadObjectStart();
+        count = _headers.Length;
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!NextColumn())
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        utf8Name = Encoding.UTF8.GetBytes(_headers[_column]);
+        return true;
+    }
+
     public bool TryReadFieldName(out string name)
     {
         if (!NextColumn())

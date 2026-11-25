@@ -115,6 +115,24 @@ internal struct MessagePackWriter : IDocumentWriter
         }
 
         OnValue();
+        WriteText(value);
+    }
+
+    public void WriteFieldName(string name)
+    {
+        _stack.Counts[_depth]++;
+        WriteText(name);
+    }
+
+    public void WriteFieldNameUtf8(ReadOnlySpan<byte> utf8Name)
+    {
+        _stack.Counts[_depth]++;
+        WriteStringHeader(utf8Name.Length);
+        _output.Write(utf8Name);
+    }
+
+    private void WriteText(string value)
+    {
         var maxLength = Encoding.UTF8.GetMaxByteCount(value.Length);
 
         if (maxLength > ushort.MaxValue)

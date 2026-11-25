@@ -62,9 +62,10 @@ public static class Formatters
             RegisterCore();
         }
 
-        if (Volatile.Read(ref FormatterCache<T>.Registration) == null)
+        if (Volatile.Read(ref FormatterCache<T>.Registration) == null && !Volatile.Read(ref FormatterCache<T>.AssembliesInitialized))
         {
             InitializeAssemblies(typeof(T));
+            Volatile.Write(ref FormatterCache<T>.AssembliesInitialized, true);
         }
 
         return Volatile.Read(ref FormatterCache<T>.Registration);

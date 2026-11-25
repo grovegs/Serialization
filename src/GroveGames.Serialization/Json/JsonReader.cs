@@ -126,6 +126,12 @@ internal struct JsonReader : IDocumentReader
         Push();
     }
 
+    public void ReadObjectStart(out int count)
+    {
+        ReadObjectStart();
+        count = -1;
+    }
+
     public void ReadArrayStart()
     {
         Expect((byte)'[');
@@ -194,6 +200,23 @@ internal struct JsonReader : IDocumentReader
         }
 
         name = ReadString() ?? throw Error("a field name is null");
+        Expect((byte)':');
+        return true;
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!Next((byte)'}'))
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        if (!ReadStringUtf8(out utf8Name))
+        {
+            throw Error("a field name is null");
+        }
+
         Expect((byte)':');
         return true;
     }

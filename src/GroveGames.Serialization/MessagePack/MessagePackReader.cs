@@ -137,7 +137,19 @@ internal struct MessagePackReader : IDocumentReader
 
     public void ReadObjectStart()
     {
-        Push(ReadMapHeader());
+        ReadObjectStart(out _);
+    }
+
+    public void ReadObjectStart(out int count)
+    {
+        count = ReadMapHeader();
+
+        if (count > (_end - _position) / 2)
+        {
+            throw Error($"a map of {count} fields is longer than the data");
+        }
+
+        Push(count);
     }
 
     public void ReadArrayStart()
@@ -189,6 +201,22 @@ internal struct MessagePackReader : IDocumentReader
         }
 
         name = ReadString() ?? throw Error("a field name is null");
+        return true;
+    }
+
+    public bool TryReadFieldNameUtf8(out ReadOnlySpan<byte> utf8Name)
+    {
+        if (!NextItem())
+        {
+            utf8Name = default;
+            return false;
+        }
+
+        if (!ReadStringUtf8(out utf8Name))
+        {
+            throw Error("a field name is null");
+        }
+
         return true;
     }
 

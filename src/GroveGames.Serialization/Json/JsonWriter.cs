@@ -69,22 +69,25 @@ internal struct JsonWriter : IDocumentWriter
 
     public void WriteField(byte[] utf8Name)
     {
-        var bit = 1UL << _depth;
-
-        if ((_hasItems & bit) != 0)
-        {
-            _output.Write((byte)',');
-        }
-        else
-        {
-            _hasItems |= bit;
-        }
-
+        BeginField();
         _output.Write((byte)'"');
         _output.Write(utf8Name);
         _output.Write((byte)'"');
-        _output.Write((byte)':');
-        _afterName = true;
+        EndField();
+    }
+
+    public void WriteFieldName(string name)
+    {
+        BeginField();
+        WriteQuoted(name);
+        EndField();
+    }
+
+    public void WriteFieldNameUtf8(ReadOnlySpan<byte> utf8Name)
+    {
+        BeginField();
+        WriteQuoted(utf8Name);
+        EndField();
     }
 
     public void WriteInt32(int value)
@@ -146,6 +149,17 @@ internal struct JsonWriter : IDocumentWriter
         }
 
         Prefix();
+        WriteQuoted(value);
+    }
+
+    public void WriteStringUtf8(ReadOnlySpan<byte> utf8)
+    {
+        Prefix();
+        WriteQuoted(utf8);
+    }
+
+    private void WriteQuoted(string value)
+    {
         _output.Write((byte)'"');
         var start = 0;
 
@@ -167,9 +181,8 @@ internal struct JsonWriter : IDocumentWriter
         _output.Write((byte)'"');
     }
 
-    public void WriteStringUtf8(ReadOnlySpan<byte> utf8)
+    private void WriteQuoted(ReadOnlySpan<byte> utf8)
     {
-        Prefix();
         _output.Write((byte)'"');
         var start = 0;
 
@@ -189,6 +202,26 @@ internal struct JsonWriter : IDocumentWriter
 
         _output.Write(utf8.Slice(start));
         _output.Write((byte)'"');
+    }
+
+    private void BeginField()
+    {
+        var bit = 1UL << _depth;
+
+        if ((_hasItems & bit) != 0)
+        {
+            _output.Write((byte)',');
+        }
+        else
+        {
+            _hasItems |= bit;
+        }
+    }
+
+    private void EndField()
+    {
+        _output.Write((byte)':');
+        _afterName = true;
     }
 
     private void WriteNonFinite(double value)

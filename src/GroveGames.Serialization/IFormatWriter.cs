@@ -4,6 +4,8 @@ public interface IFormatWriter
 {
     public void BeginObject(int fieldCount);
     public void WriteField(byte[] utf8Name);
+    public void WriteFieldName(string name);
+    public void WriteFieldNameUtf8(ReadOnlySpan<byte> utf8Name);
     public void EndObject();
     public void BeginArray(int count);
     public void EndArray();

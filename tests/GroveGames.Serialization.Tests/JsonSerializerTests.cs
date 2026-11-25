@@ -132,6 +132,18 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
+    public void Serialize_DataObjectFieldNeedingEscapes_WritesValidJson()
+    {
+        var serializer = CreateSerializer();
+        var data = new DataObject { ["a\"b\\c"] = 1 };
+
+        var text = serializer.Serialize(DataValue.FromObject(data));
+
+        Assert.Equal("{\"a\\\"b\\\\c\":1}", Encoding.UTF8.GetString(text));
+        Assert.Equal(1, serializer.Deserialize<DataValue>(text).AsObject["a\"b\\c"].AsInt64);
+    }
+
+    [Fact]
     public void ReadVersion_Envelope_ReturnsStoredVersion()
     {
         var serializer = CreateSerializer();

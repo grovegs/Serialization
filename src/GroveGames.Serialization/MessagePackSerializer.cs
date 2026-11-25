@@ -5,6 +5,13 @@ namespace GroveGames.Serialization;
 
 public sealed class MessagePackSerializer : ISerializer, IFormat
 {
+    private MessagePackStack? _stack;
+
+    public MessagePackSerializer()
+    {
+        _stack = null;
+    }
+
     public void Serialize<T>(T? value, IBufferWriter<byte> output)
     {
         FormatOperations.Serialize(this, value, output);
@@ -17,7 +24,7 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
 
     public int ReadVersion(ReadOnlyMemory<byte> data)
     {
-        var stack = MessagePackStack.Rent();
+        var stack = RentStack();
 
         try
         {
@@ -27,13 +34,13 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
         finally
         {
-            MessagePackStack.Return(stack);
+            ReturnStack(stack);
         }
     }
 
     void IFormat.Serialize<T>(T? value, ByteBuffer output) where T : default
     {
-        var stack = MessagePackStack.Rent();
+        var stack = RentStack();
 
         try
         {
@@ -42,13 +49,13 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
         finally
         {
-            MessagePackStack.Return(stack);
+            ReturnStack(stack);
         }
     }
 
     T? IFormat.Deserialize<T>(ReadOnlyMemory<byte> data) where T : default
     {
-        var stack = MessagePackStack.Rent();
+        var stack = RentStack();
 
         try
         {
@@ -57,13 +64,13 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
         finally
         {
-            MessagePackStack.Return(stack);
+            ReturnStack(stack);
         }
     }
 
     void IFormat.Convert<T>(ReadOnlyMemory<byte> data, IFormat target, ByteBuffer output)
     {
-        var stack = MessagePackStack.Rent();
+        var stack = RentStack();
 
         try
         {
@@ -72,13 +79,13 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         }
         finally
         {
-            MessagePackStack.Return(stack);
+            ReturnStack(stack);
         }
     }
 
     void IFormat.ConvertFrom<T, TReader>(ref TReader reader, ByteBuffer output)
     {
-        var stack = MessagePackStack.Rent();
+        var stack = RentStack();
 
         try
         {
@@ -86,6 +93,19 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
             Pipeline.Convert<T, TReader, MessagePackWriter>(ref reader, ref writer);
         }
         finally
+        {
+            ReturnStack(stack);
+        }
+    }
+
+    private MessagePackStack RentStack()
+    {
+        return Interlocked.Exchange(ref _stack, null) ?? MessagePackStack.Rent();
+    }
+
+    private void ReturnStack(MessagePackStack stack)
+    {
+        if (Interlocked.CompareExchange(ref _stack, stack, null) != null)
         {
             MessagePackStack.Return(stack);
         }

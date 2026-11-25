@@ -258,7 +258,7 @@ internal static class FormatterEmitter
                 code.Open("else");
                 code.Line($"writer.BeginObject({map}.Count);");
                 code.Open($"foreach (var {pair} in {map})");
-                code.Line($"writer.WriteField(global::System.Text.Encoding.UTF8.GetBytes({pair}.Key));");
+                code.Line($"writer.WriteFieldName({pair}.Key);");
                 WriteValue(code, shape.Element!, pair + ".Value", depth + 1);
                 code.Close();
                 code.Line("writer.EndObject();");
@@ -335,8 +335,9 @@ internal static class FormatterEmitter
                 var entry = "entry" + depth;
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line($"{target} = null;").Close();
                 code.Open("else");
-                code.Line($"var {map} = new global::System.Collections.Generic.Dictionary<string, {shape.Element!.TypeName}>();");
-                code.Line("reader.ReadObjectStart();");
+                var fields = "fields" + depth;
+                code.Line($"reader.ReadObjectStart(out var {fields});");
+                code.Line($"var {map} = new global::System.Collections.Generic.Dictionary<string, {shape.Element!.TypeName}>(global::System.Math.Max({fields}, 0));");
                 code.Open($"while (reader.TryReadFieldName(out var {key}))");
                 code.Line($"{shape.Element!.TypeName} {entry} = default;");
                 ReadValue(code, shape.Element!, entry, depth + 1);
@@ -408,10 +409,11 @@ internal static class FormatterEmitter
                 var key = "key" + depth;
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line("writer.WriteNull();").Close();
                 code.Open("else");
-                code.Line("reader.ReadObjectStart();");
-                code.Line("writer.BeginObject(-1);");
-                code.Open($"while (reader.TryReadFieldName(out var {key}))");
-                code.Line($"writer.WriteField(global::System.Text.Encoding.UTF8.GetBytes({key}));");
+                var entries = "entries" + depth;
+                code.Line($"reader.ReadObjectStart(out var {entries});");
+                code.Line($"writer.BeginObject({entries});");
+                code.Open($"while (reader.TryReadFieldNameUtf8(out var {key}))");
+                code.Line($"writer.WriteFieldNameUtf8({key});");
                 TranscodeValue(code, shape.Element!, depth + 1);
                 code.Close();
                 code.Line("writer.EndObject();");

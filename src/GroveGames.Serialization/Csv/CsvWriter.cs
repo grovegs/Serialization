@@ -70,6 +70,16 @@ internal struct CsvWriter : IDocumentWriter
         _row.Reset();
     }
 
+    public void WriteFieldName(string name)
+    {
+        WriteField(Encoding.UTF8.GetBytes(name));
+    }
+
+    public void WriteFieldNameUtf8(ReadOnlySpan<byte> utf8Name)
+    {
+        WriteField(utf8Name.ToArray());
+    }
+
     public void WriteField(byte[] utf8Name)
     {
         if (!_headerWritten)

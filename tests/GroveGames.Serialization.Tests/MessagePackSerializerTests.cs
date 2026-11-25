@@ -168,6 +168,15 @@ public sealed class MessagePackSerializerTests
     }
 
     [Fact]
+    public void Deserialize_MapLongerThanData_ThrowsFormatException()
+    {
+        var serializer = CreateSerializer();
+        byte[] bytes = [0xdf, 0x7f, 0xff, 0xff, 0xff, 0xa1, (byte)'a', 0xc0];
+
+        Assert.Throws<FormatException>(() => serializer.Deserialize<DataValue>(bytes));
+    }
+
+    [Fact]
     public void ReadVersion_VersionedData_ReturnsStoredVersion()
     {
         var serializer = CreateSerializer();
