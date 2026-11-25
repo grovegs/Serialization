@@ -5,8 +5,10 @@ public interface IFormatReader
     public TokenType Peek();
     public void ReadObjectStart();
     public bool TryReadField(FieldTable fields, out int index);
+    public bool TryReadNextField(FieldTable fields, ref int index);
     public bool TryReadFieldName(out string name);
     public void ReadArrayStart();
+    public void ReadArrayStart(out int count);
     public bool TryReadNextElement();
     public int ReadInt32();
     public long ReadInt64();

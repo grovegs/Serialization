@@ -69,6 +69,16 @@ public sealed class FieldTable
         return -1;
     }
 
+    internal int IndexOf(ReadOnlySpan<byte> utf8Name, int expected)
+    {
+        return (uint)expected < (uint)_utf8Names.Length && utf8Name.SequenceEqual(_utf8Names[expected]) ? expected : IndexOf(utf8Name);
+    }
+
+    internal int IndexOf(string name, int expected)
+    {
+        return (uint)expected < (uint)_names.Length && string.Equals(_names[expected], name, StringComparison.Ordinal) ? expected : IndexOf(name);
+    }
+
     public int IndexOf(string name)
     {
         for (var i = 0; i < _names.Length; i++)

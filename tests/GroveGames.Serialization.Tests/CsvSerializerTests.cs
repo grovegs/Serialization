@@ -77,6 +77,15 @@ public sealed class CsvSerializerTests
     }
 
     [Fact]
+    public void ReadVersion_VersionLine_ReturnsStoredVersion()
+    {
+        var serializer = new CsvSerializer();
+
+        Assert.Equal(2, serializer.ReadVersion(serializer.Serialize(new List<TestItemV2> { new() { Id = "a" } })));
+        Assert.Equal(1, serializer.ReadVersion(serializer.Serialize(new List<TestItem> { new() { Id = "a" } })));
+    }
+
+    [Fact]
     public void Serialize_SingleObject_ThrowsNotSupportedException()
     {
         var serializer = CreateSerializer();

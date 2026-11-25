@@ -44,7 +44,19 @@ internal struct DataValueReader : IFormatReader
         Push(DataKind.Array);
     }
 
+    public void ReadArrayStart(out int count)
+    {
+        Push(DataKind.Array);
+        count = _containers[_depth].AsArray.Count;
+    }
+
     public bool TryReadField(FieldTable fields, out int index)
+    {
+        index = -1;
+        return TryReadNextField(fields, ref index);
+    }
+
+    public bool TryReadNextField(FieldTable fields, ref int index)
     {
         if (!TryReadFieldName(out var name))
         {
@@ -52,7 +64,7 @@ internal struct DataValueReader : IFormatReader
             return false;
         }
 
-        index = fields.IndexOf(name);
+        index = fields.IndexOf(name, index + 1);
         return true;
     }
 

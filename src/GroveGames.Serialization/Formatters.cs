@@ -57,11 +57,25 @@ public static class Formatters
 
     private static TypeRegistration<T>? Load<T>()
     {
+        if (!Volatile.Read(ref s_coreRegistered))
+        {
+            RegisterCore();
+        }
+
+        if (Volatile.Read(ref FormatterCache<T>.Registration) == null)
+        {
+            InitializeAssemblies(typeof(T));
+        }
+
+        return Volatile.Read(ref FormatterCache<T>.Registration);
+    }
+
+    private static void RegisterCore()
+    {
         lock (s_lock)
         {
             if (!s_coreRegistered)
             {
-                s_coreRegistered = true;
                 var registrar = new FormatterRegistrar();
                 registrar.AddFormatter(new DataValueFormatter());
                 registrar.AddFormatter(new ListFormatter<DataValue>());
@@ -74,15 +88,9 @@ public static class Formatters
                 registrar.AddFormatter(new TimeSpanFormatter());
                 registrar.AddFormatter(new ListFormatter<TimeSpan>());
                 registrar.Commit();
+                Volatile.Write(ref s_coreRegistered, true);
             }
         }
-
-        if (Volatile.Read(ref FormatterCache<T>.Registration) == null)
-        {
-            InitializeAssemblies(typeof(T));
-        }
-
-        return Volatile.Read(ref FormatterCache<T>.Registration);
     }
 
     private static void InitializeAssemblies(Type type)

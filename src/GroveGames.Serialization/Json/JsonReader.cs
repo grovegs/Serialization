@@ -132,8 +132,22 @@ internal struct JsonReader : IDocumentReader
         Push();
     }
 
+    public void ReadArrayStart(out int count)
+    {
+        ReadArrayStart();
+        count = -1;
+    }
+
     public bool TryReadField(FieldTable fields, out int index)
     {
+        index = -1;
+        return TryReadNextField(fields, ref index);
+    }
+
+    public bool TryReadNextField(FieldTable fields, ref int index)
+    {
+        var expected = index + 1;
+
         if (!Next((byte)'}'))
         {
             index = -1;
@@ -159,11 +173,11 @@ internal struct JsonReader : IDocumentReader
         {
             _position = start - 1;
             ReadStringUtf8(out var name);
-            index = fields.IndexOf(name);
+            index = fields.IndexOf(name, expected);
         }
         else
         {
-            index = fields.IndexOf(new ReadOnlySpan<byte>(_buffer, start, _position - start));
+            index = fields.IndexOf(new ReadOnlySpan<byte>(_buffer, start, _position - start), expected);
             _position++;
         }
 

@@ -115,9 +115,47 @@ internal struct MessagePackWriter : IDocumentWriter
         }
 
         OnValue();
-        var length = Encoding.UTF8.GetByteCount(value);
-        WriteStringHeader(length);
-        Encoding.UTF8.GetBytes(value.AsSpan(), _output.Take(length));
+        var maxLength = Encoding.UTF8.GetMaxByteCount(value.Length);
+
+        if (maxLength > ushort.MaxValue)
+        {
+            var length = Encoding.UTF8.GetByteCount(value);
+            WriteStringHeader(length);
+            Encoding.UTF8.GetBytes(value.AsSpan(), _output.Take(length));
+            return;
+        }
+
+        var reserved = StringHeaderLength(maxLength);
+        var span = _output.GetSpan(reserved + maxLength);
+        var written = Encoding.UTF8.GetBytes(value.AsSpan(), span.Slice(reserved));
+        var headerLength = StringHeaderLength(written);
+
+        if (headerLength < reserved)
+        {
+            span.Slice(reserved, written).CopyTo(span.Slice(headerLength));
+        }
+
+        if (headerLength == 1)
+        {
+            span[0] = (byte)(0xa0 | written);
+        }
+        else if (headerLength == 2)
+        {
+            span[0] = 0xd9;
+            span[1] = (byte)written;
+        }
+        else
+        {
+            span[0] = 0xda;
+            BinaryPrimitives.WriteUInt16BigEndian(span.Slice(1), (ushort)written);
+        }
+
+        _output.Advance(headerLength + written);
+    }
+
+    private static int StringHeaderLength(int length)
+    {
+        return length < 32 ? 1 : length <= byte.MaxValue ? 2 : 3;
     }
 
     public void WriteStringUtf8(ReadOnlySpan<byte> utf8)

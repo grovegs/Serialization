@@ -141,7 +141,8 @@ internal static class FormatterEmitter
         code.Line($"var value = new {model.FullName}();");
         code.Line("reader.ReadObjectStart();");
         code.Line();
-        code.Open("while (reader.TryReadField(s_fields, out var index))");
+        code.Line("var index = -1;");
+        code.Open("while (reader.TryReadNextField(s_fields, ref index))");
         code.Open("switch (index)");
 
         for (var i = 0; i < model.Members.Count; i++)
@@ -170,7 +171,8 @@ internal static class FormatterEmitter
         code.Line("reader.ReadObjectStart();");
         code.Line("writer.BeginObject(-1);");
         code.Line();
-        code.Open("while (reader.TryReadField(s_fields, out var index))");
+        code.Line("var index = -1;");
+        code.Open("while (reader.TryReadNextField(s_fields, ref index))");
         code.Open("switch (index)");
 
         for (var i = 0; i < model.Members.Count; i++)
@@ -316,8 +318,9 @@ internal static class FormatterEmitter
                 var item = "item" + depth;
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line($"{target} = null;").Close();
                 code.Open("else");
-                code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>();");
-                code.Line("reader.ReadArrayStart();");
+                var count = "count" + depth;
+                code.Line($"reader.ReadArrayStart(out var {count});");
+                code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>(global::System.Math.Max({count}, 0));");
                 code.Open("while (reader.TryReadNextElement())");
                 code.Line($"{shape.Element!.TypeName} {item} = default;");
                 ReadValue(code, shape.Element!, item, depth + 1);
@@ -392,8 +395,9 @@ internal static class FormatterEmitter
             case ShapeKind.Array:
                 code.Open($"if (reader.Peek() == {Core}TokenType.Null)").Line("reader.Skip();").Line("writer.WriteNull();").Close();
                 code.Open("else");
-                code.Line("reader.ReadArrayStart();");
-                code.Line("writer.BeginArray(-1);");
+                var items = "items" + depth;
+                code.Line($"reader.ReadArrayStart(out var {items});");
+                code.Line($"writer.BeginArray({items});");
                 code.Open("while (reader.TryReadNextElement())");
                 TranscodeValue(code, shape.Element!, depth + 1);
                 code.Close();

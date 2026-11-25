@@ -132,6 +132,28 @@ public sealed class JsonSerializerTests
     }
 
     [Fact]
+    public void ReadVersion_Envelope_ReturnsStoredVersion()
+    {
+        var serializer = CreateSerializer();
+
+        Assert.Equal(3, serializer.ReadVersion(serializer.Serialize(new TestSave { Name = "hero" })));
+        Assert.Equal(1, serializer.ReadVersion(Encoding.UTF8.GetBytes("{\"name\":\"hero\"}")));
+    }
+
+    [Fact]
+    public void Deserialize_FieldsOutOfOrder_ReadsEveryField()
+    {
+        var serializer = CreateSerializer();
+        var json = "{\"$v\":3,\"data\":{\"gold\":3,\"level\":2,\"name\":\"hero\"}}";
+
+        var result = serializer.Deserialize<TestSave>(Encoding.UTF8.GetBytes(json));
+
+        Assert.Equal("hero", result!.Name);
+        Assert.Equal(2, result.Level);
+        Assert.Equal(3, result.Gold);
+    }
+
+    [Fact]
     public void Deserialize_VersionedType_RoundTrips()
     {
         var serializer = CreateSerializer();

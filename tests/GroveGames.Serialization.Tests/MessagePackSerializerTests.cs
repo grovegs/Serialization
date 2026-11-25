@@ -125,6 +125,66 @@ public sealed class MessagePackSerializerTests
         Assert.Throws<FormatException>(() => serializer.Deserialize<TestItem>(bytes));
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(31)]
+    [InlineData(32)]
+    [InlineData(255)]
+    [InlineData(256)]
+    [InlineData(21_844)]
+    [InlineData(21_845)]
+    public void Serialize_StringOfLength_WritesShortestHeaderAndRoundTrips(int length)
+    {
+        var serializer = CreateSerializer();
+        var id = new string('x', length);
+
+        var bytes = serializer.Serialize(DataValue.FromString(id));
+
+        Assert.Equal(length < 32 ? 1 : length <= byte.MaxValue ? 2 : 3, bytes.Length - length);
+        Assert.Equal(id, serializer.Deserialize<DataValue>(bytes).AsString);
+    }
+
+    [Fact]
+    public void Serialize_MultiByteString_WritesShortestHeaderAndRoundTrips()
+    {
+        var serializer = CreateSerializer();
+        var id = new string('ı', 15);
+
+        var bytes = serializer.Serialize(DataValue.FromString(id));
+
+        Assert.Equal(0xa0 | 30, bytes[0]);
+        Assert.Equal(id, serializer.Deserialize<DataValue>(bytes).AsString);
+    }
+
+    [Fact]
+    public void Deserialize_ArrayLongerThanData_ThrowsFormatException()
+    {
+        var serializer = CreateSerializer();
+        byte[] bytes = [0xdd, 0x7f, 0xff, 0xff, 0xff, 0xc0];
+
+        Assert.Throws<FormatException>(() => serializer.Deserialize<List<TestItem>>(bytes));
+    }
+
+    [Fact]
+    public void ReadVersion_VersionedData_ReturnsStoredVersion()
+    {
+        var serializer = CreateSerializer();
+
+        Assert.Equal(300, serializer.ReadVersion(serializer.Serialize(new TestItemV300 { Id = "a" })));
+        Assert.Equal(2, serializer.ReadVersion(serializer.Serialize(new TestItemV2 { Id = "a" })));
+    }
+
+    [Fact]
+    public void ReadVersion_DataWithoutVersion_ReturnsOne()
+    {
+        var serializer = CreateSerializer();
+
+        Assert.Equal(1, serializer.ReadVersion(serializer.Serialize(new TestItem { Id = "a" })));
+        Assert.Equal(1, serializer.ReadVersion(ReadOnlyMemory<byte>.Empty));
+    }
+
     private static MessagePackSerializer CreateSerializer()
     {
         return new MessagePackSerializer();

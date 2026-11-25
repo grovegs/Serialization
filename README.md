@@ -1,4 +1,4 @@
-# GroveGames.Serialization
+﻿# GroveGames.Serialization
 
 High-performance JSON, MessagePack and CSV serialization for .NET, Unity and Godot, with conversion between formats and versioned migrations.
 
@@ -133,6 +133,8 @@ Each root type has a version, and the version is written with the value only whe
 
 Data without a version counts as v1, so data written before a type was versioned keeps loading. Older data is loaded into a `DataValue` tree, each migration from its version runs in order, and the result is read normally. Unreadable data throws `FormatException`: data from a newer version, a step with no migration, and a migration that throws (its exception is the inner exception).
 
+`ReadVersion(data)` on any serializer returns the version stored with the data, or 1 when it has none, without reading the value. Storage uses it to find values written by an older version and rewrite them once.
+
 ```csharp
 public sealed class PlayerSaveXpToLevel : IMigration<PlayerSave>
 {
@@ -212,7 +214,8 @@ Download the Godot addon from the [latest release](https://github.com/grovegs/Se
 ## Architecture
 
 - **Struct readers and writers**: Formatters are generic over `TWriter : struct, IFormatWriter` and `TReader : struct, IFormatReader`, so every per-value call is direct, including under IL2CPP.
-- **Pre-encoded names**: `FieldTable` stores field names as UTF-8, so writers never encode them and readers match them without allocating.
+- **Pre-encoded names**: `FieldTable` stores field names as UTF-8, so writers never encode them and readers match them without allocating. Generated readers check the field after the previous one first, so fields in written order match in one comparison.
+- **Sized collections**: Lists are created with the element count when the format stores it, as MessagePack and CSV do.
 - **Fast path**: Data at the current version is read straight into the object. Only older data builds a `DataValue` tree, whose scalars are stored inline without allocating.
 - **Bounded nesting**: Readers stop at 63 levels of nesting and throw `FormatException`.
 

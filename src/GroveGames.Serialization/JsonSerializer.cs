@@ -15,6 +15,13 @@ public sealed class JsonSerializer : ISerializer, IFormat
         return ((IFormat)this).Deserialize<T>(data);
     }
 
+    public int ReadVersion(ReadOnlyMemory<byte> data)
+    {
+        var reader = new JsonReader(data);
+        reader.TryReadEnvelope(out var version);
+        return version;
+    }
+
     void IFormat.Serialize<T>(T? value, ByteBuffer output) where T : default
     {
         var writer = new JsonWriter(output);

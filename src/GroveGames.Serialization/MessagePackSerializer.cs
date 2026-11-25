@@ -15,6 +15,22 @@ public sealed class MessagePackSerializer : ISerializer, IFormat
         return ((IFormat)this).Deserialize<T>(data);
     }
 
+    public int ReadVersion(ReadOnlyMemory<byte> data)
+    {
+        var stack = MessagePackStack.Rent();
+
+        try
+        {
+            var reader = new MessagePackReader(data, stack);
+            reader.TryReadEnvelope(out var version);
+            return version;
+        }
+        finally
+        {
+            MessagePackStack.Return(stack);
+        }
+    }
+
     void IFormat.Serialize<T>(T? value, ByteBuffer output) where T : default
     {
         var stack = MessagePackStack.Rent();

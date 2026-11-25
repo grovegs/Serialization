@@ -32,8 +32,8 @@ public sealed class ListFormatter<T> : IFormatter<List<T>>
         }
 
         var formatter = Formatters.Get<T>();
-        var list = new List<T>();
-        reader.ReadArrayStart();
+        reader.ReadArrayStart(out var count);
+        var list = new List<T>(Math.Max(count, 0));
 
         while (reader.TryReadNextElement())
         {
@@ -55,8 +55,8 @@ public sealed class ListFormatter<T> : IFormatter<List<T>>
         }
 
         var formatter = Formatters.Get<T>();
-        reader.ReadArrayStart();
-        writer.BeginArray(-1);
+        reader.ReadArrayStart(out var count);
+        writer.BeginArray(count);
 
         while (reader.TryReadNextElement())
         {
