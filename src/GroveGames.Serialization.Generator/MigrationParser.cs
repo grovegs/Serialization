@@ -46,7 +46,41 @@ internal static class MigrationParser
         return new MigrationModel(
             type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             migration.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            GetFromVersion(context, cancellationToken),
             new EquatableArray<DiagnosticInfo>([.. diagnostics]));
+    }
+
+    private static int? GetFromVersion(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+    {
+        foreach (var member in ((ClassDeclarationSyntax)context.Node).Members)
+        {
+            if (member is not PropertyDeclarationSyntax { Identifier.Text: "FromVersion" } property)
+            {
+                continue;
+            }
+
+            var expression = property.ExpressionBody?.Expression;
+
+            if (expression == null && property.AccessorList != null)
+            {
+                foreach (var accessor in property.AccessorList.Accessors)
+                {
+                    if (accessor.Keyword.Text == "get")
+                    {
+                        expression = accessor.ExpressionBody?.Expression ?? (accessor.Body is { Statements.Count: 1 } body && body.Statements[0] is ReturnStatementSyntax returnStatement ? returnStatement.Expression : null);
+                    }
+                }
+            }
+
+            if (expression != null && context.SemanticModel.GetConstantValue(expression, cancellationToken) is { HasValue: true, Value: int version })
+            {
+                return version;
+            }
+
+            return null;
+        }
+
+        return null;
     }
 
     private static bool IsAccessible(INamedTypeSymbol type)

@@ -7,7 +7,8 @@ internal sealed record SchemaTypeModel(
     bool IsValueType,
     int Version,
     EquatableArray<SchemaMemberModel> Members,
-    EquatableArray<DiagnosticInfo> Diagnostics)
+    EquatableArray<DiagnosticInfo> Diagnostics,
+    LocationInfo? Location)
 {
     public string FormatterName => Name + "Formatter";
 

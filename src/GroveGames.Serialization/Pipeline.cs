@@ -96,8 +96,8 @@ internal static class Pipeline
         reader.EndDocument();
     }
 
-    private static NotSupportedException Newer<T>(int stored, int current)
+    private static FormatException Newer<T>(int stored, int current)
     {
-        return new NotSupportedException($"{typeof(T).Name} data is v{stored}, but this build only knows up to v{current}.");
+        return new FormatException($"{typeof(T).Name} data is v{stored}, but this build only knows up to v{current}.");
     }
 }

@@ -30,6 +30,9 @@ internal static class SchemaDiagnostics
     public static readonly DiagnosticDescriptor InvalidFormatter = new(
         "GGS008", "Invalid formatter", "Formatter '{0}' must be a public or internal, non-abstract, non-generic class or struct that implements IFormatter<T> once and has a parameterless constructor", Category, DiagnosticSeverity.Error, true);
 
+    public static readonly DiagnosticDescriptor MissingMigration = new(
+        "GGS009", "Missing migration", "'{0}' is version {1}, but no migration in this assembly upgrades it from version {2}, so saved data at that version would fail to load", Category, DiagnosticSeverity.Error, true);
+
     public static DiagnosticDescriptor Find(string id)
     {
         return id switch
@@ -41,6 +44,7 @@ internal static class SchemaDiagnostics
             "GGS005" => InvalidMigration,
             "GGS006" => MissingConstructor,
             "GGS007" => InvalidVersion,
+            "GGS009" => MissingMigration,
             _ => InvalidFormatter
         };
     }

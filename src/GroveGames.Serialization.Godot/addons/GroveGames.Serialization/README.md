@@ -61,6 +61,7 @@ The generator also registers every schema type with its version, a `ListFormatte
 | GGS006     | Error    | A schema class has no parameterless constructor                         |
 | GGS007     | Error    | A schema or formatter version is below 1                                |
 | GGS008     | Error    | A `[Formatter]` class is not a valid formatter                          |
+| GGS009     | Error    | A `[Schema(version: n)]` type has no migration in its assembly for a step below n (checked when every `FromVersion` is a constant) |
 
 ### Type Schemas
 
@@ -130,7 +131,7 @@ Each root type has a version, and the version is written with the value only whe
 | MessagePack | the value | a 3-byte extension, then the value |
 | CSV         | the rows  | a `#v=3` first line, then the rows |
 
-Data without a version counts as v1, so data written before a type was versioned keeps loading. Older data is loaded into a `DataValue` tree, each migration from its version runs in order, and the result is read normally. Data from a newer version throws `NotSupportedException`.
+Data without a version counts as v1, so data written before a type was versioned keeps loading. Older data is loaded into a `DataValue` tree, each migration from its version runs in order, and the result is read normally. Unreadable data throws `FormatException`: data from a newer version, a step with no migration, and a migration that throws (its exception is the inner exception).
 
 ```csharp
 public sealed class PlayerSaveXpToLevel : IMigration<PlayerSave>
