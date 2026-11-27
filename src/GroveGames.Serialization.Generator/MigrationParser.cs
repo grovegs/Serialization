@@ -8,9 +8,40 @@ internal static class MigrationParser
 {
     private const string MigrationInterface = "GroveGames.Serialization.IMigration<T>";
 
+    // Checked on every keystroke, so it only looks at syntax: a generic base type, or one whose name mentions Migration,
+    // covers IMigration<T> and migration base classes, and skips the MonoBehaviours and ScriptableObjects of a game.
     public static bool IsCandidate(SyntaxNode node)
     {
-        return node is ClassDeclarationSyntax { BaseList: not null };
+        if (node is not (ClassDeclarationSyntax or RecordDeclarationSyntax) || ((TypeDeclarationSyntax)node).BaseList is not { } baseList)
+        {
+            return false;
+        }
+
+        foreach (var baseType in baseList.Types)
+        {
+            if (RightmostName(baseType.Type).IndexOf("Migration", StringComparison.Ordinal) >= 0 || IsGeneric(baseType.Type))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsGeneric(TypeSyntax type)
+    {
+        return type is GenericNameSyntax || (type is QualifiedNameSyntax { Right: GenericNameSyntax }) || (type is AliasQualifiedNameSyntax { Name: GenericNameSyntax });
+    }
+
+    private static string RightmostName(TypeSyntax type)
+    {
+        return type switch
+        {
+            QualifiedNameSyntax qualified => qualified.Right.Identifier.ValueText,
+            AliasQualifiedNameSyntax alias => alias.Name.Identifier.ValueText,
+            SimpleNameSyntax simple => simple.Identifier.ValueText,
+            _ => string.Empty
+        };
     }
 
     public static MigrationModel? Parse(GeneratorSyntaxContext context, CancellationToken cancellationToken)
@@ -52,7 +83,7 @@ internal static class MigrationParser
 
     private static int? GetFromVersion(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
-        foreach (var member in ((ClassDeclarationSyntax)context.Node).Members)
+        foreach (var member in ((TypeDeclarationSyntax)context.Node).Members)
         {
             if (member is not PropertyDeclarationSyntax { Identifier.Text: "FromVersion" } property)
             {

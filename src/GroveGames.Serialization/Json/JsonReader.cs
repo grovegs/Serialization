@@ -117,6 +117,11 @@ internal struct JsonReader : IDocumentReader
             }
         }
 
+        if (_position + 1 < _end && _buffer[_position] == '-' && _buffer[_position + 1] == '0' && (_position + 2 >= _end || !IsDigit(_buffer[_position + 2])))
+        {
+            return TokenType.Float;
+        }
+
         return TokenType.Integer;
     }
 
@@ -548,7 +553,7 @@ internal struct JsonReader : IDocumentReader
                         }
                     }
 
-                    WriteCodePoint(output, codePoint);
+                    WriteCodePoint(output, codePoint is >= 0xD800 and <= 0xDFFF ? 0xFFFD : codePoint);
                     break;
                 default:
                     output.Write(value);
@@ -608,5 +613,10 @@ internal struct JsonReader : IDocumentReader
             output.Write((byte)(0x80 | ((codePoint >> 6) & 0x3F)));
             output.Write((byte)(0x80 | (codePoint & 0x3F)));
         }
+    }
+
+    private static bool IsDigit(byte value)
+    {
+        return value >= '0' && value <= '9';
     }
 }

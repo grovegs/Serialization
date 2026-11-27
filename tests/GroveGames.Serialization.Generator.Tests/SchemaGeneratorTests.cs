@@ -254,6 +254,13 @@ public sealed class SchemaGeneratorTests
     [InlineData("[Schema(version: 2)] public sealed class Bumped { }", "GGS009")]
     [InlineData("[Schema(version: 3)] public sealed class Gap { } public sealed class GapFromOne : IMigration<Gap> { public int FromVersion => 1; public void Apply(DataValue root) { } }", "GGS009")]
     [InlineData("public sealed class Outer { [Formatter] private sealed class Hidden : IFormatter<int> { public void Write<TWriter>(ref TWriter writer, int value) where TWriter : struct, IFormatWriter { } public int Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => 0; public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { } } }", "GGS008")]
+    [InlineData("[Schema(version: 2)] public sealed class Twice { } public sealed class TwiceA : IMigration<Twice> { public int FromVersion => 1; public void Apply(DataValue root) { } } public sealed class TwiceB : IMigration<Twice> { public int FromVersion => 1; public void Apply(DataValue root) { } }", "GGS010")]
+    [InlineData("[Schema(version: 2)] public sealed class Ahead { } public sealed class AheadFromOne : IMigration<Ahead> { public int FromVersion => 1; public void Apply(DataValue root) { } } public sealed class AheadFromTwo : IMigration<Ahead> { public int FromVersion => 2; public void Apply(DataValue root) { } }", "GGS011")]
+    [InlineData("[Schema] public sealed class Pair { } [Formatter] public sealed class PairFormatter2 : IFormatter<Pair> { public void Write<TWriter>(ref TWriter writer, Pair value) where TWriter : struct, IFormatWriter { } public Pair Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => null; public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { } }", "GGS012")]
+    [InlineData("[Schema] public sealed class Locked { public readonly int Value; }", "GGS013")]
+    [InlineData("[Schema] public sealed class Bag { public System.Collections.Generic.List<int> Items { get; } = new(); }", "GGS013")]
+    [InlineData("public class BaseRecord { public int Shared; } [Schema] public sealed class Child : BaseRecord { public int Own; }", "GGS013")]
+    [InlineData("[Schema(version: 2)] public sealed class Inner { public int Value; } public sealed class InnerFromOne : IMigration<Inner> { public int FromVersion => 1; public void Apply(DataValue root) { } } [Schema] public sealed class Outer { public Inner Part; }", "GGS014")]
     public void Generate_InvalidSchema_ReportsDiagnostic(string declarations, string id)
     {
         var result = Run("using GroveGames.Serialization;\nnamespace Game;\n" + declarations);
@@ -381,6 +388,158 @@ public sealed class SchemaGeneratorTests
 
         Assert.Empty(result.GeneratorDiagnostics);
         Assert.Empty(result.GeneratedSources);
+    }
+
+    [Fact]
+    public void Generate_KeywordMemberName_Compiles()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            [Schema]
+            public sealed class Calendar
+            {
+                public int @event;
+                public string @class;
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+    }
+
+    [Fact]
+    public void Generate_MemberTypeWithFormatterInAssembly_ReportsNoMissingFormatter()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            public sealed class Coin { }
+
+            [Formatter]
+            public sealed class CoinFormatter : IFormatter<Coin>
+            {
+                public void Write<TWriter>(ref TWriter writer, Coin value) where TWriter : struct, IFormatWriter { }
+                public Coin Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => null;
+                public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { }
+            }
+
+            [Schema]
+            public sealed class Purse
+            {
+                public Coin Coin;
+            }
+            """);
+
+        Assert.DoesNotContain(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == "GGS004");
+    }
+
+    [Fact]
+    public void Generate_RecordMigration_RegistersIt()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            [Schema(version: 2)]
+            public sealed class Save
+            {
+                public int Gold;
+            }
+
+            public sealed record SaveFromOne : IMigration<Save>
+            {
+                public int FromVersion => 1;
+
+                public void Apply(DataValue root)
+                {
+                }
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+        Assert.Contains(result.GeneratedSources, source => source.Contains("registrar.AddMigration(new global::Game.SaveFromOne());"));
+    }
+
+    [Fact]
+    public void Generate_JaggedArrayMember_Compiles()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            [Schema]
+            public sealed class Grid
+            {
+                public int[][] Cells;
+                public string[] Names;
+            }
+            """);
+
+        Assert.Empty(result.GeneratorDiagnostics);
+        Assert.Empty(result.CompilationErrors);
+    }
+
+    [Fact]
+    public void Generate_ListFormatterDeclaredBeforeItsItemFormatter_ReportsDuplicateFormatter()
+    {
+        var result = Run("""
+            using System.Collections.Generic;
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            public sealed class Coin { }
+
+            [Formatter]
+            public sealed class ACoinsFormatter : IFormatter<List<Coin>>
+            {
+                public void Write<TWriter>(ref TWriter writer, List<Coin> value) where TWriter : struct, IFormatWriter { }
+                public List<Coin> Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => null;
+                public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { }
+            }
+
+            [Formatter]
+            public sealed class ZCoinFormatter : IFormatter<Coin>
+            {
+                public void Write<TWriter>(ref TWriter writer, Coin value) where TWriter : struct, IFormatWriter { }
+                public Coin Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader => null;
+                public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer) where TReader : struct, IFormatReader where TWriter : struct, IFormatWriter { }
+            }
+            """);
+
+        Assert.Contains(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == "GGS012");
+    }
+
+    [Fact]
+    public void Generate_IgnoredInheritedMember_ReportsNothing()
+    {
+        var result = Run("""
+            using GroveGames.Serialization;
+
+            namespace Game;
+
+            public class Base
+            {
+                [Ignore]
+                public int Cached;
+            }
+
+            [Schema]
+            public sealed class Child : Base
+            {
+                public int Own;
+            }
+            """);
+
+        Assert.DoesNotContain(result.GeneratorDiagnostics, diagnostic => diagnostic.Id == "GGS013");
     }
 
     private static GeneratorResult Run(string source)

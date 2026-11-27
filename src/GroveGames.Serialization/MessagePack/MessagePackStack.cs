@@ -4,6 +4,7 @@ internal sealed class MessagePackStack
 {
     private readonly int[] _positions;
     private readonly int[] _counts;
+    private readonly int[] _declared;
     private readonly bool[] _isArray;
 
     public const int MaxDepth = 63;
@@ -18,12 +19,15 @@ internal sealed class MessagePackStack
     {
         _positions = new int[MaxDepth + 1];
         _counts = new int[MaxDepth + 1];
+        _declared = new int[MaxDepth + 1];
         _isArray = new bool[MaxDepth + 1];
     }
 
     public int[] Positions => _positions;
 
     public int[] Counts => _counts;
+
+    public int[] Declared => _declared;
 
     public bool[] IsArray => _isArray;
 

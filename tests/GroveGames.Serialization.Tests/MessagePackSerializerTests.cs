@@ -218,6 +218,91 @@ public sealed class MessagePackSerializerTests
         public float Score;
     }
 
+    [Fact]
+    public void Serialize_FormatterWritesFewerFieldsThanItDeclared_Throws()
+    {
+        Formatters.Register(registrar => registrar.AddFormatter(new TestShortFormatter()));
+        var serializer = CreateSerializer();
+
+        Assert.Throws<InvalidOperationException>(() => serializer.Serialize(new TestShort()));
+    }
+
+    [Fact]
+    public void Serialize_NestedSerializeToAnotherBufferWriter_KeepsTheOuterOutput()
+    {
+        Formatters.Register(registrar => registrar.AddFormatter(new TestNestingFormatter()));
+        var serializer = CreateSerializer();
+        var direct = serializer.Serialize(new TestNesting());
+        var output = new System.Buffers.ArrayBufferWriter<byte>();
+
+        serializer.Serialize(new TestNesting(), output);
+
+        Assert.Equal(direct, output.WrittenSpan.ToArray());
+    }
+
+    private sealed class TestShort
+    {
+    }
+
+    private sealed class TestShortFormatter : IFormatter<TestShort>
+    {
+        private static readonly FieldTable s_fields = new("a", "b", "c");
+
+        public void Write<TWriter>(ref TWriter writer, TestShort? value) where TWriter : struct, IFormatWriter
+        {
+            writer.BeginObject(3);
+            writer.WriteField(s_fields[0]);
+            writer.WriteInt32(1);
+            writer.WriteField(s_fields[1]);
+            writer.WriteInt32(2);
+            writer.EndObject();
+        }
+
+        public TestShort? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
+        {
+            reader.Skip();
+            return new TestShort();
+        }
+
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
+            where TReader : struct, IFormatReader
+            where TWriter : struct, IFormatWriter
+        {
+            Write(ref writer, Read(ref reader));
+        }
+    }
+
+    private sealed class TestNesting
+    {
+    }
+
+    private sealed class TestNestingFormatter : IFormatter<TestNesting>
+    {
+        private static readonly FieldTable s_fields = new("inner");
+
+        public void Write<TWriter>(ref TWriter writer, TestNesting? value) where TWriter : struct, IFormatWriter
+        {
+            var inner = new MessagePackSerializer().Serialize(new TestItem { Id = "inner", Count = 3 });
+            writer.BeginObject(1);
+            writer.WriteField(s_fields[0]);
+            writer.WriteInt32(inner.Length);
+            writer.EndObject();
+        }
+
+        public TestNesting? Read<TReader>(ref TReader reader) where TReader : struct, IFormatReader
+        {
+            reader.Skip();
+            return new TestNesting();
+        }
+
+        public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)
+            where TReader : struct, IFormatReader
+            where TWriter : struct, IFormatWriter
+        {
+            Write(ref writer, Read(ref reader));
+        }
+    }
+
     private sealed class TestItemFormatter<T> : IFormatter<T>
         where T : TestItem, new()
     {

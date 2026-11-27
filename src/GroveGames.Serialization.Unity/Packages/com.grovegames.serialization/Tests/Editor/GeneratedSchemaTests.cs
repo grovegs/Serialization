@@ -20,7 +20,7 @@ namespace GroveGames.Serialization.Unity.Editor.Tests
         }
     }
 
-    [Schema(version: 2)]
+    [Schema]
     public sealed class GeneratedUnitySample
     {
         public string Name;

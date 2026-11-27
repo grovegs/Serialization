@@ -96,15 +96,47 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         }
 
         var validFormatters = new List<FormatterModel>();
+        var versions = new Dictionary<string, int>();
+        var hasConflict = false;
+
+        foreach (var schema in validSchemas)
+        {
+            versions[schema.FullName] = schema.Version;
+        }
+
+        var targets = new HashSet<string>(versions.Keys);
 
         foreach (var formatter in formatters)
         {
             if (formatter is { IsValid: true })
             {
-                validFormatters.Add(formatter);
-                schemaNames.Add(formatter.TargetFullName);
+                targets.Add(formatter.TargetFullName);
             }
         }
+
+        var claimed = new HashSet<string>();
+
+        foreach (var formatter in formatters)
+        {
+            if (formatter is not { IsValid: true })
+            {
+                continue;
+            }
+
+            // A second formatter for one type, including the list formatter generated for every schema and formatter, fails the whole registration.
+            if (versions.ContainsKey(formatter.TargetFullName) || !claimed.Add(formatter.TargetFullName) || IsGeneratedList(formatter.TargetFullName, targets))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.DuplicateFormatter, null, formatter.TargetFullName.Replace("global::", string.Empty)));
+                hasConflict = true;
+                continue;
+            }
+
+            validFormatters.Add(formatter);
+            schemaNames.Add(formatter.TargetFullName);
+            versions[formatter.TargetFullName] = formatter.Version;
+        }
+
+        ReportMissingFormatters(context, validSchemas, versions);
 
         var validMigrations = new List<MigrationModel>();
 
@@ -133,7 +165,13 @@ public sealed class SchemaGenerator : IIncrementalGenerator
             validMigrations.Add(migration);
         }
 
-        ReportMissingMigrations(context, validSchemas, validMigrations);
+        hasConflict |= ReportMigrationConflicts(context, validMigrations, versions);
+        ReportMissingMigrations(context, versions, validSchemas, migrations);
+
+        if (hasConflict)
+        {
+            return;
+        }
 
         if (validSchemas.Count == 0 && validFormatters.Count == 0)
         {
@@ -146,21 +184,70 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         context.AddSource("FormatterRegistration.g.cs", RegistrationEmitter.Emit(target, validSchemas, validFormatters, validMigrations));
     }
 
-    private static void ReportMissingMigrations(SourceProductionContext context, List<SchemaTypeModel> schemas, List<MigrationModel> migrations)
+    private static bool IsGeneratedList(string target, HashSet<string> targets)
+    {
+        const string ListPrefix = "global::System.Collections.Generic.List<";
+        return target.StartsWith(ListPrefix, StringComparison.Ordinal) && target.EndsWith(">", StringComparison.Ordinal) && targets.Contains(target.Substring(ListPrefix.Length, target.Length - ListPrefix.Length - 1));
+    }
+
+    private static void ReportMissingFormatters(SourceProductionContext context, List<SchemaTypeModel> schemas, Dictionary<string, int> versions)
     {
         foreach (var schema in schemas)
         {
-            if (schema.Version <= 1)
+            foreach (var member in schema.RegisteredMembers)
+            {
+                if (!versions.ContainsKey(member.TypeName))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.RegisteredMember, member.Location?.ToLocation(), member.MemberName, member.TypeName.Replace("global::", string.Empty)));
+                }
+            }
+        }
+    }
+
+    private static bool ReportMigrationConflicts(SourceProductionContext context, List<MigrationModel> migrations, Dictionary<string, int> versions)
+    {
+        var hasConflict = false;
+        var seen = new HashSet<(string, int)>();
+
+        foreach (var migration in migrations)
+        {
+            if (migration.FromVersion is not int from || !versions.TryGetValue(migration.TargetFullName, out var version))
             {
                 continue;
             }
 
-            var covered = new bool[schema.Version];
+            var target = migration.TargetFullName.Replace("global::", string.Empty);
+
+            if (from < 1 || from >= version)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.MigrationOutOfRange, null, migration.FullName.Replace("global::", string.Empty), target, from, version));
+                hasConflict = true;
+            }
+            else if (!seen.Add((migration.TargetFullName, from)))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.DuplicateMigration, null, target, from));
+                hasConflict = true;
+            }
+        }
+
+        return hasConflict;
+    }
+
+    private static void ReportMissingMigrations(SourceProductionContext context, Dictionary<string, int> versions, List<SchemaTypeModel> schemas, ImmutableArray<MigrationModel?> allMigrations)
+    {
+        foreach (var pair in versions)
+        {
+            if (pair.Value <= 1)
+            {
+                continue;
+            }
+
+            var covered = new bool[pair.Value];
             var isKnown = true;
 
-            foreach (var migration in migrations)
+            foreach (var migration in allMigrations)
             {
-                if (migration.TargetFullName != schema.FullName)
+                if (migration == null || migration.TargetFullName != pair.Key)
                 {
                     continue;
                 }
@@ -171,7 +258,8 @@ public sealed class SchemaGenerator : IIncrementalGenerator
                     break;
                 }
 
-                if (from >= 1 && from < schema.Version)
+                // An invalid migration has already been reported, so the step it was meant to cover is not reported again.
+                if (from >= 1 && from < pair.Value)
                 {
                     covered[from] = true;
                 }
@@ -182,14 +270,27 @@ public sealed class SchemaGenerator : IIncrementalGenerator
                 continue;
             }
 
-            for (var version = 1; version < schema.Version; version++)
+            for (var version = 1; version < pair.Value; version++)
             {
                 if (!covered[version])
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.MissingMigration, schema.Location?.ToLocation(), schema.FullName.Replace("global::", string.Empty), schema.Version, version));
+                    context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.MissingMigration, LocationOf(schemas, pair.Key), pair.Key.Replace("global::", string.Empty), pair.Value, version));
                 }
             }
         }
+    }
+
+    private static Location? LocationOf(List<SchemaTypeModel> schemas, string fullName)
+    {
+        foreach (var schema in schemas)
+        {
+            if (schema.FullName == fullName)
+            {
+                return schema.Location?.ToLocation();
+            }
+        }
+
+        return null;
     }
 
     private static string HintName(SchemaTypeModel model)

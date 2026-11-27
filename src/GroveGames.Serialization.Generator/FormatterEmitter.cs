@@ -1,4 +1,5 @@
 ﻿using GroveGames.Serialization.Generator.Models;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace GroveGames.Serialization.Generator;
 
@@ -126,7 +127,7 @@ internal static class FormatterEmitter
             var member = model.Members[i];
             code.Line($"writer.WriteField(s_fields[{i}]);");
             code.Block();
-            WriteValue(code, member.Shape, "value." + member.MemberName, 0);
+            WriteValue(code, member.Shape, "value." + Identifier(member.MemberName), 0);
             code.Close();
         }
 
@@ -149,7 +150,7 @@ internal static class FormatterEmitter
         {
             var member = model.Members[i];
             code.Open($"case {i}:");
-            ReadValue(code, member.Shape, "value." + member.MemberName, 0);
+            ReadValue(code, member.Shape, "value." + Identifier(member.MemberName), 0);
             code.Line("break;");
             code.Close();
         }
@@ -320,6 +321,28 @@ internal static class FormatterEmitter
                 code.Open("else");
                 var count = "count" + depth;
                 code.Line($"reader.ReadArrayStart(out var {count});");
+
+                // Small arrays of non-array items are filled directly; anything else goes through a list, which keeps a hostile
+                // count from allocating up front and avoids array-of-array creation syntax.
+                var isDirect = shape.Kind == ShapeKind.Array && shape.Element!.Kind != ShapeKind.Array;
+
+                if (isDirect)
+                {
+                    var array = "array" + depth;
+                    var index = "index" + depth;
+                    code.Open($"if ({count} >= 0 && {count} <= 1024)");
+                    code.Line($"var {array} = new {shape.Element!.TypeName}[{count}];");
+                    code.Line($"var {index} = 0;");
+                    code.Open("while (reader.TryReadNextElement())");
+                    code.Line($"{shape.Element!.TypeName} {item} = default;");
+                    ReadValue(code, shape.Element!, item, depth + 1);
+                    code.Line($"{array}[{index}++] = {item};");
+                    code.Close();
+                    code.Line($"{target} = {array};");
+                    code.Close();
+                    code.Open("else");
+                }
+
                 code.Line($"var {list} = new global::System.Collections.Generic.List<{shape.Element!.TypeName}>(global::System.Math.Min(global::System.Math.Max({count}, 0), 1024));");
                 code.Open("while (reader.TryReadNextElement())");
                 code.Line($"{shape.Element!.TypeName} {item} = default;");
@@ -327,6 +350,12 @@ internal static class FormatterEmitter
                 code.Line($"{list}.Add({item});");
                 code.Close();
                 code.Line(shape.Kind == ShapeKind.List ? $"{target} = {list};" : $"{target} = {list}.ToArray();");
+
+                if (isDirect)
+                {
+                    code.Close();
+                }
+
                 code.Close();
                 break;
             case ShapeKind.Dictionary:
@@ -459,5 +488,10 @@ internal static class FormatterEmitter
     private static bool UsesDataValue(TypeShape shape)
     {
         return shape.Kind == ShapeKind.DataValue || (shape.Element != null && UsesDataValue(shape.Element));
+    }
+
+    private static string Identifier(string name)
+    {
+        return SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace GroveGames.Serialization.Unity
@@ -58,7 +59,17 @@ namespace GroveGames.Serialization.Unity
                 }
             }
 
-            return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
+            return new Color32(ToByte(r), ToByte(g), ToByte(b), ToByte(a));
+        }
+
+        private static byte ToByte(int value)
+        {
+            if (value < byte.MinValue || value > byte.MaxValue)
+            {
+                throw new FormatException($"A Color32 channel is {value}, outside 0 to 255.");
+            }
+
+            return (byte)value;
         }
 
         public void Transcode<TReader, TWriter>(ref TReader reader, ref TWriter writer)

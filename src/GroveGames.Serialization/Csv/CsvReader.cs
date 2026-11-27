@@ -15,7 +15,15 @@ internal struct CsvReader : IDocumentReader
 
     public CsvReader(ReadOnlyMemory<byte> data)
     {
-        var records = Parse(Encoding.UTF8.GetString(data.Span));
+        var span = data.Span;
+
+        // Spreadsheet exports often start with a UTF-8 byte order mark, which would otherwise become part of the first header.
+        if (span.Length >= 3 && span[0] == 0xEF && span[1] == 0xBB && span[2] == 0xBF)
+        {
+            span = span.Slice(3);
+        }
+
+        var records = Parse(Encoding.UTF8.GetString(span));
         _version = 1;
         _hasVersionLine = false;
 
