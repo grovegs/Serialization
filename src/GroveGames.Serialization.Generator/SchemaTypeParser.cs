@@ -132,7 +132,7 @@ internal static class SchemaTypeParser
         {
             foreach (var member in baseType.GetMembers())
             {
-                if (!member.IsStatic && !member.IsImplicitlyDeclared && member.DeclaredAccessibility == Accessibility.Public && member is IFieldSymbol or IPropertySymbol { IsIndexer: false })
+                if (!member.IsStatic && !member.IsImplicitlyDeclared && member.DeclaredAccessibility == Accessibility.Public && member is IFieldSymbol or IPropertySymbol { IsIndexer: false } && !IsIgnored(member) && type.GetMembers(member.Name).IsEmpty)
                 {
                     diagnostics.Add(DiagnosticInfo.Create(SchemaDiagnostics.MemberNotSaved, location, member.ToDisplayString(), $"members inherited from '{baseType.ToDisplayString()}' are not serialized; declare them on '{type.Name}'"));
                     return;

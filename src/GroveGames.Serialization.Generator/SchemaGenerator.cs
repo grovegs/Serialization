@@ -104,6 +104,18 @@ public sealed class SchemaGenerator : IIncrementalGenerator
             versions[schema.FullName] = schema.Version;
         }
 
+        var targets = new HashSet<string>(versions.Keys);
+
+        foreach (var formatter in formatters)
+        {
+            if (formatter is { IsValid: true })
+            {
+                targets.Add(formatter.TargetFullName);
+            }
+        }
+
+        var claimed = new HashSet<string>();
+
         foreach (var formatter in formatters)
         {
             if (formatter is not { IsValid: true })
@@ -111,8 +123,8 @@ public sealed class SchemaGenerator : IIncrementalGenerator
                 continue;
             }
 
-            // A second formatter for one type, including the list formatter generated for every schema, fails the whole registration.
-            if (versions.ContainsKey(formatter.TargetFullName) || IsGeneratedList(formatter.TargetFullName, versions))
+            // A second formatter for one type, including the list formatter generated for every schema and formatter, fails the whole registration.
+            if (versions.ContainsKey(formatter.TargetFullName) || !claimed.Add(formatter.TargetFullName) || IsGeneratedList(formatter.TargetFullName, targets))
             {
                 context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.DuplicateFormatter, null, formatter.TargetFullName.Replace("global::", string.Empty)));
                 hasConflict = true;
@@ -154,7 +166,7 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         }
 
         hasConflict |= ReportMigrationConflicts(context, validMigrations, versions);
-        ReportMissingMigrations(context, versions, validMigrations, migrations);
+        ReportMissingMigrations(context, versions, validSchemas, migrations);
 
         if (hasConflict)
         {
@@ -172,10 +184,10 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         context.AddSource("FormatterRegistration.g.cs", RegistrationEmitter.Emit(target, validSchemas, validFormatters, validMigrations));
     }
 
-    private static bool IsGeneratedList(string target, Dictionary<string, int> versions)
+    private static bool IsGeneratedList(string target, HashSet<string> targets)
     {
         const string ListPrefix = "global::System.Collections.Generic.List<";
-        return target.StartsWith(ListPrefix, StringComparison.Ordinal) && target.EndsWith(">", StringComparison.Ordinal) && versions.ContainsKey(target.Substring(ListPrefix.Length, target.Length - ListPrefix.Length - 1));
+        return target.StartsWith(ListPrefix, StringComparison.Ordinal) && target.EndsWith(">", StringComparison.Ordinal) && targets.Contains(target.Substring(ListPrefix.Length, target.Length - ListPrefix.Length - 1));
     }
 
     private static void ReportMissingFormatters(SourceProductionContext context, List<SchemaTypeModel> schemas, Dictionary<string, int> versions)
@@ -221,7 +233,7 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         return hasConflict;
     }
 
-    private static void ReportMissingMigrations(SourceProductionContext context, Dictionary<string, int> versions, List<MigrationModel> migrations, ImmutableArray<MigrationModel?> allMigrations)
+    private static void ReportMissingMigrations(SourceProductionContext context, Dictionary<string, int> versions, List<SchemaTypeModel> schemas, ImmutableArray<MigrationModel?> allMigrations)
     {
         foreach (var pair in versions)
         {
@@ -262,10 +274,23 @@ public sealed class SchemaGenerator : IIncrementalGenerator
             {
                 if (!covered[version])
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.MissingMigration, null, pair.Key.Replace("global::", string.Empty), pair.Value, version));
+                    context.ReportDiagnostic(Diagnostic.Create(SchemaDiagnostics.MissingMigration, LocationOf(schemas, pair.Key), pair.Key.Replace("global::", string.Empty), pair.Value, version));
                 }
             }
         }
+    }
+
+    private static Location? LocationOf(List<SchemaTypeModel> schemas, string fullName)
+    {
+        foreach (var schema in schemas)
+        {
+            if (schema.FullName == fullName)
+            {
+                return schema.Location?.ToLocation();
+            }
+        }
+
+        return null;
     }
 
     private static string HintName(SchemaTypeModel model)

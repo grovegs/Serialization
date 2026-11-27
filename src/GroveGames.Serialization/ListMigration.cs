@@ -1,9 +1,7 @@
-﻿using System.ComponentModel;
+﻿namespace GroveGames.Serialization;
 
-namespace GroveGames.Serialization;
-
-// Generated registrations use it so a list root, such as every CSV, moves through the same versions as its items.
-[EditorBrowsable(EditorBrowsableState.Never)]
+// Register it with a versioned ListFormatter<T> so a list root, such as a CSV, runs its items' migrations. It is not
+// registered automatically, because list roots written before were stored without a version and would migrate twice.
 public sealed class ListMigration<T> : IMigration<List<T>>
 {
     private readonly IMigration<T> _migration;
@@ -18,11 +16,19 @@ public sealed class ListMigration<T> : IMigration<List<T>>
 
     public void Apply(DataValue root)
     {
+        if (root.IsNull)
+        {
+            return;
+        }
+
         var items = root.AsArray;
 
         for (var i = 0; i < items.Count; i++)
         {
-            _migration.Apply(items[i]);
+            if (!items[i].IsNull)
+            {
+                _migration.Apply(items[i]);
+            }
         }
     }
 }

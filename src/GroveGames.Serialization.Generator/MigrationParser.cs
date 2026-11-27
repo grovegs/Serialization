@@ -8,8 +8,8 @@ internal static class MigrationParser
 {
     private const string MigrationInterface = "GroveGames.Serialization.IMigration<T>";
 
-    // Checked on every keystroke, so it only looks at syntax: a base type whose name mentions Migration, which covers
-    // IMigration<T> and a migration base class, and skips the MonoBehaviours and ScriptableObjects of a game.
+    // Checked on every keystroke, so it only looks at syntax: a generic base type, or one whose name mentions Migration,
+    // covers IMigration<T> and migration base classes, and skips the MonoBehaviours and ScriptableObjects of a game.
     public static bool IsCandidate(SyntaxNode node)
     {
         if (node is not (ClassDeclarationSyntax or RecordDeclarationSyntax) || ((TypeDeclarationSyntax)node).BaseList is not { } baseList)
@@ -19,13 +19,18 @@ internal static class MigrationParser
 
         foreach (var baseType in baseList.Types)
         {
-            if (RightmostName(baseType.Type).IndexOf("Migration", StringComparison.Ordinal) >= 0)
+            if (RightmostName(baseType.Type).IndexOf("Migration", StringComparison.Ordinal) >= 0 || IsGeneric(baseType.Type))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static bool IsGeneric(TypeSyntax type)
+    {
+        return type is GenericNameSyntax || (type is QualifiedNameSyntax { Right: GenericNameSyntax }) || (type is AliasQualifiedNameSyntax { Name: GenericNameSyntax });
     }
 
     private static string RightmostName(TypeSyntax type)
@@ -78,7 +83,7 @@ internal static class MigrationParser
 
     private static int? GetFromVersion(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
-        foreach (var member in ((ClassDeclarationSyntax)context.Node).Members)
+        foreach (var member in ((TypeDeclarationSyntax)context.Node).Members)
         {
             if (member is not PropertyDeclarationSyntax { Identifier.Text: "FromVersion" } property)
             {

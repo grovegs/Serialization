@@ -49,7 +49,7 @@ Every public field and every public property with a public getter and setter, de
 
 Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>`, `DataValue`, `Guid`, `DateTime`, `DateTimeOffset` and `TimeSpan`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
-The generator also registers every schema type with its version, a `ListFormatter<T>` for each at the same version, and every `IMigration<T>` for those types, which also migrates every item of an older `List<T>`. Nothing needs to be called: the registration runs when the assembly starts.
+The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Nothing needs to be called: the registration runs when the assembly starts. A generated list formatter is v1; for a versioned list root such as a CSV, register `ListFormatter<T>` with the version yourself and wrap each `IMigration<T>` in `ListMigration<T>`, which migrates every row.
 
 | Diagnostic | Severity | Meaning                                                                                                                                                                |
 | ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

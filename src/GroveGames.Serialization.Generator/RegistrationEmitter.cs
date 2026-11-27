@@ -86,19 +86,18 @@ internal static class RegistrationEmitter
         foreach (var schema in schemas)
         {
             code.Line($"registrar.AddFormatter({schema.FormatterFullName}.Instance, {schema.Version});");
-            code.Line($"registrar.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{schema.FullName}>(), {schema.Version});");
+            code.Line($"registrar.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{schema.FullName}>());");
         }
 
         foreach (var formatter in formatters)
         {
             code.Line($"registrar.AddFormatter(new {formatter.FullName}(), {formatter.Version});");
-            code.Line($"registrar.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{formatter.TargetFullName}>(), {formatter.Version});");
+            code.Line($"registrar.AddFormatter(new global::GroveGames.Serialization.ListFormatter<{formatter.TargetFullName}>());");
         }
 
         foreach (var migration in migrations)
         {
             code.Line($"registrar.AddMigration(new {migration.FullName}());");
-            code.Line($"registrar.AddMigration(new global::GroveGames.Serialization.ListMigration<{migration.TargetFullName}>(new {migration.FullName}()));");
         }
 
         code.Close();

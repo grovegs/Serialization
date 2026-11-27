@@ -322,11 +322,15 @@ internal static class FormatterEmitter
                 var count = "count" + depth;
                 code.Line($"reader.ReadArrayStart(out var {count});");
 
-                if (shape.Kind == ShapeKind.Array)
+                // Small arrays of non-array items are filled directly; anything else goes through a list, which keeps a hostile
+                // count from allocating up front and avoids array-of-array creation syntax.
+                var isDirect = shape.Kind == ShapeKind.Array && shape.Element!.Kind != ShapeKind.Array;
+
+                if (isDirect)
                 {
                     var array = "array" + depth;
                     var index = "index" + depth;
-                    code.Open($"if ({count} >= 0)");
+                    code.Open($"if ({count} >= 0 && {count} <= 1024)");
                     code.Line($"var {array} = new {shape.Element!.TypeName}[{count}];");
                     code.Line($"var {index} = 0;");
                     code.Open("while (reader.TryReadNextElement())");
@@ -347,7 +351,7 @@ internal static class FormatterEmitter
                 code.Close();
                 code.Line(shape.Kind == ShapeKind.List ? $"{target} = {list};" : $"{target} = {list}.ToArray();");
 
-                if (shape.Kind == ShapeKind.Array)
+                if (isDirect)
                 {
                     code.Close();
                 }
