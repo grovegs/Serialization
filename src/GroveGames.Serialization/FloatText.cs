@@ -1,4 +1,4 @@
-using System.Buffers.Text;
+﻿using System.Buffers.Text;
 #if NETSTANDARD2_1
 using System.Globalization;
 #endif
