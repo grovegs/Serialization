@@ -111,8 +111,7 @@ internal struct JsonWriter : IDocumentWriter
         }
 
         Prefix();
-        Utf8Formatter.TryFormat(value, _output.GetSpan(32), out var written);
-        _output.Advance(written);
+        _output.Advance(FloatText.Write(value, _output.GetSpan(FloatText.MaxLength)));
     }
 
     public void WriteDouble(double value)
@@ -124,8 +123,7 @@ internal struct JsonWriter : IDocumentWriter
         }
 
         Prefix();
-        Utf8Formatter.TryFormat(value, _output.GetSpan(32), out var written);
-        _output.Advance(written);
+        _output.Advance(FloatText.Write(value, _output.GetSpan(FloatText.MaxLength)));
     }
 
     public void WriteBool(bool value)

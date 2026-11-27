@@ -12,6 +12,10 @@ public sealed class CsvSerializerTests
             .AddFormatter(new TestItemFormatter<TestItemV2>())
             .AddFormatter(new ListFormatter<TestItemV2>(), version: 2)
             .AddMigration(new TestRowsNoChange())
+            .AddFormatter(new TestItemFormatter<TestItemV3>(), version: 2)
+            .AddFormatter(new ListFormatter<TestItemV3>(), version: 2)
+            .AddMigration(new TestRenameQuantity())
+            .AddMigration(new ListMigration<TestItemV3>(new TestRenameQuantity()))
             .AddFormatter(new TestCellsFormatter())
             .AddFormatter(new ListFormatter<TestCells>()));
     }
@@ -25,6 +29,29 @@ public sealed class CsvSerializerTests
         var csv = Encoding.UTF8.GetString(serializer.Serialize(rows));
 
         Assert.Equal("id,count,weight,score\n\"a,b\",1,0.5,2\n\"say \"\"hi\"\"\",2,0,0\n", csv);
+    }
+
+    [Fact]
+    public void Deserialize_ByteOrderMark_ReadsTheFirstColumn()
+    {
+        var serializer = CreateSerializer();
+        var csv = new byte[] { 0xEF, 0xBB, 0xBF }.Concat(Encoding.UTF8.GetBytes("id,count\nx,7\n")).ToArray();
+
+        var result = serializer.Deserialize<List<TestItem>>(csv);
+
+        Assert.Equal("x", result![0].Id);
+        Assert.Equal(7, result[0].Count);
+    }
+
+    [Fact]
+    public void Deserialize_OlderRowsWithItemMigration_MigratesEveryRow()
+    {
+        var serializer = CreateSerializer();
+
+        var result = serializer.Deserialize<List<TestItemV3>>(Encoding.UTF8.GetBytes("id,quantity\na,5\nb,6\n"));
+
+        Assert.Equal(5, result![0].Count);
+        Assert.Equal(6, result[1].Count);
     }
 
     [Fact]
@@ -250,5 +277,19 @@ public sealed class CsvSerializerTests
 
     private sealed class TestItemV2 : TestItem
     {
+    }
+
+    private sealed class TestItemV3 : TestItem
+    {
+    }
+
+    private sealed class TestRenameQuantity : IMigration<TestItemV3>
+    {
+        public int FromVersion => 1;
+
+        public void Apply(DataValue root)
+        {
+            root.AsObject.Rename("quantity", "count");
+        }
     }
 }

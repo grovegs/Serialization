@@ -202,6 +202,7 @@ internal struct MessagePackWriter : IDocumentWriter
 
         _stack.IsArray[_depth] = isArray;
         _stack.Counts[_depth] = 0;
+        _stack.Declared[_depth] = count;
 
         if (count < 0)
         {
@@ -232,6 +233,14 @@ internal struct MessagePackWriter : IDocumentWriter
 
     private void Close()
     {
+        var declared = _stack.Declared[_depth];
+
+        // A header that promises more or fewer items than follow would only fail when the data is read back.
+        if (declared >= 0 && declared != _stack.Counts[_depth])
+        {
+            throw new InvalidOperationException($"A MessagePack {(_stack.IsArray[_depth] ? "array" : "map")} declared {declared} items but {_stack.Counts[_depth]} were written.");
+        }
+
         var position = _stack.Positions[_depth];
 
         if (position >= 0)

@@ -8,9 +8,35 @@ internal static class MigrationParser
 {
     private const string MigrationInterface = "GroveGames.Serialization.IMigration<T>";
 
+    // Checked on every keystroke, so it only looks at syntax: a base type whose name mentions Migration, which covers
+    // IMigration<T> and a migration base class, and skips the MonoBehaviours and ScriptableObjects of a game.
     public static bool IsCandidate(SyntaxNode node)
     {
-        return node is ClassDeclarationSyntax { BaseList: not null };
+        if (node is not (ClassDeclarationSyntax or RecordDeclarationSyntax) || ((TypeDeclarationSyntax)node).BaseList is not { } baseList)
+        {
+            return false;
+        }
+
+        foreach (var baseType in baseList.Types)
+        {
+            if (RightmostName(baseType.Type).IndexOf("Migration", StringComparison.Ordinal) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string RightmostName(TypeSyntax type)
+    {
+        return type switch
+        {
+            QualifiedNameSyntax qualified => qualified.Right.Identifier.ValueText,
+            AliasQualifiedNameSyntax alias => alias.Name.Identifier.ValueText,
+            SimpleNameSyntax simple => simple.Identifier.ValueText,
+            _ => string.Empty
+        };
     }
 
     public static MigrationModel? Parse(GeneratorSyntaxContext context, CancellationToken cancellationToken)

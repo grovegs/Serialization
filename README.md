@@ -45,23 +45,28 @@ public sealed class PlayerSave
 }
 ```
 
-Every public field and every public property with a public getter and setter is serialized under its camelCase name (`Gold` → `gold`, `URLPath` → `urlPath`), in declaration order. `[Ignore]` excludes a member.
+Every public field and every public property with a public getter and setter, declared on the type itself, is serialized under its camelCase name (`Gold` → `gold`, `URLPath` → `urlPath`), in declaration order. `[Ignore]` excludes a member. Readonly fields, properties without a public setter and members inherited from a base class are not saved, and the generator warns about each (GGS013).
 
 Supported member types: `bool`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `float`, `double`, `string`, enums, `Nullable<T>`, other `[Schema]` types (classes or structs), `List<T>`, `T[]`, `Dictionary<string, T>`, `DataValue`, `Guid`, `DateTime`, `DateTimeOffset` and `TimeSpan`. Any other type, such as Unity's `Vector3`, uses the formatter registered for it.
 
-The generator also registers every schema type with its version, a `ListFormatter<T>` for each, and every `IMigration<T>` for those types. Nothing needs to be called: the registration runs when the assembly starts.
+The generator also registers every schema type with its version, a `ListFormatter<T>` for each at the same version, and every `IMigration<T>` for those types, which also migrates every item of an older `List<T>`. Nothing needs to be called: the registration runs when the assembly starts.
 
-| Diagnostic | Severity | Meaning                                                                 |
-| ---------- | -------- | ----------------------------------------------------------------------- |
-| GGS001     | Error    | Nested and generic types cannot be schema types                         |
-| GGS002     | Error    | Two members map to the same field name                                  |
-| GGS003     | Error    | A member type is not supported, including `ulong` and init-only setters |
-| GGS004     | Info     | A member uses a `[Formatter]` because its type has no `[Schema]`        |
-| GGS005     | Error    | A migration for a schema type has no parameterless constructor          |
-| GGS006     | Error    | A schema class has no parameterless constructor                         |
-| GGS007     | Error    | A schema or formatter version is below 1                                |
-| GGS008     | Error    | A `[Formatter]` class is not a valid formatter                          |
-| GGS009     | Error    | A `[Schema(version: n)]` type has no migration in its assembly for a step below n (checked when every `FromVersion` is a constant) |
+| Diagnostic | Severity | Meaning                                                                                                                                                                |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GGS001     | Error    | Nested and generic types cannot be schema types                                                                                                                        |
+| GGS002     | Error    | Two members map to the same field name                                                                                                                                 |
+| GGS003     | Error    | A member type is not supported, including `ulong` and init-only setters                                                                                                |
+| GGS004     | Warning  | A member's type has no `[Schema]` and no `[Formatter]` in this assembly, and is not from a package that registers its own (UnityEngine, Unity.Mathematics, GroveGames) |
+| GGS005     | Error    | A migration for a schema type has no parameterless constructor                                                                                                         |
+| GGS006     | Error    | A schema class has no parameterless constructor                                                                                                                        |
+| GGS007     | Error    | A schema or formatter version is below 1                                                                                                                               |
+| GGS008     | Error    | A `[Formatter]` class is not a valid formatter                                                                                                                         |
+| GGS009     | Error    | A `[Schema(version: n)]` or `[Formatter(version: n)]` type has no migration in its assembly for a step below n (checked when every `FromVersion` is a constant)        |
+| GGS010     | Error    | Two migrations of one type start from the same version                                                                                                                 |
+| GGS011     | Error    | A migration starts at or past its type's version                                                                                                                       |
+| GGS012     | Error    | A type has more than one formatter, including a `[Formatter]` for a generated `List<T>`                                                                                |
+| GGS013     | Warning  | A public member is not saved: readonly, no public setter, or inherited                                                                                                 |
+| GGS014     | Warning  | A versioned schema type is used as a member, where its migrations do not run                                                                                           |
 
 ### Type Schemas
 
@@ -157,13 +162,13 @@ Versions belong to the root type. A change inside a nested type is migrated by t
 
 ### Formats
 
-| Format      | Shape                            | Notes                                                                                    |
-| ----------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
-| JSON        | Objects keyed by camelCase names | `NaN` and infinities are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`. |
-| MessagePack | Maps keyed by name strings       | Floats are 32-bit (`0xca`), doubles 64-bit (`0xcb`).                                     |
-| CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`.                                  |
+| Format      | Shape                            | Notes                                                                                                                                                           |
+| ----------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JSON        | Objects keyed by camelCase names | `NaN` and infinities are written as the strings `"NaN"`, `"Infinity"` and `"-Infinity"`. A root object whose first key is `"$v"` is read as a version envelope. |
+| MessagePack | Maps keyed by name strings       | Floats are 32-bit (`0xca`), doubles 64-bit (`0xcb`).                                                                                                            |
+| CSV         | The root is a list of flat rows  | Nested objects and lists throw `NotSupportedException`. A leading UTF-8 byte order mark is skipped.                                                             |
 
-Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, lists and `null`.
+Values: `int`, `long`, `float`, `double`, `bool`, `string`, nested objects, lists and `null`. Floats and doubles in JSON and CSV are written so they read back as the same value on every runtime, including Unity's.
 
 `Guid`, `DateTime`, `DateTimeOffset` and `TimeSpan` are strings in every format: `Guid` as `6f9619ff-8b86-d011-b42d-00c04fc964ff`, `DateTime` and `DateTimeOffset` in ISO 8601 round-trip form (`2026-10-09T10:30:15.2500000Z`), which keeps the `DateTimeKind` or offset, and `TimeSpan` as `[-][d.]hh:mm:ss[.fffffff]`. They are formatted and parsed as UTF-8 without allocating. Reading also accepts any form .NET parses with the invariant culture, such as `2026-10-09`, so hand-written JSON and CSV work.
 

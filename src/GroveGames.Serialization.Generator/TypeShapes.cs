@@ -154,8 +154,4 @@ internal static class TypeShapes
         return false;
     }
 
-    public static bool HasRegisteredMember(TypeShape shape)
-    {
-        return shape.Kind == ShapeKind.Registered || (shape.Element != null && HasRegisteredMember(shape.Element));
-    }
 }

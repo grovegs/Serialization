@@ -6,14 +6,33 @@ internal static class ScratchBuffers
     private static ByteBuffer? s_output;
 
     [ThreadStatic]
+    private static bool s_isOutputRented;
+
+    [ThreadStatic]
     private static ByteBuffer? s_input;
 
     [ThreadStatic]
     private static ByteBuffer? s_text;
 
-    public static ByteBuffer Output()
+    // A serialize started from inside another one, such as by a formatter or a migration, gets its own buffer, so it
+    // cannot reset the output the outer call is still writing and back-patching.
+    public static ByteBuffer RentOutput()
     {
+        if (s_isOutputRented)
+        {
+            return new ByteBuffer(1024);
+        }
+
+        s_isOutputRented = true;
         return Reset(s_output ??= new ByteBuffer(1024));
+    }
+
+    public static void ReturnOutput(ByteBuffer buffer)
+    {
+        if (ReferenceEquals(buffer, s_output))
+        {
+            s_isOutputRented = false;
+        }
     }
 
     public static ByteBuffer Input()

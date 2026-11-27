@@ -132,15 +132,13 @@ internal struct CsvWriter : IDocumentWriter
     public void WriteSingle(float value)
     {
         EnsureCell();
-        Utf8Formatter.TryFormat(value, _row.GetSpan(32), out var written);
-        _row.Advance(written);
+        _row.Advance(FloatText.Write(value, _row.GetSpan(FloatText.MaxLength)));
     }
 
     public void WriteDouble(double value)
     {
         EnsureCell();
-        Utf8Formatter.TryFormat(value, _row.GetSpan(32), out var written);
-        _row.Advance(written);
+        _row.Advance(FloatText.Write(value, _row.GetSpan(FloatText.MaxLength)));
     }
 
     public void WriteBool(bool value)

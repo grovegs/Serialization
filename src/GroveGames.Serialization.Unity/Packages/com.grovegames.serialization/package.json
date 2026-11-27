@@ -3,7 +3,7 @@
   "version": "0.4.0",
   "displayName": "GroveGames.Serialization",
   "description": "High-performance JSON, MessagePack and CSV serialization with format conversion and versioned migrations",
-  "unity": "2021.3",
+  "unity": "6000.0",
   "documentationUrl": "https://github.com/grovegs/Serialization",
   "changelogUrl": "https://github.com/grovegs/Serialization/releases",
   "licensesUrl": "https://github.com/grovegs/Serialization/blob/main/LICENSE",

@@ -1,7 +1,19 @@
-﻿namespace GroveGames.Serialization.Tests;
+﻿using System.Text;
+
+namespace GroveGames.Serialization.Tests;
 
 public sealed class DataValueTests
 {
+    [Fact]
+    public void Deserialize_ObjectWithEmptyKey_KeepsTheField()
+    {
+        var serializer = new JsonSerializer();
+
+        var value = serializer.Deserialize<DataValue>(Encoding.UTF8.GetBytes("{\"\":1}"));
+
+        Assert.Equal(1, value.AsObject[""].AsInt64);
+    }
+
     [Fact]
     public void Default_IsNull()
     {

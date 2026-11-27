@@ -83,7 +83,7 @@ public sealed class DataObject
 
     internal void Add(string name, DataValue value)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ArgumentNullException.ThrowIfNull(name);
         _fields.Add(new DataField(name, value));
     }
 
